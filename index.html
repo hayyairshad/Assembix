@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Assembix | Portal</title>
+<script src="https://accounts.google.com/gsi/client" async defer onload="initGoogleSignIn()"
+onerror="handleGsiLoadError()"></script>
+<style>
+:root {
+--bg-color: #00332e;
+--panel-color: rgba(255, 255, 255, 0.08);
+--border-color: rgba(255, 255, 255, 0.15);
+--accent-color: #00796b;
+--text-main: #ffffff;
+--text-dim: #b2dfdb;
+}
+* { box-sizing: border-box; font-family: 'Inter', -apple-system, sans-serif; }
+body {
+background: var(--bg-color);
+background-image: linear-gradient(180deg, #00332e 0%, #001a1a 100%);
+color: var(--text-main);
+margin: 0;
+min-height: 100vh;
+display: flex;
+flex-direction: column;
+}
+header {
+background: rgba(0, 0, 0, 0.3);
+backdrop-filter: blur(20px);
+border-bottom: 1px solid var(--border-color);
+padding: 12px 20px;
+display: flex;
+align-items: center;
+justify-content: space-between;
+position: sticky;
+top: 0;
+z-index: 1000;
+flex-wrap: wrap;
+gap: 10px;
+}
+.header-left { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+.site-title { font-weight: 600; font-size: 1.05rem; letter-spacing: 0.5px; }
+.header-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.user-meta { font-size: 0.8rem; color: var(--text-dim); }
+
+.icon-action {
+background: var(--panel-color);
+border: 1px solid var(--border-color);
+color: var(--text-main);
+width: 36px; height: 36px; padding: 0;
+border-radius: 8px;
+display: flex; align-items: center; justify-content: center;
+cursor: pointer; transition: all 0.2s ease;
+}
+.icon-action:hover { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.4); }
+.icon-action svg {
+width: 18px; height: 18px;
+stroke: currentColor; fill: none;
+stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+}
+
+.btn {
+background: var(--panel-color);
+border: 1px solid var(--border-color);
+color: white;
+padding: 8px 16px;
+border-radius: 6px;
+cursor: pointer;
+font-size: 0.8rem;
+transition: all 0.2s ease;
+white-space: nowrap;
+}
+.btn:hover { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.4); }
+.btn-primary { background: var(--accent-color); border: none; font-weight: 600; }
+.btn-primary:hover { background: #00897b; }
+
+.main-content { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.glass-panel {
+background: var(--panel-color);
+backdrop-filter: blur(30px);
+border: 1px solid var(--border-color);
+border-radius: 16px;
+padding: 30px;
+width: 100%;
+max-width: 420px;
+box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+}
+.wide-panel { max-width: 900px; }
+.hidden { display: none !important; }
+h2 { font-weight: 400; margin-top: 0; margin-bottom: 20px; letter-spacing: -0.5px; font-size: 1.3rem; }
+
+.placeholder-tile {
+border: 1px dashed var(--border-color); border-radius: 12px;
+padding: 60px 20px; text-align: center;
+color: var(--text-dim); font-size: 0.9rem;
+}
+
+@media (max-width: 600px) {
+header { padding: 10px 15px; }
+.glass-panel { padding: 20px; }
+.placeholder-tile { padding: 40px 15px; }
+}
+</style>
+</head>
+<body>
+<header>
+<div class="header-left">
+<span class="site-title">Assembix</span>
+</div>
+<div class="header-right">
+<span id="active-user-display" class="user-meta hidden"></span>
+<button id="btn-logout" class="icon-action hidden" onclick="doLogout()" title="Sign Out" aria-label="Sign Out">
+<svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><path d="M21 12H9"/></svg>
+</button>
+</div>
+</header>
+
+<div class="main-content">
+
+<!-- 1. LOGIN -->
+<div id="scr-login" class="glass-panel">
+<h2>Sign In</h2>
+<p style="color:var(--text-dim); font-size:0.85rem; margin-top:-15px; margin-bottom:25px;">
+Sign in with your authorized Google account.
+</p>
+<div id="g_id_signin" style="display:flex; justify-content:center;"></div>
+<div id="login-status" style="text-align:center; color:var(--text-dim); font-size:0.8rem; margin-top:16px;"></div>
+</div>
+
+<!-- 2. HOME (everything after login goes here) -->
+<div id="scr-home" class="glass-panel wide-panel hidden">
+<h2 id="home-label">Welcome</h2>
+<div class="placeholder-tile">
+Nothing built here yet.
+</div>
+</div>
+
+</div>
+
+<script>
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDAt4paCuEsZ0HZG4eWyWAMX_AVevyEBNVdUPyM6t6EJoMi8r1fpEc-R3epfe5XmMv/exec";
+const GOOGLE_CLIENT_ID = "766825494798-2vq54u2u9kmfegir98uig2ubr9gr6hj4.apps.googleusercontent.com";
+
+let idToken = localStorage.getItem('assembix_idToken') || null;
+let user = null;
+
+async function apiCall(action, payload = {}) {
+  const res = await fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action, idToken, ...payload })
+  });
+  return res.json();
+}
+
+function initGoogleSignIn() {
+  if (typeof google === 'undefined') {
+    handleGsiLoadError();
+    return;
+  }
+  google.accounts.id.initialize({
+    client_id: GOOGLE_CLIENT_ID,
+    callback: handleCredentialResponse
+  });
+  google.accounts.id.renderButton(
+    document.getElementById('g_id_signin'),
+    { theme: 'filled_black', size: 'large', width: 260 }
+  );
+  if (idToken) {
+    completeLogin();
+  } else {
+    google.accounts.id.prompt();
+  }
+}
+
+function handleGsiLoadError() {
+  document.getElementById('login-status').innerText =
+    "Could not load Google Sign-In. Make sure this page is served over https:// and that you have an internet connection.";
+}
+
+function handleCredentialResponse(response) {
+  idToken = response.credential;
+  localStorage.setItem('assembix_idToken', idToken);
+  completeLogin();
+}
+
+async function completeLogin() {
+  const statusEl = document.getElementById('login-status');
+  statusEl.innerText = "Verifying...";
+  try {
+    const result = await apiCall('whoami');
+    if (!result.ok) {
+      statusEl.innerText = result.error || "Authorization Failed";
+      idToken = null;
+      localStorage.removeItem('assembix_idToken');
+      google.accounts.id.prompt();
+      return;
+    }
+
+    user = { name: result.name, email: result.email, level: result.level };
+    statusEl.innerText = "";
+
+    document.getElementById('scr-login').classList.add('hidden');
+    document.getElementById('scr-home').classList.remove('hidden');
+    document.getElementById('btn-logout').classList.remove('hidden');
+    document.getElementById('active-user-display').classList.remove('hidden');
+    document.getElementById('active-user-display').innerText = user.name;
+    document.getElementById('home-label').innerText = "Welcome, " + user.name;
+  } catch (e) {
+    statusEl.innerText = "Could not reach the server. Please try again.";
+    idToken = null;
+    localStorage.removeItem('assembix_idToken');
+  }
+}
+
+function doLogout() {
+  idToken = null;
+  localStorage.removeItem('assembix_idToken');
+  user = null;
+  google.accounts.id.disableAutoSelect();
+  location.reload();
+}
+</script>
+</body>
+</html>
