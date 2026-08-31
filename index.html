@@ -25,6 +25,19 @@ min-height: 100vh;
 display: flex;
 flex-direction: column;
 }
+
+/* Photo shows only on the sign-in screen, then drops away so it doesn't
+   compete with the interface. Light overlay: the shot is already dark,
+   this just knocks back the crane lights enough to read text over. */
+body.login-bg {
+background-image:
+linear-gradient(rgba(0, 26, 26, 0.55), rgba(0, 20, 18, 0.75)),
+url('login-bg.jpg');
+background-size: cover;
+background-position: center;
+background-attachment: fixed;
+}
+
 header {
 background: rgba(0, 0, 0, 0.3);
 backdrop-filter: blur(20px);
@@ -86,6 +99,12 @@ width: 100%;
 max-width: 420px;
 box-shadow: 0 20px 50px rgba(0,0,0,0.3);
 }
+/* The login panel sits over a photo, so it needs a more solid backing
+   than the panels that sit over a flat background. */
+#scr-login {
+background: rgba(0, 26, 24, 0.55);
+box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+}
 .wide-panel { max-width: 900px; }
 .hidden { display: none !important; }
 h2 { font-weight: 400; margin-top: 0; margin-bottom: 20px; letter-spacing: -0.5px; font-size: 1.3rem; }
@@ -100,6 +119,8 @@ color: var(--text-dim); font-size: 0.9rem;
 header { padding: 10px 15px; }
 .glass-panel { padding: 20px; }
 .placeholder-tile { padding: 40px 15px; }
+/* Tall screens crop this photo to mostly sky when centred. */
+body.login-bg { background-position: center bottom; }
 }
 </style>
 </head>
@@ -202,6 +223,7 @@ async function completeLogin() {
     statusEl.innerText = "";
 
     document.getElementById('scr-login').classList.add('hidden');
+    document.body.classList.remove('login-bg');
     document.getElementById('scr-home').classList.remove('hidden');
     document.getElementById('btn-logout').classList.remove('hidden');
     document.getElementById('active-user-display').classList.remove('hidden');
@@ -221,6 +243,9 @@ function doLogout() {
   google.accounts.id.disableAutoSelect();
   location.reload();
 }
+
+// Photo background is on until someone signs in.
+document.body.classList.add('login-bg');
 </script>
 </body>
 </html>
