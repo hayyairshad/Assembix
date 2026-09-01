@@ -3,168 +3,278 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Assembix | Portal</title>
+<title>Assembix</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
 <script src="https://accounts.google.com/gsi/client" async defer onload="initGoogleSignIn()"
 onerror="handleGsiLoadError()"></script>
 <style>
-:root {
---bg-color: #00332e;
---panel-color: rgba(255, 255, 255, 0.08);
---border-color: rgba(255, 255, 255, 0.15);
---accent-color: #00796b;
---text-main: #ffffff;
---text-dim: #b2dfdb;
+:root{
+--primary:#F97316;
+--primary-dark:#C2410C;
+--secondary:#A8877D;
+--accent:#FDBA74;
+--dark:#7C2D12;
+--dark-2:#9A3412;
+--bg-page:#FFF4EC;
+--surface:#FFFFFF;
+--border:#F3DCC9;
+--text:#431407;
+--text-soft:#8B6F5E;
+--text-faint:#D9BBA5;
+--success:#15803D;
+--success-bg:#DCFCE7;
+--warning:#B45309;
+--warning-bg:#FEF3C7;
+--danger:#B91C1C;
+--danger-bg:#FEE2E2;
+--info:#1D4ED8;
+--info-bg:#DBEAFE;
 }
-* { box-sizing: border-box; font-family: 'Inter', -apple-system, sans-serif; }
-body {
-background: var(--bg-color);
-background-image: linear-gradient(180deg, #00332e 0%, #001a1a 100%);
-color: var(--text-main);
-margin: 0;
-min-height: 100vh;
-display: flex;
-flex-direction: column;
+*{box-sizing:border-box;}
+body{
+margin:0;
+background:var(--bg-page);
+font-family:"IBM Plex Sans",system-ui,sans-serif;
+color:var(--text);
+min-height:100vh;
 }
+h1,h2,h3,.brand-word,.btn,.nav-item,.content-h,.stat-value{font-family:"Plus Jakarta Sans",sans-serif;}
+.icon{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
+.hidden{display:none !important;}
 
-/* Photo shows only on the sign-in screen, then drops away so it doesn't
-   compete with the interface. Light overlay: the shot is already dark,
-   this just knocks back the crane lights enough to read text over. */
-body.login-bg {
+/* ===== LOGIN ===== */
+.login-screen{
+min-height:100vh;
+display:flex;align-items:center;justify-content:center;
+padding:24px;
 background-image:
-linear-gradient(rgba(0, 26, 26, 0.55), rgba(0, 20, 18, 0.75)),
+linear-gradient(rgba(67,20,7,0.72), rgba(67,20,7,0.86)),
 url('login-bg.jpg');
-background-size: cover;
-background-position: center;
-background-attachment: fixed;
+background-size:cover;
+background-position:center;
 }
+.login-card{
+background:var(--surface);
+border-radius:18px;
+padding:36px 32px;
+width:100%;max-width:400px;
+box-shadow:0 24px 60px rgba(67,20,7,0.35);
+text-align:center;
+}
+.login-card .brand{justify-content:center;margin-bottom:22px;}
+.login-card h2{font-weight:800;font-size:20px;margin:0 0 6px;color:var(--dark);}
+.login-card p{margin:0 0 24px;color:var(--text-soft);font-size:13.5px;line-height:1.6;}
+#g_id_signin{display:flex;justify-content:center;}
+#login-status{margin-top:16px;font-size:12.5px;color:var(--text-soft);min-height:18px;}
 
-header {
-background: rgba(0, 0, 0, 0.3);
-backdrop-filter: blur(20px);
-border-bottom: 1px solid var(--border-color);
-padding: 12px 20px;
-display: flex;
-align-items: center;
-justify-content: space-between;
-position: sticky;
-top: 0;
-z-index: 1000;
-flex-wrap: wrap;
-gap: 10px;
+/* ===== APP SHELL ===== */
+.app-shell{display:flex;align-items:stretch;min-height:100vh;}
+.sidebar{
+width:214px;flex-shrink:0;background:var(--dark);
+display:flex;flex-direction:column;padding:20px 14px;gap:22px;
+position:sticky;top:0;height:100vh;
 }
-.header-left { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
-.site-title { font-weight: 600; font-size: 1.05rem; letter-spacing: 0.5px; }
-.header-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.user-meta { font-size: 0.8rem; color: var(--text-dim); }
+.brand{display:flex;align-items:center;gap:10px;padding:0 6px;}
+.brand-mark{
+width:32px;height:32px;flex-shrink:0;border-radius:9px;background:var(--primary);
+display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:15px;
+font-family:"Plus Jakarta Sans",sans-serif;
+}
+.brand-word{font-weight:800;font-size:17px;letter-spacing:0.02em;color:#FFF7ED;}
+.nav{display:flex;flex-direction:column;gap:2px;}
+.nav-label{
+font-size:10.5px;text-transform:uppercase;letter-spacing:0.09em;
+color:#B98A6E;padding:12px 10px 5px;font-weight:700;
+}
+.nav-item{
+display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;
+color:#EAD5C8;font-size:13.5px;font-weight:500;cursor:pointer;
+text-decoration:none;transition:0.15s ease;border:none;background:none;width:100%;text-align:left;
+}
+.nav-item:hover{background:rgba(255,255,255,0.07);color:#fff;}
+.nav-item.active{background:var(--primary);color:#fff;font-weight:600;}
+.sidebar-foot{margin-top:auto;display:flex;flex-direction:column;gap:8px;}
+.who{padding:0 10px;font-size:12px;color:#C8A18A;line-height:1.4;}
+.who b{display:block;color:#FFF7ED;font-size:13px;font-weight:600;}
 
-.icon-action {
-background: var(--panel-color);
-border: 1px solid var(--border-color);
-color: var(--text-main);
-width: 36px; height: 36px; padding: 0;
-border-radius: 8px;
-display: flex; align-items: center; justify-content: center;
-cursor: pointer; transition: all 0.2s ease;
+.main{flex:1;min-width:0;display:flex;flex-direction:column;}
+.topbar{
+background:var(--surface);border-bottom:1px solid var(--border);
+padding:16px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
 }
-.icon-action:hover { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.4); }
-.icon-action svg {
-width: 18px; height: 18px;
-stroke: currentColor; fill: none;
-stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
-}
+.content-h{font-weight:700;font-size:19px;color:var(--dark);margin:0;}
+.content-sub{font-size:13px;color:var(--text-soft);margin:3px 0 0;}
+.content{padding:28px;flex:1;}
 
-.btn {
-background: var(--panel-color);
-border: 1px solid var(--border-color);
-color: white;
-padding: 8px 16px;
-border-radius: 6px;
-cursor: pointer;
-font-size: 0.8rem;
-transition: all 0.2s ease;
-white-space: nowrap;
+/* ===== COMPONENTS ===== */
+.btn{
+border:1px solid var(--border);background:var(--surface);color:var(--text);
+padding:8px 15px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;
+display:inline-flex;align-items:center;gap:7px;transition:0.15s ease;white-space:nowrap;
 }
-.btn:hover { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.4); }
-.btn-primary { background: var(--accent-color); border: none; font-weight: 600; }
-.btn-primary:hover { background: #00897b; }
+.btn:hover{background:#FFF7ED;border-color:var(--accent);}
+.btn-primary{background:var(--primary);border-color:var(--primary);color:#fff;}
+.btn-primary:hover{background:var(--primary-dark);border-color:var(--primary-dark);}
+.btn-sm{padding:6px 11px;font-size:12px;}
+.btn:disabled{opacity:0.55;cursor:not-allowed;}
 
-.main-content { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; }
-.glass-panel {
-background: var(--panel-color);
-backdrop-filter: blur(30px);
-border: 1px solid var(--border-color);
-border-radius: 16px;
-padding: 30px;
-width: 100%;
-max-width: 420px;
-box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+.card{
+background:var(--surface);border:1px solid var(--border);border-radius:13px;
+padding:20px;box-shadow:0 1px 3px rgba(124,45,18,0.04);
 }
-/* The login panel sits over a photo, so it needs a more solid backing
-   than the panels that sit over a flat background. */
-#scr-login {
-background: rgba(0, 26, 24, 0.55);
-box-shadow: 0 24px 60px rgba(0,0,0,0.5);
-}
-.wide-panel { max-width: 900px; }
-.hidden { display: none !important; }
-h2 { font-weight: 400; margin-top: 0; margin-bottom: 20px; letter-spacing: -0.5px; font-size: 1.3rem; }
+.card + .card{margin-top:18px;}
+.card-h{font-weight:700;font-size:15px;color:var(--dark);margin:0 0 4px;font-family:"Plus Jakarta Sans",sans-serif;}
+.card-sub{font-size:12.5px;color:var(--text-soft);margin:0 0 16px;line-height:1.5;}
 
-.placeholder-tile {
-border: 1px dashed var(--border-color); border-radius: 12px;
-padding: 60px 20px; text-align: center;
-color: var(--text-dim); font-size: 0.9rem;
-}
+.grid{display:grid;gap:16px;}
+.grid-4{grid-template-columns:repeat(auto-fill,minmax(190px,1fr));}
+.grid-3{grid-template-columns:repeat(auto-fill,minmax(240px,1fr));}
+.grid-2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr));}
 
-@media (max-width: 600px) {
-header { padding: 10px 15px; }
-.glass-panel { padding: 20px; }
-.placeholder-tile { padding: 40px 15px; }
-/* Tall screens crop this photo to mostly sky when centred. */
-body.login-bg { background-position: center bottom; }
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+.stat-label{font-size:11.5px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-soft);font-weight:600;}
+.stat-value{font-size:26px;font-weight:800;color:var(--dark);margin-top:5px;line-height:1;}
+.stat-note{font-size:12px;color:var(--text-soft);margin-top:6px;}
+
+label{display:block;font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;
+color:var(--text-soft);margin-bottom:6px;}
+input,select,textarea{
+width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;
+background:var(--surface);color:var(--text);font-size:14px;font-family:inherit;
+}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(249,115,22,0.13);}
+.field{margin-bottom:16px;}
+.form-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px;}
+
+.chip{
+display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;
+font-size:11.5px;font-weight:600;border:1px solid transparent;
+}
+.chip-ok{background:var(--success-bg);color:var(--success);}
+.chip-warn{background:var(--warning-bg);color:var(--warning);}
+.chip-bad{background:var(--danger-bg);color:var(--danger);}
+.chip-info{background:var(--info-bg);color:var(--info);}
+.chip-idle{background:#F5EBE3;color:var(--text-soft);}
+
+table{width:100%;border-collapse:collapse;}
+th{
+text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);
+font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-soft);font-weight:700;
+}
+td{padding:12px;border-bottom:1px solid #F8EDE4;font-size:13.5px;}
+tbody tr:last-child td{border-bottom:none;}
+
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;}
+.tab{
+padding:7px 14px;border-radius:999px;border:1px solid var(--border);background:var(--surface);
+font-size:12.5px;font-weight:600;color:var(--text-soft);cursor:pointer;transition:0.15s ease;
+}
+.tab:hover{border-color:var(--accent);color:var(--text);}
+.tab.active{background:var(--primary);border-color:var(--primary);color:#fff;}
+
+.empty{
+border:1px dashed var(--border);border-radius:12px;padding:44px 20px;text-align:center;
+color:var(--text-soft);font-size:13.5px;background:#FFFBF7;
+}
+.note{
+background:#FFF7ED;border:1px solid var(--border);border-radius:10px;
+padding:12px 15px;font-size:12.5px;color:var(--text-soft);line-height:1.55;
+}
+.note b{color:var(--text);}
+
+@media (max-width:820px){
+.app-shell{flex-direction:column;}
+.sidebar{width:100%;height:auto;position:static;flex-direction:column;}
+.nav{flex-direction:row;flex-wrap:wrap;}
+.nav-item{width:auto;}
+.nav-label{display:none;}
+.sidebar-foot{margin-top:14px;}
+.content{padding:18px;}
+.topbar{padding:14px 18px;}
 }
 </style>
 </head>
 <body>
-<header>
-<div class="header-left">
-<span class="site-title">Assembix</span>
-</div>
-<div class="header-right">
-<span id="active-user-display" class="user-meta hidden"></span>
-<button id="btn-logout" class="icon-action hidden" onclick="doLogout()" title="Sign Out" aria-label="Sign Out">
-<svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><path d="M21 12H9"/></svg>
-</button>
-</div>
-</header>
 
-<div class="main-content">
-
-<!-- 1. LOGIN -->
-<div id="scr-login" class="glass-panel">
-<h2>Sign In</h2>
-<p style="color:var(--text-dim); font-size:0.85rem; margin-top:-15px; margin-bottom:25px;">
-Sign in with your authorized Google account.
-</p>
-<div id="g_id_signin" style="display:flex; justify-content:center;"></div>
-<div id="login-status" style="text-align:center; color:var(--text-dim); font-size:0.8rem; margin-top:16px;"></div>
+<!-- ============ LOGIN ============ -->
+<div id="scr-login" class="login-screen">
+  <div class="login-card">
+    <div class="brand">
+      <div class="brand-mark">A</div>
+      <div class="brand-word" style="color:var(--dark)">Assembix</div>
+    </div>
+    <h2>Sign in</h2>
+    <p>Use your authorised Google account to continue.</p>
+    <div id="g_id_signin"></div>
+    <div id="login-status"></div>
+  </div>
 </div>
 
-<!-- 2. HOME (everything after login goes here) -->
-<div id="scr-home" class="glass-panel wide-panel hidden">
-<h2 id="home-label">Welcome</h2>
-<div class="placeholder-tile">
-Nothing built here yet.
-</div>
-</div>
+<!-- ============ APP ============ -->
+<div id="app" class="app-shell hidden">
 
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">A</div>
+      <div class="brand-word">Assembix</div>
+    </div>
+
+    <nav class="nav" id="nav"></nav>
+
+    <div class="sidebar-foot">
+      <div class="who"><b id="who-name">—</b><span id="who-role">—</span></div>
+      <button class="nav-item" onclick="doLogout()">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><path d="M21 12H9"/></svg>
+        Sign out
+      </button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h1 class="content-h" id="page-title">Dashboard</h1>
+        <p class="content-sub" id="page-sub"></p>
+      </div>
+      <div id="page-actions"></div>
+    </div>
+    <div class="content" id="content"></div>
+  </div>
 </div>
 
 <script>
+/* Fill APPS_SCRIPT_URL after deploying the Assembix Apps Script project.
+   The client ID may be shared with Mahana, but the Assembix origin must be
+   added to that OAuth client's Authorized JavaScript origins first. */
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDAt4paCuEsZ0HZG4eWyWAMX_AVevyEBNVdUPyM6t6EJoMi8r1fpEc-R3epfe5XmMv/exec";
 const GOOGLE_CLIENT_ID = "766825494798-2vq54u2u9kmfegir98uig2ubr9gr6hj4.apps.googleusercontent.com";
 
+/* =========================
+   NAVIGATION
+   Each entry maps a hash route to a title and a render function.
+   ========================= */
+const PAGES = [
+  { id: 'dashboard',  label: 'Dashboard',   group: 'Overview',
+    sub: 'Suppliers, activity and anything needing attention.' },
+  { id: 'consignments', label: 'Add consignment', group: 'Intake',
+    sub: 'Enter a consignment manually, or sync rows from a Google Sheet.' },
+  { id: 'status',     label: 'Status board', group: 'Intake',
+    sub: 'Every consignment sits in exactly one grid.' },
+  { id: 'queue',      label: 'Assembly queue', group: 'Assembly',
+    sub: 'Everything pending, in the order staff should work through it.' },
+  { id: 'assemble',   label: 'Assembly',     group: 'Assembly',
+    sub: 'Build partially or fully. Quantity is capped by the scarcest part.' },
+  { id: 'deliveries', label: 'Deliveries',   group: 'Output',
+    sub: 'Mark quantities out, then close the loop on what customers confirm.' },
+  { id: 'reports',    label: 'Reports',      group: 'Output',
+    sub: 'Every event per consignment and part, filterable and exportable.' },
+  { id: 'models',     label: 'Models & parts', group: 'Setup',
+    sub: 'Master setup, done once per model. Name it, then define its parts.' }
+];
+
 let idToken = localStorage.getItem('assembix_idToken') || null;
 let user = null;
+let currentPage = 'dashboard';
 
 async function apiCall(action, payload = {}) {
   const res = await fetch(APPS_SCRIPT_URL, {
@@ -175,29 +285,27 @@ async function apiCall(action, payload = {}) {
   return res.json();
 }
 
+/* =========================
+   AUTH
+   ========================= */
+
 function initGoogleSignIn() {
-  if (typeof google === 'undefined') {
-    handleGsiLoadError();
-    return;
-  }
+  if (typeof google === 'undefined') { handleGsiLoadError(); return; }
   google.accounts.id.initialize({
     client_id: GOOGLE_CLIENT_ID,
     callback: handleCredentialResponse
   });
   google.accounts.id.renderButton(
     document.getElementById('g_id_signin'),
-    { theme: 'filled_black', size: 'large', width: 260 }
+    { theme: 'outline', size: 'large', width: 260 }
   );
-  if (idToken) {
-    completeLogin();
-  } else {
-    google.accounts.id.prompt();
-  }
+  if (idToken) completeLogin();
+  else google.accounts.id.prompt();
 }
 
 function handleGsiLoadError() {
   document.getElementById('login-status').innerText =
-    "Could not load Google Sign-In. Make sure this page is served over https:// and that you have an internet connection.";
+    "Could not load Google Sign-In. The page must be served over https:// with a working connection.";
 }
 
 function handleCredentialResponse(response) {
@@ -212,7 +320,7 @@ async function completeLogin() {
   try {
     const result = await apiCall('whoami');
     if (!result.ok) {
-      statusEl.innerText = result.error || "Authorization Failed";
+      statusEl.innerText = result.error || "Authorization failed";
       idToken = null;
       localStorage.removeItem('assembix_idToken');
       google.accounts.id.prompt();
@@ -223,17 +331,24 @@ async function completeLogin() {
     statusEl.innerText = "";
 
     document.getElementById('scr-login').classList.add('hidden');
-    document.body.classList.remove('login-bg');
-    document.getElementById('scr-home').classList.remove('hidden');
-    document.getElementById('btn-logout').classList.remove('hidden');
-    document.getElementById('active-user-display').classList.remove('hidden');
-    document.getElementById('active-user-display').innerText = user.name;
-    document.getElementById('home-label').innerText = "Welcome, " + user.name;
+    document.getElementById('app').classList.remove('hidden');
+    document.getElementById('who-name').innerText = user.name;
+    document.getElementById('who-role').innerText = roleLabel(user.level);
+
+    renderNav();
+    window.addEventListener('hashchange', route);
+    route();
   } catch (e) {
-    statusEl.innerText = "Could not reach the server. Please try again.";
+    statusEl.innerText = "Could not reach the server. Try again.";
     idToken = null;
     localStorage.removeItem('assembix_idToken');
   }
+}
+
+function roleLabel(level) {
+  if (level === 0) return 'Director';
+  if (level === 1) return 'Manager';
+  return 'Staff';
 }
 
 function doLogout() {
@@ -244,8 +359,206 @@ function doLogout() {
   location.reload();
 }
 
-// Photo background is on until someone signs in.
-document.body.classList.add('login-bg');
+/* =========================
+   SHELL
+   ========================= */
+
+function renderNav() {
+  const nav = document.getElementById('nav');
+  nav.innerHTML = "";
+  let lastGroup = null;
+  PAGES.forEach(p => {
+    if (p.group !== lastGroup) {
+      nav.insertAdjacentHTML('beforeend', `<div class="nav-label">${p.group}</div>`);
+      lastGroup = p.group;
+    }
+    nav.insertAdjacentHTML('beforeend',
+      `<a class="nav-item${p.id === currentPage ? ' active' : ''}" href="#/${p.id}">${p.label}</a>`);
+  });
+}
+
+function route() {
+  if (!user) return;
+  const id = window.location.hash.replace(/^#\/?/, '') || 'dashboard';
+  const page = PAGES.filter(p => p.id === id)[0];
+  if (!page) { window.location.hash = '#/dashboard'; return; }
+
+  currentPage = page.id;
+  document.getElementById('page-title').innerText = page.label;
+  document.getElementById('page-sub').innerText = page.sub;
+  document.getElementById('page-actions').innerHTML = "";
+  renderNav();
+
+  const render = RENDERERS[page.id];
+  document.getElementById('content').innerHTML = render ? render() : '';
+}
+
+/* =========================
+   PAGE RENDERERS
+   Static layouts for now — nothing is wired to the Sheet yet beyond sign-in.
+   ========================= */
+
+const notWired = (what) => `
+  <div class="note" style="margin-bottom:18px;">
+    <b>Not connected yet.</b> ${what} The layout is here so we can agree the shape
+    before building the data model behind it.
+  </div>`;
+
+const RENDERERS = {
+
+  dashboard: () => `
+    ${notWired('Figures below are placeholders.')}
+    <div class="grid grid-4" style="margin-bottom:18px;">
+      <div class="stat"><div class="stat-label">Fully pending</div><div class="stat-value">—</div><div class="stat-note">No parts received</div></div>
+      <div class="stat"><div class="stat-label">Partial pending</div><div class="stat-value">—</div><div class="stat-note">Some parts landed</div></div>
+      <div class="stat"><div class="stat-label">Assembly pending</div><div class="stat-value">—</div><div class="stat-note">Ready to build</div></div>
+      <div class="stat"><div class="stat-label">Awaiting confirmation</div><div class="stat-value">—</div><div class="stat-note">Out, not confirmed</div></div>
+    </div>
+
+    <div class="card">
+      <h3 class="card-h">Suppliers</h3>
+      <p class="card-sub">Toggle between assembly status, import status and product views.</p>
+      <div class="tabs">
+        <button class="tab active">Assembly status</button>
+        <button class="tab">Import status</button>
+        <button class="tab">Products</button>
+      </div>
+      <div class="empty">Supplier tiles appear here once consignments exist.</div>
+    </div>
+
+    <div class="grid grid-2" style="margin-top:18px;">
+      <div class="card">
+        <h3 class="card-h">Recent activity</h3>
+        <p class="card-sub">Latest events across all consignments.</p>
+        <div class="empty">Nothing logged yet.</div>
+      </div>
+      <div class="card">
+        <h3 class="card-h">Needs attention</h3>
+        <p class="card-sub">Stalled consignments and unconfirmed deliveries.</p>
+        <div class="empty">Nothing flagged.</div>
+      </div>
+    </div>`,
+
+  consignments: () => `
+    ${notWired('Saving is not hooked up.')}
+    <div class="card">
+      <h3 class="card-h">New consignment</h3>
+      <p class="card-sub">Matching rows — for example Careline-3A and Careline-3C — fold into the same consignment.</p>
+      <div class="form-row">
+        <div class="field"><label>Supplier</label><input type="text" placeholder="Supplier name"></div>
+        <div class="field"><label>Model</label><select><option>Select a model</option></select></div>
+        <div class="field"><label>Consignment ref</label><input type="text" placeholder="e.g. Careline-3"></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Loaded date</label><input type="date"></div>
+        <div class="field"><label>Import status</label>
+          <select><option>Loaded</option><option>F-Bank</option><option>L-Bank</option><option>Clearance</option><option>Received</option></select>
+        </div>
+      </div>
+      <h3 class="card-h" style="margin-top:8px;">Quantity by customer</h3>
+      <p class="card-sub">Split the consignment across customer or branch codes.</p>
+      <div class="form-row">
+        <div class="field"><label>BB</label><input type="number" min="0" placeholder="0"></div>
+        <div class="field"><label>FR</label><input type="number" min="0" placeholder="0"></div>
+        <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-sm">+ Add customer</button></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:6px;">
+        <button class="btn btn-primary">Save consignment</button>
+        <button class="btn">Connect a Google Sheet</button>
+      </div>
+    </div>`,
+
+  status: () => `
+    ${notWired('The grids below are empty placeholders.')}
+    <div class="grid grid-3">
+      ${['Fully pending','Partial pending','Assembly pending','Assembled','Delivered']
+        .map(s => `
+        <div class="card">
+          <h3 class="card-h">${s}</h3>
+          <p class="card-sub">Part chips show what has landed so far.</p>
+          <div class="empty" style="padding:28px 14px;">Empty</div>
+        </div>`).join('')}
+    </div>`,
+
+  queue: () => `
+    ${notWired('Ordering and priorities are not saved.')}
+    <div class="card">
+      <h3 class="card-h">Work order</h3>
+      <p class="card-sub">Drag to reorder, or set a priority. Every staff member sees this same list, top to bottom.</p>
+      <table>
+        <thead><tr><th style="width:44px">#</th><th>Consignment</th><th>Model</th><th>Buildable</th><th>Priority</th><th></th></tr></thead>
+        <tbody><tr><td colspan="6" style="color:var(--text-soft);padding:22px 12px;">Nothing in the queue.</td></tr></tbody>
+      </table>
+    </div>`,
+
+  assemble: () => `
+    ${notWired('Nothing is written on save.')}
+    <div class="card">
+      <h3 class="card-h">Build</h3>
+      <p class="card-sub">Buildable quantity is capped by whichever part arrived least. Parts merge into a single model line.</p>
+      <div class="form-row">
+        <div class="field"><label>Consignment</label><select><option>Select a consignment</option></select></div>
+        <div class="field"><label>Buildable now</label><input type="text" value="—" disabled></div>
+        <div class="field"><label>Quantity to build</label><input type="number" min="0" placeholder="0"></div>
+      </div>
+      <div class="field"><label>Remarks</label><input type="text" placeholder="Anything worth noting about this build"></div>
+      <button class="btn btn-primary">Record build</button>
+    </div>`,
+
+  deliveries: () => `
+    ${notWired('Nothing is recorded yet.')}
+    <div class="grid grid-2">
+      <div class="card">
+        <h3 class="card-h">Mark out</h3>
+        <p class="card-sub">Send a quantity to a customer.</p>
+        <div class="field"><label>Consignment</label><select><option>Select</option></select></div>
+        <div class="form-row">
+          <div class="field"><label>Customer</label><select><option>BB</option><option>FR</option></select></div>
+          <div class="field"><label>Quantity out</label><input type="number" min="0" placeholder="0"></div>
+        </div>
+        <button class="btn btn-primary">Mark out</button>
+      </div>
+      <div class="card">
+        <h3 class="card-h">Customer confirmation</h3>
+        <p class="card-sub">Only confirmed units leave the board as Delivered.</p>
+        <div class="empty" style="padding:30px 14px;">Nothing awaiting confirmation.</div>
+      </div>
+    </div>`,
+
+  reports: () => `
+    ${notWired('No events to show.')}
+    <div class="card">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+        <input type="text" placeholder="Search consignment, model or part" style="max-width:280px;">
+        <select style="max-width:170px;"><option>All events</option></select>
+        <button class="btn">Export</button>
+      </div>
+      <table>
+        <thead><tr><th>When</th><th>Consignment</th><th>Part</th><th>Event</th><th>Qty</th><th>By</th></tr></thead>
+        <tbody><tr><td colspan="6" style="color:var(--text-soft);padding:22px 12px;">No events logged.</td></tr></tbody>
+      </table>
+    </div>`,
+
+  models: () => `
+    ${notWired('Models are not saved yet.')}
+    <div class="card">
+      <h3 class="card-h">New model</h3>
+      <p class="card-sub">Name the model, then define what each part actually is.</p>
+      <div class="field" style="max-width:340px;"><label>Model name</label><input type="text" placeholder="e.g. SKD 3-part unit"></div>
+      <table>
+        <thead><tr><th style="width:70px">Part</th><th>What it is</th><th style="width:120px">Per unit</th></tr></thead>
+        <tbody>
+          <tr><td><b>A</b></td><td><input type="text" placeholder="e.g. Body"></td><td><input type="number" value="1" min="1"></td></tr>
+          <tr><td><b>B</b></td><td><input type="text" placeholder="e.g. Basket"></td><td><input type="number" value="1" min="1"></td></tr>
+          <tr><td><b>C</b></td><td><input type="text" placeholder="e.g. Carton"></td><td><input type="number" value="1" min="1"></td></tr>
+        </tbody>
+      </table>
+      <div style="display:flex;gap:10px;margin-top:16px;">
+        <button class="btn btn-primary">Save model</button>
+        <button class="btn btn-sm">+ Add part</button>
+      </div>
+    </div>`
+};
 </script>
 </body>
 </html>
