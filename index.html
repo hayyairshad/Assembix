@@ -72,7 +72,7 @@ text-align:center;
 .sidebar{
 width:214px;flex-shrink:0;background:var(--dark);
 display:flex;flex-direction:column;padding:20px 14px;gap:22px;
-position:sticky;top:0;height:100vh;
+position:sticky;top:0;height:100vh;overflow-y:auto;
 }
 .brand{display:flex;align-items:center;gap:10px;padding:0 6px;}
 .brand-mark{
@@ -243,38 +243,26 @@ padding:12px 15px;font-size:12.5px;color:var(--text-soft);line-height:1.55;
 </div>
 
 <script>
-/* Fill APPS_SCRIPT_URL after deploying the Assembix Apps Script project.
-   The client ID may be shared with Mahana, but the Assembix origin must be
-   added to that OAuth client's Authorized JavaScript origins first. */
+/* Fill APPS_SCRIPT_URL after deploying the Assembix Apps Script project. */
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDAt4paCuEsZ0HZG4eWyWAMX_AVevyEBNVdUPyM6t6EJoMi8r1fpEc-R3epfe5XmMv/exec";
 const GOOGLE_CLIENT_ID = "766825494798-2vq54u2u9kmfegir98uig2ubr9gr6hj4.apps.googleusercontent.com";
 
-/* =========================
-   NAVIGATION
-   Each entry maps a hash route to a title and a render function.
-   ========================= */
 const PAGES = [
-  { id: 'dashboard',  label: 'Dashboard',   group: 'Overview',
-    sub: 'Suppliers, activity and anything needing attention.' },
-  { id: 'consignments', label: 'Add consignment', group: 'Intake',
-    sub: 'Enter a consignment manually, or sync rows from a Google Sheet.' },
-  { id: 'status',     label: 'Status board', group: 'Intake',
-    sub: 'Every consignment sits in exactly one grid.' },
-  { id: 'queue',      label: 'Assembly queue', group: 'Assembly',
-    sub: 'Everything pending, in the order staff should work through it.' },
-  { id: 'assemble',   label: 'Assembly',     group: 'Assembly',
-    sub: 'Build partially or fully. Quantity is capped by the scarcest part.' },
-  { id: 'deliveries', label: 'Deliveries',   group: 'Output',
-    sub: 'Mark quantities out, then close the loop on what customers confirm.' },
-  { id: 'reports',    label: 'Reports',      group: 'Output',
-    sub: 'Every event per consignment and part, filterable and exportable.' },
-  { id: 'models',     label: 'Models & parts', group: 'Setup',
-    sub: 'Master setup, done once per model. Name it, then define its parts.' }
+  { id: 'dashboard',    label: 'Dashboard',      group: 'Overview', sub: 'Suppliers, activity and anything needing attention.' },
+  { id: 'consignments', label: 'Add consignment', group: 'Intake',  sub: 'Enter a consignment row manually. Parsed against the Model & Parts master automatically.' },
+  { id: 'needsreview',  label: 'Needs review',    group: 'Intake',  sub: "Rows that didn't parse cleanly against the naming pattern." },
+  { id: 'status',       label: 'Status board',    group: 'Intake',  sub: 'Every consignment group sits in exactly one grid.' },
+  { id: 'queue',        label: 'Assembly queue',  group: 'Assembly', sub: 'Everything pending, in the order staff should work through it.' },
+  { id: 'assemble',     label: 'Assembly',        group: 'Assembly', sub: 'Build partially or fully. Quantity is capped by the scarcest part.' },
+  { id: 'deliveries',   label: 'Deliveries',      group: 'Output',  sub: 'Mark quantities out, then close the loop on what customers confirm.' },
+  { id: 'reports',      label: 'Reports',         group: 'Output',  sub: 'Every event per consignment and part, filterable.' },
+  { id: 'models',       label: 'Models & parts',  group: 'Setup',   sub: 'Master setup, done once per model. Name it, set its sheet code, then define its parts.' }
 ];
 
 let idToken = localStorage.getItem('assembix_idToken') || null;
 let user = null;
 let currentPage = 'dashboard';
+let cache = { models: [], customers: [] }; // small lookups reused across pages
 
 async function apiCall(action, payload = {}) {
   const res = await fetch(APPS_SCRIPT_URL, {
@@ -291,21 +279,14 @@ async function apiCall(action, payload = {}) {
 
 function initGoogleSignIn() {
   if (typeof google === 'undefined') { handleGsiLoadError(); return; }
-  google.accounts.id.initialize({
-    client_id: GOOGLE_CLIENT_ID,
-    callback: handleCredentialResponse
-  });
-  google.accounts.id.renderButton(
-    document.getElementById('g_id_signin'),
-    { theme: 'outline', size: 'large', width: 260 }
-  );
+  google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleCredentialResponse });
+  google.accounts.id.renderButton(document.getElementById('g_id_signin'), { theme: 'outline', size: 'large', width: 260 });
   if (idToken) completeLogin();
   else google.accounts.id.prompt();
 }
 
 function handleGsiLoadError() {
-  document.getElementById('login-status').innerText =
-    "Could not load Google Sign-In. The page must be served over https:// with a working connection.";
+  document.getElementById('login-status').innerText = "Could not load Google Sign-In. The page must be served over https:// with a working connection.";
 }
 
 function handleCredentialResponse(response) {
@@ -326,15 +307,14 @@ async function completeLogin() {
       google.accounts.id.prompt();
       return;
     }
-
     user = { name: result.name, email: result.email, level: result.level };
     statusEl.innerText = "";
-
     document.getElementById('scr-login').classList.add('hidden');
     document.getElementById('app').classList.remove('hidden');
     document.getElementById('who-name').innerText = user.name;
     document.getElementById('who-role').innerText = roleLabel(user.level);
 
+    await Promise.all([refreshModels(), refreshCustomers()]);
     renderNav();
     window.addEventListener('hashchange', route);
     route();
@@ -372,15 +352,14 @@ function renderNav() {
       nav.insertAdjacentHTML('beforeend', `<div class="nav-label">${p.group}</div>`);
       lastGroup = p.group;
     }
-    nav.insertAdjacentHTML('beforeend',
-      `<a class="nav-item${p.id === currentPage ? ' active' : ''}" href="#/${p.id}">${p.label}</a>`);
+    nav.insertAdjacentHTML('beforeend', `<a class="nav-item${p.id === currentPage ? ' active' : ''}" href="#/${p.id}">${p.label}</a>`);
   });
 }
 
-function route() {
+async function route() {
   if (!user) return;
   const id = window.location.hash.replace(/^#\/?/, '') || 'dashboard';
-  const page = PAGES.filter(p => p.id === id)[0];
+  const page = PAGES.find(p => p.id === id);
   if (!page) { window.location.hash = '#/dashboard'; return; }
 
   currentPage = page.id;
@@ -389,176 +368,514 @@ function route() {
   document.getElementById('page-actions').innerHTML = "";
   renderNav();
 
-  const render = RENDERERS[page.id];
-  document.getElementById('content').innerHTML = render ? render() : '';
+  const content = document.getElementById('content');
+  content.innerHTML = `<div class="empty">Loading…</div>`;
+  const renderer = RENDERERS[page.id];
+  content.innerHTML = renderer ? await renderer() : '';
+  wirePageHandlers(page.id);
 }
 
+async function refreshModels() {
+  const res = await apiCall('listModels');
+  if (res.ok) cache.models = res.models;
+}
+async function refreshCustomers() {
+  const res = await apiCall('listCustomers');
+  if (res.ok) cache.customers = res.customers;
+}
+
+function chip(status) {
+  const map = {
+    'Fully Pending': 'chip-idle', 'Partial Pending': 'chip-warn', 'Assembly Pending': 'chip-info',
+    'Ready to Deliver': 'chip-info', 'Delivered': 'chip-ok', 'Delivery discrepancy': 'chip-bad'
+  };
+  let cls = map[status];
+  if (!cls) cls = status.indexOf('Towards') === 0 ? 'chip-warn' : 'chip-idle';
+  return `<span class="chip ${cls}">${status}</span>`;
+}
+
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
 /* =========================
-   PAGE RENDERERS
-   Static layouts for now — nothing is wired to the Sheet yet beyond sign-in.
+   DASHBOARD
    ========================= */
 
-const notWired = (what) => `
-  <div class="note" style="margin-bottom:18px;">
-    <b>Not connected yet.</b> ${what} The layout is here so we can agree the shape
-    before building the data model behind it.
-  </div>`;
-
-const RENDERERS = {
-
-  dashboard: () => `
-    ${notWired('Figures below are placeholders.')}
+async function renderDashboard() {
+  const res = await apiCall('getDashboard');
+  if (!res.ok) return `<div class="empty">Could not load dashboard: ${esc(res.error)}</div>`;
+  const s = res.stats;
+  return `
     <div class="grid grid-4" style="margin-bottom:18px;">
-      <div class="stat"><div class="stat-label">Fully pending</div><div class="stat-value">—</div><div class="stat-note">No parts received</div></div>
-      <div class="stat"><div class="stat-label">Partial pending</div><div class="stat-value">—</div><div class="stat-note">Some parts landed</div></div>
-      <div class="stat"><div class="stat-label">Assembly pending</div><div class="stat-value">—</div><div class="stat-note">Ready to build</div></div>
-      <div class="stat"><div class="stat-label">Awaiting confirmation</div><div class="stat-value">—</div><div class="stat-note">Out, not confirmed</div></div>
+      <div class="stat"><div class="stat-label">Fully pending</div><div class="stat-value">${s.fullyPending}</div><div class="stat-note">No parts received</div></div>
+      <div class="stat"><div class="stat-label">Partial pending</div><div class="stat-value">${s.partialPending}</div><div class="stat-note">Some parts landed</div></div>
+      <div class="stat"><div class="stat-label">Assembly pending</div><div class="stat-value">${s.assemblyPending}</div><div class="stat-note">Ready to build</div></div>
+      <div class="stat"><div class="stat-label">Awaiting confirmation</div><div class="stat-value">${s.awaitingConfirmation}</div><div class="stat-note">Out, not confirmed</div></div>
     </div>
-
+    ${s.needsReview > 0 ? `<div class="note" style="margin-bottom:18px;"><b>${s.needsReview} row(s) need review.</b> <a href="#/needsreview">Go fix them</a> — they're excluded from every grid until resolved.</div>` : ''}
     <div class="card">
       <h3 class="card-h">Suppliers</h3>
-      <p class="card-sub">Toggle between assembly status, import status and product views.</p>
-      <div class="tabs">
-        <button class="tab active">Assembly status</button>
-        <button class="tab">Import status</button>
-        <button class="tab">Products</button>
-      </div>
-      <div class="empty">Supplier tiles appear here once consignments exist.</div>
+      <p class="card-sub">Consignment groups per supplier.</p>
+      ${res.suppliers.length ? `<table><thead><tr><th>Supplier</th><th>Consignment groups</th></tr></thead><tbody>
+        ${res.suppliers.map(s => `<tr><td>${esc(s.supplier)}</td><td>${s.count}</td></tr>`).join('')}
+      </tbody></table>` : `<div class="empty">No consignments yet.</div>`}
     </div>
-
     <div class="grid grid-2" style="margin-top:18px;">
       <div class="card">
         <h3 class="card-h">Recent activity</h3>
-        <p class="card-sub">Latest events across all consignments.</p>
-        <div class="empty">Nothing logged yet.</div>
+        ${res.recentActivity.length ? `<table><tbody>
+          ${res.recentActivity.map(e => `<tr><td style="white-space:nowrap;color:var(--text-soft);">${esc(fmtDate(e.Timestamp))}</td><td>${esc(e.ConsignmentGroup)}</td><td>${esc(e.EventType)}</td></tr>`).join('')}
+        </tbody></table>` : `<div class="empty">Nothing logged yet.</div>`}
       </div>
       <div class="card">
         <h3 class="card-h">Needs attention</h3>
-        <p class="card-sub">Stalled consignments and unconfirmed deliveries.</p>
-        <div class="empty">Nothing flagged.</div>
+        ${res.needsAttention.length ? `<table><tbody>
+          ${res.needsAttention.map(c => `<tr><td>${esc(c.consignmentGroup)}</td><td>${esc(c.modelName)}</td><td>${chip(c.status)}</td></tr>`).join('')}
+        </tbody></table>` : `<div class="empty">Nothing flagged.</div>`}
       </div>
-    </div>`,
+    </div>`;
+}
 
-  consignments: () => `
-    ${notWired('Saving is not hooked up.')}
+function fmtDate(v) { try { return new Date(v).toLocaleString(); } catch (e) { return v; } }
+
+/* =========================
+   MODELS & PARTS
+   ========================= */
+
+async function renderModels() {
+  const listHtml = cache.models.length ? `
     <div class="card">
-      <h3 class="card-h">New consignment</h3>
-      <p class="card-sub">Matching rows — for example Careline-3A and Careline-3C — fold into the same consignment.</p>
+      <h3 class="card-h">Existing models</h3>
+      <table><thead><tr><th>Model</th><th>Sheet code</th><th>Parts</th></tr></thead><tbody>
+        ${cache.models.map(m => `<tr><td>${esc(m.modelName)}</td><td><code>${esc(m.sheetCode)}</code></td>
+          <td>${m.parts.map(p => `<span class="chip chip-idle">${esc(p.partLetter)} · ${esc(p.partName)}</span>`).join(' ')}</td></tr>`).join('')}
+      </tbody></table>
+    </div>` : '';
+
+  return `
+    ${listHtml}
+    <div class="card">
+      <h3 class="card-h">New model</h3>
+      <p class="card-sub">Sheet code must be unique and cannot contain a hyphen — it's used in the naming parser (e.g. <code>{SheetCode}-{Lot}{PartLetter}</code>).</p>
       <div class="form-row">
-        <div class="field"><label>Supplier</label><input type="text" placeholder="Supplier name"></div>
-        <div class="field"><label>Model</label><select><option>Select a model</option></select></div>
-        <div class="field"><label>Consignment ref</label><input type="text" placeholder="e.g. Careline-3"></div>
+        <div class="field"><label>Model name</label><input id="mdl-name" type="text" placeholder="e.g. RS-150"></div>
+        <div class="field"><label>Sheet code</label><input id="mdl-sheetcode" type="text" placeholder="e.g. Careline"></div>
+        <div class="field"><label>Product line</label><input id="mdl-line" type="text" placeholder="optional"></div>
       </div>
+      <table id="mdl-parts-table">
+        <thead><tr><th style="width:90px">Letter</th><th>Part name</th><th style="width:120px">Code prefix</th><th style="width:100px">Per unit</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div style="display:flex;gap:10px;margin-top:16px;">
+        <button class="btn btn-primary" id="mdl-save">Save model</button>
+        <button class="btn btn-sm" id="mdl-addpart">+ Add part</button>
+      </div>
+      <div id="mdl-status" class="note hidden" style="margin-top:12px;"></div>
+    </div>`;
+}
+
+function addModelPartRow(letter, name, prefix, qty) {
+  const tbody = document.querySelector('#mdl-parts-table tbody');
+  const row = document.createElement('tr');
+  row.innerHTML = `
+    <td><input type="text" maxlength="1" value="${esc(letter || '')}" placeholder="A"></td>
+    <td><input type="text" value="${esc(name || '')}" placeholder="e.g. Body"></td>
+    <td><input type="text" value="${esc(prefix || '')}" placeholder="BDY"></td>
+    <td><input type="number" value="${qty || 1}" min="1"></td>
+    <td><button class="btn btn-sm" onclick="this.closest('tr').remove()">×</button></td>`;
+  tbody.appendChild(row);
+}
+
+/* =========================
+   ADD CONSIGNMENT
+   ========================= */
+
+async function renderConsignments() {
+  const modelOptions = cache.models.map(m => `<option value="${esc(m.sheetCode)}">${esc(m.modelName)} (${esc(m.sheetCode)})</option>`).join('');
+  const customerRows = cache.customers.map(c => `
+    <div class="field"><label>${esc(c.CustomerCode)}</label><input type="number" min="0" placeholder="0" class="cust-qty" data-code="${esc(c.CustomerCode)}"></div>`).join('');
+
+  return `
+    <div class="card">
+      <h3 class="card-h">New consignment row</h3>
+      <p class="card-sub">One row per part per lot — e.g. <code>Careline-3A</code>. Matching rows fold into the same consignment group automatically.</p>
+      ${cache.models.length ? '' : `<div class="note" style="margin-bottom:14px;"><b>No models defined yet.</b> Add one on the <a href="#/models">Models & parts</a> page first, or rows here will go straight to Needs Review.</div>`}
       <div class="form-row">
-        <div class="field"><label>Loaded date</label><input type="date"></div>
+        <div class="field"><label>Sheet row name</label><input id="cn-name" type="text" placeholder="e.g. Careline-3A"></div>
+        <div class="field"><label>Supplier</label><input id="cn-supplier" type="text" placeholder="Supplier name"></div>
         <div class="field"><label>Import status</label>
-          <select><option>Loaded</option><option>F-Bank</option><option>L-Bank</option><option>Clearance</option><option>Received</option></select>
+          <select id="cn-status"><option>Loaded</option><option>F-Bank</option><option>L-Bank</option><option>Clearance</option><option>Received</option></select>
         </div>
       </div>
+      <div id="cn-preview" class="note" style="margin-bottom:16px;">Type a sheet row name above to preview how it parses.</div>
       <h3 class="card-h" style="margin-top:8px;">Quantity by customer</h3>
-      <p class="card-sub">Split the consignment across customer or branch codes.</p>
-      <div class="form-row">
-        <div class="field"><label>BB</label><input type="number" min="0" placeholder="0"></div>
-        <div class="field"><label>FR</label><input type="number" min="0" placeholder="0"></div>
-        <div class="field" style="display:flex;align-items:flex-end;"><button class="btn btn-sm">+ Add customer</button></div>
-      </div>
+      <p class="card-sub">Optional — how this consignment's units are allocated once built.</p>
+      <div class="form-row" id="cn-customers">${customerRows}</div>
       <div style="display:flex;gap:10px;margin-top:6px;">
-        <button class="btn btn-primary">Save consignment</button>
-        <button class="btn">Connect a Google Sheet</button>
+        <button class="btn btn-primary" id="cn-save">Save consignment row</button>
       </div>
-    </div>`,
+      <div id="cn-result" class="note hidden" style="margin-top:12px;"></div>
+    </div>`;
+}
 
-  status: () => `
-    ${notWired('The grids below are empty placeholders.')}
+/* =========================
+   NEEDS REVIEW
+   ========================= */
+
+async function renderNeedsReview() {
+  const res = await apiCall('getNeedsReview');
+  if (!res.ok) return `<div class="empty">Could not load: ${esc(res.error)}</div>`;
+  if (!res.rows.length) return `<div class="empty">Nothing needs review.</div>`;
+  return `
+    <div class="card">
+      <h3 class="card-h">Unresolved rows</h3>
+      <p class="card-sub">These didn't match a known sheet code + part letter, or had no hyphen to split on. Correct the name to resolve.</p>
+      <table>
+        <thead><tr><th>Original name</th><th>Reason</th><th>Corrected name</th><th></th></tr></thead>
+        <tbody>
+          ${res.rows.map(r => `
+            <tr data-rowid="${esc(r.RowID)}">
+              <td><code>${esc(r.SheetRowName)}</code></td>
+              <td style="color:var(--warning);">${esc(r.ReviewReason)}</td>
+              <td><input type="text" class="nr-fix" placeholder="e.g. Careline-3A" style="max-width:180px;"></td>
+              <td><button class="btn btn-sm nr-resolve">Resolve</button></td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+/* =========================
+   STATUS BOARD
+   ========================= */
+
+async function renderStatus() {
+  const res = await apiCall('getStatusBoard');
+  if (!res.ok) return `<div class="empty">Could not load: ${esc(res.error)}</div>`;
+  const board = res.board;
+  return `
     <div class="grid grid-3">
-      ${['Fully pending','Partial pending','Assembly pending','Assembled','Delivered']
-        .map(s => `
+      ${Object.keys(board).map(statusName => `
         <div class="card">
-          <h3 class="card-h">${s}</h3>
-          <p class="card-sub">Part chips show what has landed so far.</p>
-          <div class="empty" style="padding:28px 14px;">Empty</div>
+          <h3 class="card-h">${esc(statusName)} <span style="color:var(--text-soft);font-weight:500;">(${board[statusName].length})</span></h3>
+          ${board[statusName].length ? board[statusName].map(c => `
+            <div style="border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:10px;">
+              <div style="font-weight:700;">${esc(c.consignmentGroup)} <span style="font-weight:500;color:var(--text-soft);">— ${esc(c.modelName)}</span></div>
+              <div style="margin-top:6px;">
+                ${c.parts.map(p => `<span class="chip ${p.qtyReceived >= p.qtyPerUnit ? 'chip-ok' : (p.qtyReceived > 0 ? 'chip-warn' : 'chip-idle')}" style="margin:2px 3px 0 0;">
+                  ${esc(p.partLetter)}: ${p.qtyReceived}/${p.qtyPerUnit}${p.rowId ? '' : ''}
+                </span>`).join('')}
+              </div>
+              ${c.parts.some(p => p.rowId) ? `
+              <div class="form-row" style="margin-top:8px;">
+                <div class="field" style="margin-bottom:0;">
+                  <select class="sb-part" data-group="${esc(c.consignmentGroup)}">
+                    ${c.parts.filter(p => p.rowId).map(p => `<option value="${esc(p.rowId)}">${esc(p.partLetter)} · ${esc(p.partName)}</option>`).join('')}
+                  </select>
+                </div>
+                <div class="field" style="margin-bottom:0;"><input type="number" class="sb-qty" min="1" placeholder="Qty received"></div>
+                <div class="field" style="margin-bottom:0;"><button class="btn btn-sm sb-receive">+ Receive</button></div>
+              </div>` : ''}
+            </div>`).join('') : `<div class="empty" style="padding:28px 14px;">Empty</div>`}
         </div>`).join('')}
-    </div>`,
+    </div>`;
+}
 
-  queue: () => `
-    ${notWired('Ordering and priorities are not saved.')}
+/* =========================
+   QUEUE
+   ========================= */
+
+async function renderQueue() {
+  const res = await apiCall('getQueue');
+  if (!res.ok) return `<div class="empty">Could not load: ${esc(res.error)}</div>`;
+  if (!res.queue.length) return `<div class="card"><h3 class="card-h">Work order</h3><div class="empty">Nothing in the queue.</div></div>`;
+  return `
     <div class="card">
       <h3 class="card-h">Work order</h3>
-      <p class="card-sub">Drag to reorder, or set a priority. Every staff member sees this same list, top to bottom.</p>
+      <p class="card-sub">Higher priority number = worked first.</p>
       <table>
-        <thead><tr><th style="width:44px">#</th><th>Consignment</th><th>Model</th><th>Buildable</th><th>Priority</th><th></th></tr></thead>
-        <tbody><tr><td colspan="6" style="color:var(--text-soft);padding:22px 12px;">Nothing in the queue.</td></tr></tbody>
+        <thead><tr><th>Consignment</th><th>Model</th><th>Buildable</th><th>Status</th><th style="width:110px">Priority</th><th></th></tr></thead>
+        <tbody>
+          ${res.queue.map(c => `
+            <tr data-group="${esc(c.consignmentGroup)}">
+              <td>${esc(c.consignmentGroup)}</td><td>${esc(c.modelName)}</td><td>${c.buildableUnits}</td><td>${chip(c.status)}</td>
+              <td><input type="number" class="q-priority" value="${c.priority}" style="width:70px;"></td>
+              <td><button class="btn btn-sm q-save">Save</button></td>
+            </tr>`).join('')}
+        </tbody>
       </table>
-    </div>`,
+    </div>`;
+}
 
-  assemble: () => `
-    ${notWired('Nothing is written on save.')}
+/* =========================
+   ASSEMBLE
+   ========================= */
+
+async function renderAssemble() {
+  const res = await apiCall('listConsignments');
+  if (!res.ok) return `<div class="empty">Could not load: ${esc(res.error)}</div>`;
+  const buildable = res.consignments.filter(c => c.buildableUnits > 0);
+  return `
     <div class="card">
       <h3 class="card-h">Build</h3>
-      <p class="card-sub">Buildable quantity is capped by whichever part arrived least. Parts merge into a single model line.</p>
+      <p class="card-sub">Buildable quantity is capped by whichever part arrived least.</p>
       <div class="form-row">
-        <div class="field"><label>Consignment</label><select><option>Select a consignment</option></select></div>
-        <div class="field"><label>Buildable now</label><input type="text" value="—" disabled></div>
-        <div class="field"><label>Quantity to build</label><input type="number" min="0" placeholder="0"></div>
+        <div class="field">
+          <label>Consignment</label>
+          <select id="asm-group">
+            <option value="">Select a consignment</option>
+            ${buildable.map(c => `<option value="${esc(c.consignmentGroup)}" data-buildable="${c.buildableUnits}">${esc(c.consignmentGroup)} — ${esc(c.modelName)}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field"><label>Buildable now</label><input id="asm-buildable" type="text" value="—" disabled></div>
+        <div class="field"><label>Quantity to build</label><input id="asm-qty" type="number" min="1" placeholder="0"></div>
       </div>
-      <div class="field"><label>Remarks</label><input type="text" placeholder="Anything worth noting about this build"></div>
-      <button class="btn btn-primary">Record build</button>
-    </div>`,
+      <div class="field"><label>Remarks</label><input id="asm-remarks" type="text" placeholder="Anything worth noting about this build"></div>
+      <button class="btn btn-primary" id="asm-save">Record build</button>
+      <div id="asm-result" class="note hidden" style="margin-top:12px;"></div>
+    </div>`;
+}
 
-  deliveries: () => `
-    ${notWired('Nothing is recorded yet.')}
+/* =========================
+   DELIVERIES
+   ========================= */
+
+async function renderDeliveries() {
+  const [consRes, delRes] = await Promise.all([apiCall('listConsignments'), apiCall('listDeliveries')]);
+  if (!consRes.ok) return `<div class="empty">Could not load: ${esc(consRes.error)}</div>`;
+  const readyGroups = consRes.consignments.filter(c => c.totalBuilt > c.totalOut);
+  const pending = delRes.ok ? delRes.deliveries.filter(d => d.Status === 'pending') : [];
+
+  return `
     <div class="grid grid-2">
       <div class="card">
         <h3 class="card-h">Mark out</h3>
         <p class="card-sub">Send a quantity to a customer.</p>
-        <div class="field"><label>Consignment</label><select><option>Select</option></select></div>
-        <div class="form-row">
-          <div class="field"><label>Customer</label><select><option>BB</option><option>FR</option></select></div>
-          <div class="field"><label>Quantity out</label><input type="number" min="0" placeholder="0"></div>
+        <div class="field"><label>Consignment</label>
+          <select id="dl-group">
+            <option value="">Select</option>
+            ${readyGroups.map(c => `<option value="${esc(c.consignmentGroup)}">${esc(c.consignmentGroup)} — ${esc(c.modelName)} (${c.totalBuilt - c.totalOut} unassigned)</option>`).join('')}
+          </select>
         </div>
-        <button class="btn btn-primary">Mark out</button>
+        <div class="form-row">
+          <div class="field"><label>Customer</label>
+            <select id="dl-customer">${cache.customers.map(c => `<option value="${esc(c.CustomerCode)}">${esc(c.CustomerCode)}</option>`).join('')}</select>
+          </div>
+          <div class="field"><label>Quantity out</label><input id="dl-qty" type="number" min="1" placeholder="0"></div>
+        </div>
+        <button class="btn btn-primary" id="dl-markout">Mark out</button>
+        <div id="dl-result" class="note hidden" style="margin-top:12px;"></div>
       </div>
       <div class="card">
         <h3 class="card-h">Customer confirmation</h3>
-        <p class="card-sub">Only confirmed units leave the board as Delivered.</p>
-        <div class="empty" style="padding:30px 14px;">Nothing awaiting confirmation.</div>
+        <p class="card-sub">Only confirmed units leave the board as Delivered. Confirming less than sent flags a discrepancy.</p>
+        ${pending.length ? pending.map(d => `
+          <div style="border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:10px;" data-deliveryid="${esc(d.DeliveryID)}">
+            <div><b>${esc(d.ConsignmentGroup)}</b> → ${esc(d.CustomerCode)} — sent ${esc(d.QtyOut)}</div>
+            <div class="form-row" style="margin-top:8px;">
+              <div class="field" style="margin-bottom:0;"><input type="number" class="dl-confirm-qty" placeholder="Confirmed qty" value="${esc(d.QtyOut)}"></div>
+              <div class="field" style="margin-bottom:0;"><button class="btn btn-sm dl-confirm">Confirm</button></div>
+            </div>
+          </div>`).join('') : `<div class="empty" style="padding:30px 14px;">Nothing awaiting confirmation.</div>`}
       </div>
-    </div>`,
+    </div>`;
+}
 
-  reports: () => `
-    ${notWired('No events to show.')}
+/* =========================
+   REPORTS
+   ========================= */
+
+async function renderReports() {
+  const res = await apiCall('getReports', {});
+  if (!res.ok) return `<div class="empty">Could not load: ${esc(res.error)}</div>`;
+  return `
     <div class="card">
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
-        <input type="text" placeholder="Search consignment, model or part" style="max-width:280px;">
-        <select style="max-width:170px;"><option>All events</option></select>
-        <button class="btn">Export</button>
+        <input id="rp-search" type="text" placeholder="Search consignment, part or event" style="max-width:280px;">
+        <button class="btn" id="rp-filter">Search</button>
       </div>
       <table>
         <thead><tr><th>When</th><th>Consignment</th><th>Part</th><th>Event</th><th>Qty</th><th>By</th></tr></thead>
-        <tbody><tr><td colspan="6" style="color:var(--text-soft);padding:22px 12px;">No events logged.</td></tr></tbody>
-      </table>
-    </div>`,
-
-  models: () => `
-    ${notWired('Models are not saved yet.')}
-    <div class="card">
-      <h3 class="card-h">New model</h3>
-      <p class="card-sub">Name the model, then define what each part actually is.</p>
-      <div class="field" style="max-width:340px;"><label>Model name</label><input type="text" placeholder="e.g. SKD 3-part unit"></div>
-      <table>
-        <thead><tr><th style="width:70px">Part</th><th>What it is</th><th style="width:120px">Per unit</th></tr></thead>
-        <tbody>
-          <tr><td><b>A</b></td><td><input type="text" placeholder="e.g. Body"></td><td><input type="number" value="1" min="1"></td></tr>
-          <tr><td><b>B</b></td><td><input type="text" placeholder="e.g. Basket"></td><td><input type="number" value="1" min="1"></td></tr>
-          <tr><td><b>C</b></td><td><input type="text" placeholder="e.g. Carton"></td><td><input type="number" value="1" min="1"></td></tr>
+        <tbody id="rp-body">
+          ${reportRows(res.events)}
         </tbody>
       </table>
-      <div style="display:flex;gap:10px;margin-top:16px;">
-        <button class="btn btn-primary">Save model</button>
-        <button class="btn btn-sm">+ Add part</button>
-      </div>
-    </div>`
+    </div>`;
+}
+
+function reportRows(events) {
+  if (!events.length) return `<tr><td colspan="6" style="color:var(--text-soft);padding:22px 12px;">No events logged.</td></tr>`;
+  return events.map(e => `<tr><td>${esc(fmtDate(e.Timestamp))}</td><td>${esc(e.ConsignmentGroup)}</td><td>${esc(e.PartLetter)}</td><td>${esc(e.EventType)}</td><td>${esc(e.Qty)}</td><td>${esc(e.User)}</td></tr>`).join('');
+}
+
+/* =========================
+   RENDERERS MAP
+   ========================= */
+
+const RENDERERS = {
+  dashboard: renderDashboard,
+  models: renderModels,
+  consignments: renderConsignments,
+  needsreview: renderNeedsReview,
+  status: renderStatus,
+  queue: renderQueue,
+  assemble: renderAssemble,
+  deliveries: renderDeliveries,
+  reports: renderReports
 };
+
+/* =========================
+   PAGE HANDLER WIRING
+   (runs after each page's HTML is injected)
+   ========================= */
+
+function wirePageHandlers(pageId) {
+  if (pageId === 'models') {
+    addModelPartRow('A', '', '', 1);
+    document.getElementById('mdl-addpart').onclick = () => addModelPartRow();
+    document.getElementById('mdl-save').onclick = async () => {
+      const parts = [...document.querySelectorAll('#mdl-parts-table tbody tr')].map(row => {
+        const inputs = row.querySelectorAll('input');
+        return { partLetter: inputs[0].value, partName: inputs[1].value, partCodePrefix: inputs[2].value, qtyPerUnit: Number(inputs[3].value) || 1 };
+      });
+      const res = await apiCall('saveModel', {
+        modelName: document.getElementById('mdl-name').value,
+        sheetCode: document.getElementById('mdl-sheetcode').value,
+        productLine: document.getElementById('mdl-line').value,
+        parts
+      });
+      const statusEl = document.getElementById('mdl-status');
+      statusEl.classList.remove('hidden');
+      statusEl.innerText = res.ok ? 'Model saved.' : ('Error: ' + res.error);
+      if (res.ok) { await refreshModels(); route(); }
+    };
+  }
+
+  if (pageId === 'consignments') {
+    const nameInput = document.getElementById('cn-name');
+    const preview = document.getElementById('cn-preview');
+    let previewTimer;
+    nameInput.oninput = () => {
+      clearTimeout(previewTimer);
+      previewTimer = setTimeout(async () => {
+        const val = nameInput.value.trim();
+        if (!val) { preview.innerText = 'Type a sheet row name above to preview how it parses.'; return; }
+        const res = await apiCall('previewParse', { sheetRowName: val });
+        if (res.ok && res.parsed.ok) {
+          const p = res.parsed;
+          preview.innerHTML = `<b>Matched:</b> ${esc(p.modelName)} · ${esc(p.partName)} (part ${esc(p.partLetter)}) — consignment group <code>${esc(p.consignmentGroup)}</code>, part code <code>${esc(p.partCode)}</code>`;
+        } else {
+          preview.innerHTML = `<b style="color:var(--warning);">Needs review:</b> ${esc(res.parsed ? res.parsed.reason : res.error)}`;
+        }
+      }, 300);
+    };
+
+    document.getElementById('cn-save').onclick = async () => {
+      const customers = [...document.querySelectorAll('.cust-qty')]
+        .map(i => ({ customerCode: i.dataset.code, qty: Number(i.value) || 0 }))
+        .filter(c => c.qty > 0);
+      const res = await apiCall('addConsignmentRow', {
+        sheetRowName: nameInput.value,
+        supplier: document.getElementById('cn-supplier').value,
+        importStatus: document.getElementById('cn-status').value,
+        source: 'Manual',
+        customers
+      });
+      const resultEl = document.getElementById('cn-result');
+      resultEl.classList.remove('hidden');
+      resultEl.innerText = res.ok
+        ? (res.needsReview ? 'Saved — but sent to Needs Review: ' + res.reason : 'Consignment row saved.')
+        : ('Error: ' + res.error);
+    };
+  }
+
+  if (pageId === 'needsreview') {
+    document.querySelectorAll('.nr-resolve').forEach(btn => {
+      btn.onclick = async () => {
+        const row = btn.closest('tr');
+        const rowId = row.dataset.rowid;
+        const corrected = row.querySelector('.nr-fix').value;
+        const res = await apiCall('resolveNeedsReview', { rowId, correctedSheetRowName: corrected });
+        if (res.ok) route(); else alert('Error: ' + res.error);
+      };
+    });
+  }
+
+  if (pageId === 'status') {
+    document.querySelectorAll('.sb-receive').forEach(btn => {
+      btn.onclick = async () => {
+        const container = btn.closest('.form-row');
+        const rowId = container.querySelector('.sb-part').value;
+        const qty = Number(container.querySelector('.sb-qty').value);
+        if (!qty || qty <= 0) { alert('Enter a quantity'); return; }
+        const res = await apiCall('recordReceipt', { rowId, qty });
+        if (res.ok) route(); else alert('Error: ' + res.error);
+      };
+    });
+  }
+
+  if (pageId === 'queue') {
+    document.querySelectorAll('.q-save').forEach(btn => {
+      btn.onclick = async () => {
+        const row = btn.closest('tr');
+        const consignmentGroup = row.dataset.group;
+        const priority = Number(row.querySelector('.q-priority').value);
+        const res = await apiCall('setPriority', { consignmentGroup, priority });
+        if (res.ok) route(); else alert('Error: ' + res.error);
+      };
+    });
+  }
+
+  if (pageId === 'assemble') {
+    const select = document.getElementById('asm-group');
+    select.onchange = () => {
+      const opt = select.options[select.selectedIndex];
+      document.getElementById('asm-buildable').value = opt.dataset.buildable || '—';
+    };
+    document.getElementById('asm-save').onclick = async () => {
+      const res = await apiCall('recordBuild', {
+        consignmentGroup: select.value,
+        qty: Number(document.getElementById('asm-qty').value),
+        remarks: document.getElementById('asm-remarks').value
+      });
+      const resultEl = document.getElementById('asm-result');
+      resultEl.classList.remove('hidden');
+      resultEl.innerText = res.ok ? 'Build recorded.' : ('Error: ' + res.error);
+      if (res.ok) setTimeout(route, 800);
+    };
+  }
+
+  if (pageId === 'deliveries') {
+    document.getElementById('dl-markout').onclick = async () => {
+      const res = await apiCall('markOut', {
+        consignmentGroup: document.getElementById('dl-group').value,
+        customerCode: document.getElementById('dl-customer').value,
+        qty: Number(document.getElementById('dl-qty').value)
+      });
+      const resultEl = document.getElementById('dl-result');
+      resultEl.classList.remove('hidden');
+      resultEl.innerText = res.ok ? 'Marked out.' : ('Error: ' + res.error);
+      if (res.ok) setTimeout(route, 800);
+    };
+    document.querySelectorAll('.dl-confirm').forEach(btn => {
+      btn.onclick = async () => {
+        const container = btn.closest('[data-deliveryid]');
+        const deliveryId = container.dataset.deliveryid;
+        const confirmedQty = Number(container.querySelector('.dl-confirm-qty').value);
+        const res = await apiCall('confirmDelivery', { deliveryId, confirmedQty });
+        if (res.ok) route(); else alert('Error: ' + res.error);
+      };
+    });
+  }
+
+  if (pageId === 'reports') {
+    document.getElementById('rp-filter').onclick = async () => {
+      const search = document.getElementById('rp-search').value;
+      const res = await apiCall('getReports', { search });
+      document.getElementById('rp-body').innerHTML = res.ok ? reportRows(res.events) : `<tr><td colspan="6">Error: ${esc(res.error)}</td></tr>`;
+    };
+  }
+}
+
 </script>
 </body>
 </html>
