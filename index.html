@@ -272,6 +272,13 @@ let user = null;
 let currentPage = 'dashboard';
 let cache = { models: [], customers: [] }; // small lookups reused across pages
 
+// Apps Script round-trips are inherently a couple seconds (cold execution +
+// opening the spreadsheet) — that latency can't be removed client-side. What
+// we CAN fix is the perceived wait: cache each page's last-rendered HTML and
+// paint it instantly on revisit, then quietly refetch and swap in the real
+// thing underneath. First-ever visit to a page still shows the spinner.
+let pageCache = {};
+
 async function apiCall(action, payload = {}) {
   const res = await fetch(APPS_SCRIPT_URL, {
     method: 'POST',
@@ -388,10 +395,24 @@ async function route() {
   renderNav();
 
   const content = document.getElementById('content');
-  content.innerHTML = `<div class="loading-wrap"><div class="spinner"></div>Loading…</div>`;
   const renderer = RENDERERS[page.id];
-  content.innerHTML = renderer ? await renderer() : '';
-  wirePageHandlers(page.id);
+  const requestedPage = page.id; // guard against a slow fetch landing after the user has moved on
+
+  const cached = pageCache[requestedPage];
+  if (cached) {
+    // Instant paint of what we last knew, wired up and clickable right away.
+    content.innerHTML = cached;
+    wirePageHandlers(requestedPage);
+  } else {
+    content.innerHTML = `<div class="loading-wrap"><div class="spinner"></div>Loading…</div>`;
+  }
+
+  const html = renderer ? await renderer() : '';
+  if (currentPage !== requestedPage) return; // user already navigated elsewhere — drop this response
+
+  content.innerHTML = html;
+  pageCache[requestedPage] = html;
+  wirePageHandlers(requestedPage);
 }
 
 async function refreshModels() {
@@ -467,6 +488,14 @@ function fmtDate(v) { try { return new Date(v).toLocaleString(); } catch (e) { r
    ========================= */
 
 async function renderModels() {
+  const seedCard = (user && user.level === 0) ? `
+    <div class="card" style="border:1px solid var(--primary);">
+      <h3 class="card-h">Sample data</h3>
+      <p class="card-sub">Loads the 18-row sample supplier sheet in one click — safe to click even if it's already been loaded, it won't duplicate.</p>
+      <button class="btn btn-primary" id="seed-sample-btn">Load sample data</button>
+      <div id="seed-sample-status" class="note hidden" style="margin-top:12px;"></div>
+    </div>` : '';
+
   const listHtml = cache.models.length ? `
     <div class="card">
       <h3 class="card-h">Existing models</h3>
@@ -477,6 +506,7 @@ async function renderModels() {
     </div>` : '';
 
   return `
+    ${seedCard}
     ${listHtml}
     <div class="card">
       <h3 class="card-h">New model</h3>
@@ -755,6 +785,28 @@ const RENDERERS = {
 
 function wirePageHandlers(pageId) {
   if (pageId === 'models') {
+    const seedBtn = document.getElementById('seed-sample-btn');
+    if (seedBtn) {
+      seedBtn.onclick = async () => {
+        seedBtn.disabled = true;
+        seedBtn.innerText = 'Loading…';
+        const res = await apiCall('seedSampleData');
+        const statusEl = document.getElementById('seed-sample-status');
+        statusEl.classList.remove('hidden');
+        if (!res.ok) {
+          statusEl.innerText = 'Error: ' + res.error;
+        } else if (res.alreadySeeded) {
+          statusEl.innerText = res.message;
+        } else {
+          statusEl.innerText = `Loaded ${res.parsedCount} row(s). ${res.needsReviewCount} row(s) went to Needs Review.`;
+        }
+        seedBtn.disabled = false;
+        seedBtn.innerText = 'Load sample data';
+        await refreshModels();
+        pageCache = {}; // sample data touches Models/ConsignmentRows/Dashboard — drop every cached page
+        route();
+      };
+    }
     addModelPartRow('A', '', '', 1);
     document.getElementById('mdl-addpart').onclick = () => addModelPartRow();
     document.getElementById('mdl-save').onclick = async () => {
