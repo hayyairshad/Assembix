@@ -803,7 +803,8 @@ function wirePageHandlers(pageId) {
         seedBtn.disabled = false;
         seedBtn.innerText = 'Load sample data';
         await refreshModels();
-        pageCache = {}; // sample data touches Models/ConsignmentRows/Dashboard — drop every cached page
+        pageCache = {};            // sample data touches Models/ConsignmentRows/Dashboard
+        bootstrapDashboard = null; // don't reuse the login-time snapshot — it predates the seed
         route();
       };
     }
