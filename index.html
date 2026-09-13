@@ -278,13 +278,57 @@ let cache = { models: [], customers: [] }; // small lookups reused across pages
 // thing underneath. First-ever visit to a page still shows the spinner.
 let pageCache = {};
 
+// Google ID tokens are only valid for about an hour. On a long working day a
+// tab left open will start failing, and the old behaviour was to keep firing
+// requests with no token and surface the backend's "Missing idToken" as if it
+// were a data problem. Instead: detect an expired session and ask the user to
+// sign in again, once, without losing the page they were on.
+let sessionExpired = false;
+
+function handleSessionExpiry() {
+  if (sessionExpired) return;
+  sessionExpired = true;
+  idToken = null;
+  localStorage.removeItem('assembix_idToken');
+  user = null;
+  groupCache = { data: null, at: 0 };
+  pageCache = {};
+
+  const app = document.getElementById('app');
+  const login = document.getElementById('scr-login');
+  if (app) app.classList.add('hidden');
+  if (login) {
+    login.classList.remove('hidden');
+    const statusEl = document.getElementById('login-status');
+    if (statusEl) statusEl.innerText = 'Your session expired. Please sign in again.';
+  }
+  try {
+    if (typeof google !== 'undefined' && google.accounts) {
+      google.accounts.id.disableAutoSelect();
+      google.accounts.id.prompt();
+    }
+  } catch (e) { /* the sign-in button is still on screen regardless */ }
+}
+
+const AUTH_ERRORS = ['Missing idToken', 'Email not allowlisted or invalid token', 'User is not active'];
+
 async function apiCall(action, payload = {}) {
-  const res = await fetch(APPS_SCRIPT_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ action, idToken, ...payload })
-  });
-  return res.json();
+  if (!idToken) { handleSessionExpiry(); return { ok: false, error: 'Session expired', authFailed: true }; }
+  try {
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action, idToken, ...payload })
+    });
+    const data = await res.json();
+    if (!data.ok && AUTH_ERRORS.indexOf(String(data.error)) !== -1) {
+      handleSessionExpiry();
+      return { ok: false, error: 'Session expired', authFailed: true };
+    }
+    return data;
+  } catch (e) {
+    return { ok: false, error: 'Could not reach the server. Check your connection and try again.' };
+  }
 }
 
 /* =========================
@@ -304,6 +348,7 @@ function handleGsiLoadError() {
 }
 
 function handleCredentialResponse(response) {
+  sessionExpired = false;
   idToken = response.credential;
   localStorage.setItem('assembix_idToken', idToken);
   completeLogin();
@@ -383,7 +428,7 @@ function renderNav() {
 }
 
 async function route() {
-  if (!user) return;
+  if (!user || !idToken) return;
   const id = window.location.hash.replace(/^#\/?/, '') || 'dashboard';
   const page = PAGES.find(p => p.id === id);
   if (!page) { window.location.hash = '#/dashboard'; return; }
@@ -1052,7 +1097,7 @@ function reportRows(events) {
 let prefetching = false;
 
 async function prefetchPages() {
-  if (prefetching) return;
+  if (prefetching || !user || !idToken) return;
   prefetching = true;
   try {
     for (const id of ['consignments', 'receiving', 'assembly', 'delivery']) {
