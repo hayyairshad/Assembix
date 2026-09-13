@@ -256,15 +256,14 @@ const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDAt4paCuEsZ0H
 const GOOGLE_CLIENT_ID = "766825494798-2vq54u2u9kmfegir98uig2ubr9gr6hj4.apps.googleusercontent.com";
 
 const PAGES = [
-  { id: 'dashboard',    label: 'Dashboard',      group: 'Overview', sub: 'Suppliers, activity and anything needing attention.' },
-  { id: 'consignments', label: 'Add consignment', group: 'Intake',  sub: 'Enter a consignment row manually. Parsed against the Model & Parts master automatically.' },
-  { id: 'needsreview',  label: 'Needs review',    group: 'Intake',  sub: "Rows that didn't parse cleanly against the naming pattern." },
-  { id: 'status',       label: 'Status board',    group: 'Intake',  sub: 'Every consignment group sits in exactly one grid.' },
-  { id: 'queue',        label: 'Assembly queue',  group: 'Assembly', sub: 'Everything pending, in the order staff should work through it.' },
-  { id: 'assemble',     label: 'Assembly',        group: 'Assembly', sub: 'Build partially or fully. Quantity is capped by the scarcest part.' },
-  { id: 'deliveries',   label: 'Deliveries',      group: 'Output',  sub: 'Mark quantities out, then close the loop on what customers confirm.' },
-  { id: 'reports',      label: 'Reports',         group: 'Output',  sub: 'Every event per consignment and part, filterable.' },
-  { id: 'models',       label: 'Models & parts',  group: 'Setup',   sub: 'Master setup, done once per model. Name it, set its sheet code, then define its parts.' }
+  { id: 'dashboard',    label: 'Dashboard',     group: 'Overview',  sub: 'Where everything stands right now.' },
+  { id: 'consignments', label: 'Consignments',  group: 'Incoming',  sub: 'Everything on its way from China Master, soonest arrival first.' },
+  { id: 'receiving',    label: 'Receiving',     group: 'Warehouse', sub: 'Record what actually turned up, part by part.' },
+  { id: 'assembly',     label: 'Assembly',      group: 'Warehouse', sub: 'Parts on hand, and how many complete units they make.' },
+  { id: 'delivery',     label: 'Delivery',      group: 'Output',    sub: 'Units out to FR and BB, counted against what each is owed.' },
+  { id: 'needsreview',  label: 'Needs review',  group: 'Output',    sub: "Lines from China Master that couldn't be read automatically." },
+  { id: 'reports',      label: 'Reports',       group: 'Output',    sub: 'Every event per consignment and part, filterable.' },
+  { id: 'models',       label: 'Models & parts', group: 'Setup',    sub: 'Sync China Master from Dropbox, and define each model\'s parts.' }
 ];
 
 let idToken = localStorage.getItem('assembix_idToken') || null;
@@ -341,7 +340,8 @@ async function completeLogin() {
 
     renderNav();
     window.addEventListener('hashchange', route);
-    route();
+    await route();
+    prefetchPages(); // warm the rest in the background — navigation then feels instant
   } catch (e) {
     // Network/parse failure — don't leave a blank screen. Reset to login.
     statusEl.innerText = "Could not reach the server. Try signing in again.";
@@ -391,7 +391,17 @@ async function route() {
   currentPage = page.id;
   document.getElementById('page-title').innerText = page.label;
   document.getElementById('page-sub').innerText = page.sub;
-  document.getElementById('page-actions').innerHTML = "";
+  document.getElementById('page-actions').innerHTML =
+    `<button class="btn btn-sm" id="page-refresh" title="Fetch the latest data">Refresh</button>`;
+  const refreshBtn = document.getElementById('page-refresh');
+  if (refreshBtn) {
+    refreshBtn.onclick = async () => {
+      refreshBtn.disabled = true;
+      refreshBtn.innerText = 'Refreshing…';
+      invalidateGroups();
+      await route();
+    };
+  }
   renderNav();
 
   const content = document.getElementById('content');
@@ -413,6 +423,7 @@ async function route() {
   content.innerHTML = html;
   pageCache[requestedPage] = html;
   wirePageHandlers(requestedPage);
+  prefetchPages(); // keep the other pages warm as the user moves around
 }
 
 async function refreshModels() {
@@ -441,58 +452,140 @@ function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, m => ({'
    ========================= */
 
 async function renderDashboard() {
-  let res;
-  if (bootstrapDashboard) {
-    res = bootstrapDashboard;       // already fetched during login — instant
-    bootstrapDashboard = null;      // next visit fetches fresh
-  } else {
-    res = await apiCall('getDashboard');
+  // The dashboard is built from the same group data the warehouse pages use,
+  // so opening it warms the cache for Receiving, Assembly and Delivery too.
+  let groups, dash;
+  try {
+    const dashPromise = bootstrapDashboard
+      ? Promise.resolve(bootstrapDashboard)
+      : apiCall('getDashboard');
+    bootstrapDashboard = null;
+    [groups, dash] = await Promise.all([getGroups(), dashPromise]);
+  } catch (e) {
+    return `<div class="empty">Could not load dashboard: ${esc(e.message)}</div>`;
   }
-  if (!res.ok) return `<div class="empty">Could not load dashboard: ${esc(res.error)}</div>`;
-  const s = res.stats;
+  if (!dash.ok) return `<div class="empty">Could not load dashboard: ${esc(dash.error)}</div>`;
+
+  if (!groups.length) {
+    return `<div class="empty" style="padding:60px 24px;">
+      <div style="font-size:15px;color:var(--text);font-weight:600;margin-bottom:8px;">Nothing loaded yet</div>
+      Sync China Master from the <a href="#/models">Models &amp; parts</a> page to pull consignments in from Dropbox.
+    </div>`;
+  }
+
+  const buildableNow = groups.reduce((s, g) => s + g.buildableUnits, 0);
+  const readyToSend  = groups.reduce((s, g) => s + Math.max(0, g.totalBuilt - g.totalOut), 0);
+  const awaitingParts = groups.filter(g => g.parts.some(p => p.qtyReceived > 0) && g.buildableUnits <= 0).length;
+
+  // Arrivals inside a fortnight — the number that decides warehouse planning.
+  const upcoming = groups
+    .filter(g => g.nextEta)
+    .map(g => ({ g, rel: relDays(g.nextEta) }))
+    .filter(x => x.rel && x.rel.days >= -3 && x.rel.days <= 21)
+    .sort((a, b) => a.rel.days - b.rel.days);
+
+  const demand = { FR: 0, BB: 0 }, confirmed = { FR: 0, BB: 0 };
+  groups.forEach(g => {
+    demand.FR += g.frQty || 0; demand.BB += g.bbQty || 0;
+    ['FR','BB'].forEach(c => { const d = g.deliveredTo && g.deliveredTo[c]; if (d) confirmed[c] += d.confirmed; });
+  });
+
+  const s = dash.stats;
+
   return `
     <div class="grid grid-4" style="margin-bottom:18px;">
-      <div class="stat"><div class="stat-label">Fully pending</div><div class="stat-value">${s.fullyPending}</div><div class="stat-note">No parts received</div></div>
-      <div class="stat"><div class="stat-label">Partial pending</div><div class="stat-value">${s.partialPending}</div><div class="stat-note">Some parts landed</div></div>
-      <div class="stat"><div class="stat-label">Assembly pending</div><div class="stat-value">${s.assemblyPending}</div><div class="stat-note">Ready to build</div></div>
-      <div class="stat"><div class="stat-label">Awaiting confirmation</div><div class="stat-value">${s.awaitingConfirmation}</div><div class="stat-note">Out, not confirmed</div></div>
+      <div class="stat"><div class="stat-label">Can build now</div>
+        <div class="stat-value" style="color:${buildableNow ? 'var(--success)' : 'var(--dark)'};">${buildableNow}</div>
+        <div class="stat-note">complete units from parts on hand</div></div>
+      <div class="stat"><div class="stat-label">Ready to send</div>
+        <div class="stat-value">${readyToSend}</div><div class="stat-note">built, not yet out</div></div>
+      <div class="stat"><div class="stat-label">Waiting on parts</div>
+        <div class="stat-value" style="color:${awaitingParts ? 'var(--warning)' : 'var(--dark)'};">${awaitingParts}</div>
+        <div class="stat-note">partly arrived, blocked</div></div>
+      <div class="stat"><div class="stat-label">Arriving in 3 weeks</div>
+        <div class="stat-value">${upcoming.length}</div><div class="stat-note">consignments inbound</div></div>
     </div>
-    ${s.needsReview > 0 ? `<div class="note" style="margin-bottom:18px;"><b>${s.needsReview} row(s) need review.</b> <a href="#/needsreview">Go fix them</a> — they're excluded from every grid until resolved.</div>` : ''}
-    <div class="card">
-      <h3 class="card-h">Suppliers</h3>
-      <p class="card-sub">Consignment groups per supplier.</p>
-      ${res.suppliers.length ? `<table><thead><tr><th>Supplier</th><th>Consignment groups</th></tr></thead><tbody>
-        ${res.suppliers.map(s => `<tr><td>${esc(s.supplier)}</td><td>${s.count}</td></tr>`).join('')}
-      </tbody></table>` : `<div class="empty">No consignments yet.</div>`}
-    </div>
-    <div class="grid grid-2" style="margin-top:18px;">
+
+    ${s.needsReview > 0 ? `<div class="note" style="margin-bottom:18px;"><b>${s.needsReview} line(s) couldn't be read from China Master.</b> <a href="#/needsreview">Review them</a> — they're excluded from every count above until resolved.</div>` : ''}
+
+    <div class="grid grid-2">
       <div class="card">
-        <h3 class="card-h">Recent activity</h3>
-        ${res.recentActivity.length ? `<table><tbody>
-          ${res.recentActivity.map(e => `<tr><td style="white-space:nowrap;color:var(--text-soft);">${esc(fmtDate(e.Timestamp))}</td><td>${esc(e.ConsignmentGroup)}</td><td>${esc(e.EventType)}</td></tr>`).join('')}
-        </tbody></table>` : `<div class="empty">Nothing logged yet.</div>`}
+        <h3 class="card-h">Arriving soon</h3>
+        <p class="card-sub">Plan the current build around these — clear the floor before the next container lands.</p>
+        ${upcoming.length ? `<table><thead><tr><th>Consignment</th><th>Model</th><th>Arrives</th></tr></thead><tbody>
+          ${upcoming.slice(0, 8).map(x => `<tr>
+            <td><code>${esc(x.g.consignmentGroup)}</code></td>
+            <td>${esc(x.g.signatureModel || x.g.modelName)}</td>
+            <td>${esc(fmtDay(x.g.nextEta))} <span class="chip ${x.rel.cls}">${esc(x.rel.text)}</span></td>
+          </tr>`).join('')}
+        </tbody></table>` : `<div class="empty">Nothing arriving in the next three weeks.</div>`}
       </div>
+
       <div class="card">
-        <h3 class="card-h">Needs attention</h3>
-        ${res.needsAttention.length ? `<table><tbody>
-          ${res.needsAttention.map(c => `<tr><td>${esc(c.consignmentGroup)}</td><td>${esc(c.modelName)}</td><td>${chip(c.status)}</td></tr>`).join('')}
-        </tbody></table>` : `<div class="empty">Nothing flagged.</div>`}
+        <h3 class="card-h">Customer progress</h3>
+        <p class="card-sub">Confirmed against what China Master says each customer is owed.</p>
+        ${['FR','BB'].map(c => {
+          const pct = demand[c] ? Math.min(100, Math.round((confirmed[c] / demand[c]) * 100)) : 0;
+          return `<div style="margin-bottom:16px;">
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+              <b>${c}</b><span style="color:var(--text-soft);">${confirmed[c]} of ${demand[c]} units</span>
+            </div>
+            <div style="height:9px;background:#F5EBE3;border-radius:999px;overflow:hidden;">
+              <div style="height:100%;width:${pct}%;background:var(--success);"></div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:18px;">
+      <h3 class="card-h">Every consignment at a glance</h3>
+      <p class="card-sub">One row per consignment group, with parts on hand and what they add up to.</p>
+      <div style="overflow-x:auto;">
+      <table>
+        <thead><tr><th>Consignment</th><th>Supplier</th><th>Model</th><th>Parts on hand</th>
+          <th style="text-align:right;">Can build</th><th style="text-align:right;">Built</th><th>Stage</th></tr></thead>
+        <tbody>
+          ${groups.map(g => `<tr>
+            <td><code>${esc(g.consignmentGroup)}</code></td>
+            <td>${esc(g.supplier)}</td>
+            <td>${esc(g.signatureModel || g.modelName)}</td>
+            <td>${g.parts.map(p => `<span class="chip ${p.qtyReceived > 0 ? 'chip-ok' : 'chip-idle'}">${esc(p.partLetter)} ${p.qtyReceived}</span>`).join(' ')}</td>
+            <td style="text-align:right;font-weight:700;${g.buildableUnits ? 'color:var(--success);' : ''}">${g.buildableUnits}</td>
+            <td style="text-align:right;">${g.totalBuilt}</td>
+            <td>${chip(g.status)}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
       </div>
     </div>`;
 }
-
-function fmtDate(v) { try { return new Date(v).toLocaleString(); } catch (e) { return v; } }
 
 /* =========================
    MODELS & PARTS
    ========================= */
 
 async function renderModels() {
-  const seedCard = (user && user.level === 0) ? `
+  // Dropbox is the live source of consignment data — China Master is pulled
+  // straight from it, so nobody types consignments into Assembix by hand.
+  // Runs automatically each morning on a trigger; this button is for when
+  // someone knows the file just changed and doesn't want to wait.
+  const dropboxCard = (user && user.level <= 1) ? `
     <div class="card" style="border:1px solid var(--primary);">
+      <h3 class="card-h">China Master sync</h3>
+      <p class="card-sub">Pulls the latest consignment data from Dropbox. Runs automatically every morning — use this to sync right now. Received quantities and priorities you've set in Assembix are never overwritten.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn btn-primary" id="dbx-sync-btn">Sync now</button>
+        <button class="btn btn-sm" id="dbx-check-btn">Check connection</button>
+      </div>
+      <div id="dbx-status" class="note hidden" style="margin-top:12px;"></div>
+    </div>` : '';
+
+  const seedCard = (user && user.level === 0) ? `
+    <div class="card">
       <h3 class="card-h">Sample data</h3>
-      <p class="card-sub">Loads the 18-row sample supplier sheet in one click — safe to click even if it's already been loaded, it won't duplicate.</p>
-      <button class="btn btn-primary" id="seed-sample-btn">Load sample data</button>
+      <p class="card-sub">Loads the 17-row sample sheet. Only needed if Dropbox is unavailable — the sync above is the real source.</p>
+      <button class="btn btn-sm" id="seed-sample-btn">Load sample data</button>
       <div id="seed-sample-status" class="note hidden" style="margin-top:12px;"></div>
     </div>` : '';
 
@@ -506,6 +599,7 @@ async function renderModels() {
     </div>` : '';
 
   return `
+    ${dropboxCard}
     ${seedCard}
     ${listHtml}
     <div class="card">
@@ -541,35 +635,355 @@ function addModelPartRow(letter, name, prefix, qty) {
 }
 
 /* =========================
-   ADD CONSIGNMENT
+   SHARED CONSIGNMENT DATA
+   Receiving, Assembly and Delivery are three views of the same underlying
+   group data, so they share one fetch. Navigating between them after the
+   first load is instant instead of a fresh 2-4s Apps Script round-trip.
+   ========================= */
+
+let groupCache = { data: null, at: 0 };
+const GROUP_TTL = 45 * 1000;
+
+async function getGroups(force) {
+  const fresh = groupCache.data && (Date.now() - groupCache.at < GROUP_TTL);
+  if (fresh && !force) return groupCache.data;
+  const res = await apiCall('listConsignments');
+  if (!res.ok) throw new Error(res.error || 'Could not load consignments');
+  groupCache = { data: res.consignments, at: Date.now() };
+  return res.consignments;
+}
+function invalidateGroups() {
+  groupCache = { data: null, at: 0 };
+  pageCache = {};
+  bootstrapDashboard = null;
+}
+
+function fmtDay(v) {
+  if (!v) return '—';
+  const d = new Date(v);
+  if (isNaN(d.getTime())) return '—';
+  return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+// How far away a date is, in plain words, so staff can plan around it
+// without doing arithmetic in their heads.
+function relDays(v) {
+  if (!v) return null;
+  const d = new Date(v);
+  if (isNaN(d.getTime())) return null;
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const then = new Date(d); then.setHours(0, 0, 0, 0);
+  const days = Math.round((then - today) / 86400000);
+  if (days === 0) return { days, text: 'today', cls: 'chip-warn' };
+  if (days === 1) return { days, text: 'tomorrow', cls: 'chip-warn' };
+  if (days > 1) return { days, text: 'in ' + days + ' days', cls: days <= 7 ? 'chip-warn' : 'chip-idle' };
+  if (days === -1) return { days, text: 'yesterday', cls: 'chip-info' };
+  return { days, text: Math.abs(days) + ' days ago', cls: 'chip-info' };
+}
+
+function importChip(status) {
+  const map = {
+    'Production': 'chip-idle', 'Loaded': 'chip-info', 'F-Bank': 'chip-info',
+    'L-Bank': 'chip-info', 'Clearance': 'chip-warn', 'Received': 'chip-ok'
+  };
+  return `<span class="chip ${map[status] || 'chip-idle'}">${esc(status || '—')}</span>`;
+}
+
+/* =========================
+   CONSIGNMENTS  (what is coming in)
    ========================= */
 
 async function renderConsignments() {
-  const modelOptions = cache.models.map(m => `<option value="${esc(m.sheetCode)}">${esc(m.modelName)} (${esc(m.sheetCode)})</option>`).join('');
-  const customerRows = cache.customers.map(c => `
-    <div class="field"><label>${esc(c.CustomerCode)}</label><input type="number" min="0" placeholder="0" class="cust-qty" data-code="${esc(c.CustomerCode)}"></div>`).join('');
+  const res = await apiCall('getConsignmentRows');
+  if (!res.ok) return `<div class="empty">Could not load: ${esc(res.error)}</div>`;
+  if (!res.rows.length) {
+    return `<div class="empty">No consignments yet. Sync China Master from the
+      <a href="#/models">Models &amp; parts</a> page to pull them in from Dropbox.</div>`;
+  }
+
+  const rows = res.rows;
+  const arriving = rows.filter(r => r.qtyReceived <= 0 && r.eta);
+  const soon = arriving.filter(r => { const rel = relDays(r.eta); return rel && rel.days >= 0 && rel.days <= 14; });
+  const landed = rows.filter(r => r.qtyReceived > 0);
+  const shortLoads = rows.filter(r => r.shortLoad);
+
+  const syncNote = res.lastSync
+    ? `Last synced from Dropbox ${esc(fmtDate(res.lastSync))}.`
+    : `Not yet synced from Dropbox — showing whatever is in the sheet.`;
+
+  const body = rows.map(r => {
+    const rel = relDays(r.eta);
+    return `
+      <tr${r.shortLoad ? ' style="background:#FFFBF5;"' : ''}>
+        <td><code>${esc(r.packaging)}</code>${r.shortLoad ? ' <span class="chip chip-warn">Short load</span>' : ''}</td>
+        <td>${esc(r.supplier)}</td>
+        <td>${esc(r.product)}</td>
+        <td><b>${esc(r.signatureModel)}</b><div style="color:var(--text-soft);font-size:11.5px;">factory ${esc(r.factoryModel || '—')}</div></td>
+        <td style="text-align:right;">${r.frQty || '—'}</td>
+        <td style="text-align:right;">${r.bbQty || '—'}</td>
+        <td style="text-align:right;"><b>${r.totalQty || '—'}</b></td>
+        <td>${importChip(r.importStatus)}</td>
+        <td>${esc(fmtDay(r.etd))}</td>
+        <td>${esc(fmtDay(r.eta))}${rel ? `<div><span class="chip ${rel.cls}" style="margin-top:4px;">${esc(rel.text)}</span></div>` : ''}</td>
+        <td>${esc(r.mgr || '—')}</td>
+      </tr>`;
+  }).join('');
 
   return `
+    <div class="grid grid-4" style="margin-bottom:18px;">
+      <div class="stat"><div class="stat-label">Lines in total</div><div class="stat-value">${rows.length}</div><div class="stat-note">straight from China Master</div></div>
+      <div class="stat"><div class="stat-label">Still to arrive</div><div class="stat-value">${arriving.length}</div><div class="stat-note">nothing received yet</div></div>
+      <div class="stat"><div class="stat-label">Arriving within 14 days</div><div class="stat-value">${soon.length}</div><div class="stat-note">plan warehouse space</div></div>
+      <div class="stat"><div class="stat-label">Short loads</div><div class="stat-value">${shortLoads.length}</div><div class="stat-note">fewer units than expected</div></div>
+    </div>
+
     <div class="card">
-      <h3 class="card-h">New consignment row</h3>
-      <p class="card-sub">One row per part per lot — e.g. <code>Careline-3A</code>. Matching rows fold into the same consignment group automatically.</p>
-      ${cache.models.length ? '' : `<div class="note" style="margin-bottom:14px;"><b>No models defined yet.</b> Add one on the <a href="#/models">Models & parts</a> page first, or rows here will go straight to Needs Review.</div>`}
-      <div class="form-row">
-        <div class="field"><label>Sheet row name</label><input id="cn-name" type="text" placeholder="e.g. Careline-3A"></div>
-        <div class="field"><label>Supplier</label><input id="cn-supplier" type="text" placeholder="Supplier name"></div>
-        <div class="field"><label>Import status</label>
-          <select id="cn-status"><option>Loaded</option><option>F-Bank</option><option>L-Bank</option><option>Clearance</option><option>Received</option></select>
-        </div>
+      <h3 class="card-h">Every consignment line</h3>
+      <p class="card-sub">Read-only — this is China Master exactly as it comes from Dropbox, sorted by arrival date so the next thing to land is at the top. ${syncNote}</p>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr>
+            <th>Packaging</th><th>Supplier</th><th>Product</th><th>Model</th>
+            <th style="text-align:right;">FR</th><th style="text-align:right;">BB</th><th style="text-align:right;">Total</th>
+            <th>Status</th><th>ETD</th><th>ETA</th><th>MGR</th>
+          </tr></thead>
+          <tbody>${body}</tbody>
+        </table>
       </div>
-      <div id="cn-preview" class="note" style="margin-bottom:16px;">Type a sheet row name above to preview how it parses.</div>
-      <h3 class="card-h" style="margin-top:8px;">Quantity by customer</h3>
-      <p class="card-sub">Optional — how this consignment's units are allocated once built.</p>
-      <div class="form-row" id="cn-customers">${customerRows}</div>
-      <div style="display:flex;gap:10px;margin-top:6px;">
-        <button class="btn btn-primary" id="cn-save">Save consignment row</button>
-      </div>
-      <div id="cn-result" class="note hidden" style="margin-top:12px;"></div>
     </div>`;
+}
+
+/* =========================
+   RECEIVING  (what actually turned up)
+   ========================= */
+
+async function renderReceiving() {
+  let groups;
+  try { groups = await getGroups(); }
+  catch (e) { return `<div class="empty">Could not load: ${esc(e.message)}</div>`; }
+  if (!groups.length) return `<div class="empty">Nothing to receive yet — sync China Master first.</div>`;
+
+  groups.sort((a, b) => {
+    const ax = a.nextEta ? new Date(a.nextEta).getTime() : Infinity;
+    const bx = b.nextEta ? new Date(b.nextEta).getTime() : Infinity;
+    return ax - bx;
+  });
+
+  const cards = groups.map(g => {
+    const partRows = g.parts.map(p => {
+      const rel = relDays(p.eta);
+      const outstanding = Math.max(0, p.qtyExpected - p.qtyReceived);
+      return `
+        <tr data-rowid="${esc(p.rowId || '')}">
+          <td><b>Part ${esc(p.partLetter)}</b><div style="color:var(--text-soft);font-size:11.5px;">${esc(p.partName)}</div></td>
+          <td>${importChip(p.importStatus)}</td>
+          <td>${esc(fmtDay(p.eta))}${rel ? ` <span class="chip ${rel.cls}">${esc(rel.text)}</span>` : ''}</td>
+          <td style="text-align:right;">${p.qtyExpected || '—'}</td>
+          <td style="text-align:right;"><b>${p.qtyReceived}</b></td>
+          <td style="text-align:right;${outstanding > 0 ? 'color:var(--warning);font-weight:600;' : ''}">${outstanding || '—'}</td>
+          <td style="white-space:nowrap;">
+            <input type="number" min="1" class="rcv-qty" placeholder="qty" style="width:92px;display:inline-block;">
+            <button class="btn btn-sm rcv-btn" data-rowid="${esc(p.rowId || '')}" ${p.rowId ? '' : 'disabled'}>Receive</button>
+          </td>
+        </tr>`;
+    }).join('');
+
+    const rel = relDays(g.nextEta);
+    return `
+      <div class="card">
+        <h3 class="card-h">${esc(g.consignmentGroup)} · ${esc(g.signatureModel || g.modelName)}</h3>
+        <p class="card-sub">
+          ${esc(g.supplier)} · ${esc(g.product || '—')} · target ${g.totalQty || '—'} units
+          ${g.nextEta ? ` · next part arrives ${esc(fmtDay(g.nextEta))}${rel ? ` (${esc(rel.text)})` : ''}` : ''}
+        </p>
+        <table>
+          <thead><tr>
+            <th>Part</th><th>Import status</th><th>ETA</th>
+            <th style="text-align:right;">Expected</th><th style="text-align:right;">Received</th>
+            <th style="text-align:right;">Outstanding</th><th style="width:190px;">Record arrival</th>
+          </tr></thead>
+          <tbody>${partRows}</tbody>
+        </table>
+        <div class="rcv-status note hidden" style="margin-top:12px;"></div>
+      </div>`;
+  }).join('');
+
+  return `
+    <div class="note" style="margin-bottom:18px;">
+      <b>This is the one page where your team types.</b> When a shipment lands, enter how many
+      of that part actually arrived. Everything else on the site is calculated from these numbers.
+      Quantities add up, so recording 50 then 30 gives 80 — they are never overwritten by a Dropbox sync.
+    </div>
+    ${cards}`;
+}
+
+/* =========================
+   ASSEMBLY  (what can be built)
+   ========================= */
+
+async function renderAssembly() {
+  let groups;
+  try { groups = await getGroups(); }
+  catch (e) { return `<div class="empty">Could not load: ${esc(e.message)}</div>`; }
+
+  const active = groups.filter(g => g.parts.some(p => p.qtyReceived > 0));
+  const buildable = active.filter(g => g.buildableUnits > 0);
+  const blocked = active.filter(g => g.buildableUnits <= 0);
+
+  if (!active.length) {
+    return `<div class="empty">Nothing to assemble yet. Record some arrivals on the
+      <a href="#/receiving">Receiving</a> page and buildable units will appear here.</div>`;
+  }
+
+  const partBar = p => {
+    const units = Math.floor(p.qtyReceived / (p.qtyPerUnit || 1));
+    return `
+      <div style="border:1px solid var(--border);border-radius:10px;padding:12px;">
+        <div style="font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-soft);font-weight:700;">Part ${esc(p.partLetter)}</div>
+        <div style="font-size:22px;font-weight:800;color:var(--dark);margin-top:4px;line-height:1;">${p.qtyReceived}</div>
+        <div style="font-size:11.5px;color:var(--text-soft);margin-top:5px;">on hand → ${units} unit${units === 1 ? '' : 's'}</div>
+      </div>`;
+  };
+
+  const card = g => {
+    const canBuild = g.buildableUnits > 0;
+    const blockMsg = g.blockingPart
+      ? `Held up by <b>part ${esc(g.blockingPart.partLetter)}</b> — ${g.blockingPart.shortfallUnits} more unit${g.blockingPart.shortfallUnits === 1 ? '' : 's'} worth would unlock the rest.`
+      : 'Waiting on parts to arrive.';
+
+    return `
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;">
+          <div>
+            <h3 class="card-h">${esc(g.consignmentGroup)} · ${esc(g.signatureModel || g.modelName)}</h3>
+            <p class="card-sub" style="margin-bottom:0;">${esc(g.supplier)} · ${esc(g.product || '—')} · ${g.totalBuilt} built so far</p>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-soft);font-weight:700;">Can build now</div>
+            <div style="font-size:30px;font-weight:800;line-height:1;color:${canBuild ? 'var(--success)' : 'var(--text-soft)'};">${g.buildableUnits}</div>
+          </div>
+        </div>
+
+        <div class="grid grid-4" style="margin:16px 0;">${g.parts.map(partBar).join('')}</div>
+
+        ${canBuild ? `
+          <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+            <div style="flex:0 0 150px;">
+              <label>Units to build</label>
+              <input type="number" class="asm-qty" min="1" max="${g.buildableUnits}" value="${g.buildableUnits}">
+            </div>
+            <button class="btn btn-primary asm-btn" data-group="${esc(g.consignmentGroup)}" data-max="${g.buildableUnits}">Build units</button>
+          </div>
+        ` : `<div class="note">${blockMsg}</div>`}
+        <div class="asm-status note hidden" style="margin-top:12px;"></div>
+      </div>`;
+  };
+
+  const totalBuildable = buildable.reduce((s, g) => s + g.buildableUnits, 0);
+
+  return `
+    <div class="grid grid-4" style="margin-bottom:18px;">
+      <div class="stat"><div class="stat-label">Ready to build</div><div class="stat-value">${totalBuildable}</div><div class="stat-note">units, across ${buildable.length} consignment${buildable.length === 1 ? '' : 's'}</div></div>
+      <div class="stat"><div class="stat-label">Waiting on parts</div><div class="stat-value">${blocked.length}</div><div class="stat-note">partly arrived, can't build yet</div></div>
+      <div class="stat"><div class="stat-label">Built to date</div><div class="stat-value">${active.reduce((s, g) => s + g.totalBuilt, 0)}</div><div class="stat-note">complete units</div></div>
+    </div>
+
+    ${buildable.length ? `<h3 style="font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-soft);margin:0 0 12px;">Ready to build</h3>${buildable.map(card).join('')}` : ''}
+    ${blocked.length ? `<h3 style="font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-soft);margin:26px 0 12px;">Waiting on parts</h3>${blocked.map(card).join('')}` : ''}`;
+}
+
+/* =========================
+   DELIVERY  (what goes out to FR and BB)
+   ========================= */
+
+async function renderDelivery() {
+  let groups, delRes;
+  try {
+    [groups, delRes] = await Promise.all([getGroups(), apiCall('listDeliveries')]);
+  } catch (e) { return `<div class="empty">Could not load: ${esc(e.message)}</div>`; }
+
+  const deliveries = (delRes && delRes.ok) ? delRes.deliveries : [];
+
+  // Demand comes straight from China Master's FR / BB columns.
+  const demand = { FR: 0, BB: 0 }, sent = { FR: 0, BB: 0 }, confirmed = { FR: 0, BB: 0 };
+  groups.forEach(g => {
+    demand.FR += g.frQty || 0;
+    demand.BB += g.bbQty || 0;
+    ['FR', 'BB'].forEach(c => {
+      const d = g.deliveredTo && g.deliveredTo[c];
+      if (d) { sent[c] += d.out; confirmed[c] += d.confirmed; }
+    });
+  });
+
+  const custCard = c => {
+    const owed = Math.max(0, demand[c] - confirmed[c]);
+    const pct = demand[c] ? Math.min(100, Math.round((confirmed[c] / demand[c]) * 100)) : 0;
+    return `
+      <div class="card">
+        <h3 class="card-h">${c}</h3>
+        <p class="card-sub">Demand taken from China Master, so it updates itself on every sync.</p>
+        <div style="height:9px;background:#F5EBE3;border-radius:999px;overflow:hidden;margin-bottom:14px;">
+          <div style="height:100%;width:${pct}%;background:var(--success);"></div>
+        </div>
+        <div class="grid grid-3">
+          <div><div class="stat-label">Owed</div><div class="stat-value">${demand[c]}</div></div>
+          <div><div class="stat-label">Sent</div><div class="stat-value">${sent[c]}</div></div>
+          <div><div class="stat-label">Still to go</div><div class="stat-value" style="color:${owed ? 'var(--warning)' : 'var(--success)'};">${owed}</div></div>
+        </div>
+      </div>`;
+  };
+
+  const ready = groups.filter(g => g.totalBuilt - g.totalOut > 0);
+  const readyCards = ready.length ? ready.map(g => {
+    const available = g.totalBuilt - g.totalOut;
+    return `
+      <div class="card">
+        <h3 class="card-h">${esc(g.consignmentGroup)} · ${esc(g.signatureModel || g.modelName)}</h3>
+        <p class="card-sub">${available} built unit${available === 1 ? '' : 's'} ready to send. FR needs ${g.frQty || 0}, BB needs ${g.bbQty || 0}.</p>
+        <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+          <div style="flex:0 0 130px;">
+            <label>Customer</label>
+            <select class="dlv-cust"><option value="FR">FR</option><option value="BB">BB</option></select>
+          </div>
+          <div style="flex:0 0 130px;">
+            <label>Units out</label>
+            <input type="number" class="dlv-qty" min="1" max="${available}" value="${available}">
+          </div>
+          <button class="btn btn-primary dlv-btn" data-group="${esc(g.consignmentGroup)}" data-max="${available}">Mark out</button>
+        </div>
+        <div class="dlv-status note hidden" style="margin-top:12px;"></div>
+      </div>`;
+  }).join('') : `<div class="empty">No built units waiting to go out. Build some on the <a href="#/assembly">Assembly</a> page.</div>`;
+
+  const pending = deliveries.filter(d => d.Status === 'pending');
+  const pendingTable = pending.length ? `
+    <div class="card">
+      <h3 class="card-h">Awaiting customer confirmation</h3>
+      <p class="card-sub">Sent out but not yet confirmed received. Until FR and BB get their own portals, your team confirms on their behalf.</p>
+      <table>
+        <thead><tr><th>Consignment</th><th>Customer</th><th style="text-align:right;">Sent</th><th>When</th><th style="width:230px;">Confirm received</th></tr></thead>
+        <tbody>
+          ${pending.map(d => `
+            <tr data-deliveryid="${esc(d.DeliveryID)}">
+              <td><code>${esc(d.ConsignmentGroup)}</code></td>
+              <td><b>${esc(d.CustomerCode)}</b></td>
+              <td style="text-align:right;">${esc(d.QtyOut)}</td>
+              <td>${esc(fmtDay(d.Timestamp))}</td>
+              <td style="white-space:nowrap;">
+                <input type="number" class="cfm-qty" min="0" value="${esc(d.QtyOut)}" style="width:92px;display:inline-block;">
+                <button class="btn btn-sm cfm-btn" data-deliveryid="${esc(d.DeliveryID)}">Confirm</button>
+              </td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+      <div id="cfm-status" class="note hidden" style="margin-top:12px;"></div>
+    </div>` : '';
+
+  return `
+    <div class="grid grid-2" style="margin-bottom:18px;">${custCard('FR')}${custCard('BB')}</div>
+    <h3 style="font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-soft);margin:0 0 12px;">Ready to send</h3>
+    ${readyCards}
+    ${pendingTable}`;
 }
 
 /* =========================
@@ -596,142 +1010,6 @@ async function renderNeedsReview() {
             </tr>`).join('')}
         </tbody>
       </table>
-    </div>`;
-}
-
-/* =========================
-   STATUS BOARD
-   ========================= */
-
-async function renderStatus() {
-  const res = await apiCall('getStatusBoard');
-  if (!res.ok) return `<div class="empty">Could not load: ${esc(res.error)}</div>`;
-  const board = res.board;
-  return `
-    <div class="grid grid-3">
-      ${Object.keys(board).map(statusName => `
-        <div class="card">
-          <h3 class="card-h">${esc(statusName)} <span style="color:var(--text-soft);font-weight:500;">(${board[statusName].length})</span></h3>
-          ${board[statusName].length ? board[statusName].map(c => `
-            <div style="border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:10px;">
-              <div style="font-weight:700;">${esc(c.consignmentGroup)} <span style="font-weight:500;color:var(--text-soft);">— ${esc(c.modelName)}</span></div>
-              <div style="margin-top:6px;">
-                ${c.parts.map(p => `<span class="chip ${p.qtyReceived >= p.qtyPerUnit ? 'chip-ok' : (p.qtyReceived > 0 ? 'chip-warn' : 'chip-idle')}" style="margin:2px 3px 0 0;">
-                  ${esc(p.partLetter)}: ${p.qtyReceived}/${p.qtyPerUnit}${p.rowId ? '' : ''}
-                </span>`).join('')}
-              </div>
-              ${c.parts.some(p => p.rowId) ? `
-              <div class="form-row" style="margin-top:8px;">
-                <div class="field" style="margin-bottom:0;">
-                  <select class="sb-part" data-group="${esc(c.consignmentGroup)}">
-                    ${c.parts.filter(p => p.rowId).map(p => `<option value="${esc(p.rowId)}">${esc(p.partLetter)} · ${esc(p.partName)}</option>`).join('')}
-                  </select>
-                </div>
-                <div class="field" style="margin-bottom:0;"><input type="number" class="sb-qty" min="1" placeholder="Qty received"></div>
-                <div class="field" style="margin-bottom:0;"><button class="btn btn-sm sb-receive">+ Receive</button></div>
-              </div>` : ''}
-            </div>`).join('') : `<div class="empty" style="padding:28px 14px;">Empty</div>`}
-        </div>`).join('')}
-    </div>`;
-}
-
-/* =========================
-   QUEUE
-   ========================= */
-
-async function renderQueue() {
-  const res = await apiCall('getQueue');
-  if (!res.ok) return `<div class="empty">Could not load: ${esc(res.error)}</div>`;
-  if (!res.queue.length) return `<div class="card"><h3 class="card-h">Work order</h3><div class="empty">Nothing in the queue.</div></div>`;
-  return `
-    <div class="card">
-      <h3 class="card-h">Work order</h3>
-      <p class="card-sub">Higher priority number = worked first.</p>
-      <table>
-        <thead><tr><th>Consignment</th><th>Model</th><th>Buildable</th><th>Status</th><th style="width:110px">Priority</th><th></th></tr></thead>
-        <tbody>
-          ${res.queue.map(c => `
-            <tr data-group="${esc(c.consignmentGroup)}">
-              <td>${esc(c.consignmentGroup)}</td><td>${esc(c.modelName)}</td><td>${c.buildableUnits}</td><td>${chip(c.status)}</td>
-              <td><input type="number" class="q-priority" value="${c.priority}" style="width:70px;"></td>
-              <td><button class="btn btn-sm q-save">Save</button></td>
-            </tr>`).join('')}
-        </tbody>
-      </table>
-    </div>`;
-}
-
-/* =========================
-   ASSEMBLE
-   ========================= */
-
-async function renderAssemble() {
-  const res = await apiCall('listConsignments');
-  if (!res.ok) return `<div class="empty">Could not load: ${esc(res.error)}</div>`;
-  const buildable = res.consignments.filter(c => c.buildableUnits > 0);
-  return `
-    <div class="card">
-      <h3 class="card-h">Build</h3>
-      <p class="card-sub">Buildable quantity is capped by whichever part arrived least.</p>
-      <div class="form-row">
-        <div class="field">
-          <label>Consignment</label>
-          <select id="asm-group">
-            <option value="">Select a consignment</option>
-            ${buildable.map(c => `<option value="${esc(c.consignmentGroup)}" data-buildable="${c.buildableUnits}">${esc(c.consignmentGroup)} — ${esc(c.modelName)}</option>`).join('')}
-          </select>
-        </div>
-        <div class="field"><label>Buildable now</label><input id="asm-buildable" type="text" value="—" disabled></div>
-        <div class="field"><label>Quantity to build</label><input id="asm-qty" type="number" min="1" placeholder="0"></div>
-      </div>
-      <div class="field"><label>Remarks</label><input id="asm-remarks" type="text" placeholder="Anything worth noting about this build"></div>
-      <button class="btn btn-primary" id="asm-save">Record build</button>
-      <div id="asm-result" class="note hidden" style="margin-top:12px;"></div>
-    </div>`;
-}
-
-/* =========================
-   DELIVERIES
-   ========================= */
-
-async function renderDeliveries() {
-  const [consRes, delRes] = await Promise.all([apiCall('listConsignments'), apiCall('listDeliveries')]);
-  if (!consRes.ok) return `<div class="empty">Could not load: ${esc(consRes.error)}</div>`;
-  const readyGroups = consRes.consignments.filter(c => c.totalBuilt > c.totalOut);
-  const pending = delRes.ok ? delRes.deliveries.filter(d => d.Status === 'pending') : [];
-
-  return `
-    <div class="grid grid-2">
-      <div class="card">
-        <h3 class="card-h">Mark out</h3>
-        <p class="card-sub">Send a quantity to a customer.</p>
-        <div class="field"><label>Consignment</label>
-          <select id="dl-group">
-            <option value="">Select</option>
-            ${readyGroups.map(c => `<option value="${esc(c.consignmentGroup)}">${esc(c.consignmentGroup)} — ${esc(c.modelName)} (${c.totalBuilt - c.totalOut} unassigned)</option>`).join('')}
-          </select>
-        </div>
-        <div class="form-row">
-          <div class="field"><label>Customer</label>
-            <select id="dl-customer">${cache.customers.map(c => `<option value="${esc(c.CustomerCode)}">${esc(c.CustomerCode)}</option>`).join('')}</select>
-          </div>
-          <div class="field"><label>Quantity out</label><input id="dl-qty" type="number" min="1" placeholder="0"></div>
-        </div>
-        <button class="btn btn-primary" id="dl-markout">Mark out</button>
-        <div id="dl-result" class="note hidden" style="margin-top:12px;"></div>
-      </div>
-      <div class="card">
-        <h3 class="card-h">Customer confirmation</h3>
-        <p class="card-sub">Only confirmed units leave the board as Delivered. Confirming less than sent flags a discrepancy.</p>
-        ${pending.length ? pending.map(d => `
-          <div style="border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:10px;" data-deliveryid="${esc(d.DeliveryID)}">
-            <div><b>${esc(d.ConsignmentGroup)}</b> → ${esc(d.CustomerCode)} — sent ${esc(d.QtyOut)}</div>
-            <div class="form-row" style="margin-top:8px;">
-              <div class="field" style="margin-bottom:0;"><input type="number" class="dl-confirm-qty" placeholder="Confirmed qty" value="${esc(d.QtyOut)}"></div>
-              <div class="field" style="margin-bottom:0;"><button class="btn btn-sm dl-confirm">Confirm</button></div>
-            </div>
-          </div>`).join('') : `<div class="empty" style="padding:30px 14px;">Nothing awaiting confirmation.</div>`}
-      </div>
     </div>`;
 }
 
@@ -763,19 +1041,46 @@ function reportRows(events) {
 }
 
 /* =========================
+   PREFETCH
+   Apps Script round-trips are 2-4s and that latency cannot be removed from
+   the client side. What can be removed is the *waiting*: once the first page
+   is on screen, quietly render the others into pageCache so switching pages
+   is instant. Runs one at a time so it never competes with a click the user
+   actually made.
+   ========================= */
+
+let prefetching = false;
+
+async function prefetchPages() {
+  if (prefetching) return;
+  prefetching = true;
+  try {
+    for (const id of ['consignments', 'receiving', 'assembly', 'delivery']) {
+      if (pageCache[id]) continue;
+      if (currentPage === id) continue;
+      try {
+        const html = await RENDERERS[id]();
+        pageCache[id] = html;
+      } catch (e) { /* a failed prefetch is invisible — the page just loads normally */ }
+    }
+  } finally {
+    prefetching = false;
+  }
+}
+
+/* =========================
    RENDERERS MAP
    ========================= */
 
 const RENDERERS = {
   dashboard: renderDashboard,
-  models: renderModels,
   consignments: renderConsignments,
+  receiving: renderReceiving,
+  assembly: renderAssembly,
+  delivery: renderDelivery,
   needsreview: renderNeedsReview,
-  status: renderStatus,
-  queue: renderQueue,
-  assemble: renderAssemble,
-  deliveries: renderDeliveries,
-  reports: renderReports
+  reports: renderReports,
+  models: renderModels
 };
 
 /* =========================
@@ -785,6 +1090,57 @@ const RENDERERS = {
 
 function wirePageHandlers(pageId) {
   if (pageId === 'models') {
+    const dbxSync = document.getElementById('dbx-sync-btn');
+    const dbxCheck = document.getElementById('dbx-check-btn');
+    const dbxStatus = () => document.getElementById('dbx-status');
+
+    if (dbxCheck) {
+      dbxCheck.onclick = async () => {
+        const el = dbxStatus();
+        dbxCheck.disabled = true;
+        el.classList.remove('hidden');
+        el.innerText = 'Checking…';
+        const res = await apiCall('testDropbox');
+        if (!res.ok) {
+          el.innerText = "Couldn't reach the file. " + (res.error || '');
+        } else {
+          const when = res.modified ? new Date(res.modified).toLocaleString() : 'unknown';
+          const last = res.lastSync ? new Date(res.lastSync).toLocaleString() : 'never';
+          el.innerText = 'Connected. Found "' + res.name + '", last changed in Dropbox ' + when + '. Last sync: ' + last + '.';
+        }
+        dbxCheck.disabled = false;
+      };
+    }
+
+    if (dbxSync) {
+      dbxSync.onclick = async () => {
+        const el = dbxStatus();
+        dbxSync.disabled = true;
+        dbxSync.innerText = 'Syncing…';
+        el.classList.remove('hidden');
+        el.innerText = 'Fetching China Master from Dropbox — this takes a few seconds.';
+
+        const res = await apiCall('syncFromDropbox');
+        if (!res.ok) {
+          el.innerText = 'Sync failed: ' + (res.error || 'unknown error');
+        } else {
+          let msg = res.added + ' new row(s), ' + res.updated + ' updated.';
+          if (res.needsReview > 0) {
+            msg += ' ' + res.needsReview + " row(s) couldn't be read and are waiting in Needs review.";
+          }
+          if (res.skipped > 0) msg += ' ' + res.skipped + ' blank row(s) ignored.';
+          el.innerText = msg;
+          // Consignment data changed underneath every page — drop all caches
+          // so the dashboard and boards re-fetch rather than showing stale counts.
+          pageCache = {};
+          bootstrapDashboard = null;
+          await refreshModels();
+        }
+        dbxSync.disabled = false;
+        dbxSync.innerText = 'Sync now';
+      };
+    }
+
     const seedBtn = document.getElementById('seed-sample-btn');
     if (seedBtn) {
       seedBtn.onclick = async () => {
@@ -828,44 +1184,6 @@ function wirePageHandlers(pageId) {
     };
   }
 
-  if (pageId === 'consignments') {
-    const nameInput = document.getElementById('cn-name');
-    const preview = document.getElementById('cn-preview');
-    let previewTimer;
-    nameInput.oninput = () => {
-      clearTimeout(previewTimer);
-      previewTimer = setTimeout(async () => {
-        const val = nameInput.value.trim();
-        if (!val) { preview.innerText = 'Type a sheet row name above to preview how it parses.'; return; }
-        const res = await apiCall('previewParse', { sheetRowName: val });
-        if (res.ok && res.parsed.ok) {
-          const p = res.parsed;
-          preview.innerHTML = `<b>Matched:</b> ${esc(p.modelName)} · ${esc(p.partName)} (part ${esc(p.partLetter)}) — consignment group <code>${esc(p.consignmentGroup)}</code>, part code <code>${esc(p.partCode)}</code>`;
-        } else {
-          preview.innerHTML = `<b style="color:var(--warning);">Needs review:</b> ${esc(res.parsed ? res.parsed.reason : res.error)}`;
-        }
-      }, 300);
-    };
-
-    document.getElementById('cn-save').onclick = async () => {
-      const customers = [...document.querySelectorAll('.cust-qty')]
-        .map(i => ({ customerCode: i.dataset.code, qty: Number(i.value) || 0 }))
-        .filter(c => c.qty > 0);
-      const res = await apiCall('addConsignmentRow', {
-        sheetRowName: nameInput.value,
-        supplier: document.getElementById('cn-supplier').value,
-        importStatus: document.getElementById('cn-status').value,
-        source: 'Manual',
-        customers
-      });
-      const resultEl = document.getElementById('cn-result');
-      resultEl.classList.remove('hidden');
-      resultEl.innerText = res.ok
-        ? (res.needsReview ? 'Saved — but sent to Needs Review: ' + res.reason : 'Consignment row saved.')
-        : ('Error: ' + res.error);
-    };
-  }
-
   if (pageId === 'needsreview') {
     document.querySelectorAll('.nr-resolve').forEach(btn => {
       btn.onclick = async () => {
@@ -878,69 +1196,116 @@ function wirePageHandlers(pageId) {
     });
   }
 
-  if (pageId === 'status') {
-    document.querySelectorAll('.sb-receive').forEach(btn => {
+  // Receiving: the one page where staff type. Each row records an arrival
+  // against a specific packaging line.
+  if (pageId === 'receiving') {
+    document.querySelectorAll('.rcv-btn').forEach(btn => {
       btn.onclick = async () => {
-        const container = btn.closest('.form-row');
-        const rowId = container.querySelector('.sb-part').value;
-        const qty = Number(container.querySelector('.sb-qty').value);
-        if (!qty || qty <= 0) { alert('Enter a quantity'); return; }
-        const res = await apiCall('recordReceipt', { rowId, qty });
-        if (res.ok) route(); else alert('Error: ' + res.error);
+        const tr = btn.closest('tr');
+        const card = btn.closest('.card');
+        const statusEl = card.querySelector('.rcv-status');
+        const input = tr.querySelector('.rcv-qty');
+        const qty = Number(input.value);
+
+        statusEl.classList.remove('hidden');
+        if (!qty || qty <= 0) { statusEl.innerText = 'Enter how many units arrived.'; return; }
+
+        btn.disabled = true;
+        const prev = btn.innerText;
+        btn.innerText = 'Saving…';
+        const res = await apiCall('recordReceipt', { rowId: btn.dataset.rowid, qty });
+        if (res.ok) {
+          statusEl.innerText = 'Recorded. ' + res.totalReceived + ' received in total for this part.';
+          input.value = '';
+          invalidateGroups();
+          await route();
+        } else {
+          statusEl.innerText = 'Could not save: ' + (res.error || 'unknown error');
+          btn.disabled = false;
+          btn.innerText = prev;
+        }
       };
     });
   }
 
-  if (pageId === 'queue') {
-    document.querySelectorAll('.q-save').forEach(btn => {
+  if (pageId === 'assembly') {
+    document.querySelectorAll('.asm-btn').forEach(btn => {
       btn.onclick = async () => {
-        const row = btn.closest('tr');
-        const consignmentGroup = row.dataset.group;
-        const priority = Number(row.querySelector('.q-priority').value);
-        const res = await apiCall('setPriority', { consignmentGroup, priority });
-        if (res.ok) route(); else alert('Error: ' + res.error);
+        const card = btn.closest('.card');
+        const statusEl = card.querySelector('.asm-status');
+        const qty = Number(card.querySelector('.asm-qty').value);
+        const max = Number(btn.dataset.max);
+
+        statusEl.classList.remove('hidden');
+        if (!qty || qty <= 0) { statusEl.innerText = 'Enter how many units to build.'; return; }
+        if (qty > max) { statusEl.innerText = 'Only ' + max + ' can be built with the parts on hand.'; return; }
+
+        btn.disabled = true;
+        btn.innerText = 'Building…';
+        const res = await apiCall('recordBuild', { consignmentGroup: btn.dataset.group, qty, remarks: '' });
+        if (res.ok) {
+          statusEl.innerText = qty + ' unit' + (qty === 1 ? '' : 's') + ' built.';
+          invalidateGroups();
+          await route();
+        } else {
+          statusEl.innerText = 'Could not save: ' + (res.error || 'unknown error');
+          btn.disabled = false;
+          btn.innerText = 'Build units';
+        }
       };
     });
   }
 
-  if (pageId === 'assemble') {
-    const select = document.getElementById('asm-group');
-    select.onchange = () => {
-      const opt = select.options[select.selectedIndex];
-      document.getElementById('asm-buildable').value = opt.dataset.buildable || '—';
-    };
-    document.getElementById('asm-save').onclick = async () => {
-      const res = await apiCall('recordBuild', {
-        consignmentGroup: select.value,
-        qty: Number(document.getElementById('asm-qty').value),
-        remarks: document.getElementById('asm-remarks').value
-      });
-      const resultEl = document.getElementById('asm-result');
-      resultEl.classList.remove('hidden');
-      resultEl.innerText = res.ok ? 'Build recorded.' : ('Error: ' + res.error);
-      if (res.ok) setTimeout(route, 800);
-    };
-  }
-
-  if (pageId === 'deliveries') {
-    document.getElementById('dl-markout').onclick = async () => {
-      const res = await apiCall('markOut', {
-        consignmentGroup: document.getElementById('dl-group').value,
-        customerCode: document.getElementById('dl-customer').value,
-        qty: Number(document.getElementById('dl-qty').value)
-      });
-      const resultEl = document.getElementById('dl-result');
-      resultEl.classList.remove('hidden');
-      resultEl.innerText = res.ok ? 'Marked out.' : ('Error: ' + res.error);
-      if (res.ok) setTimeout(route, 800);
-    };
-    document.querySelectorAll('.dl-confirm').forEach(btn => {
+  if (pageId === 'delivery') {
+    document.querySelectorAll('.dlv-btn').forEach(btn => {
       btn.onclick = async () => {
-        const container = btn.closest('[data-deliveryid]');
-        const deliveryId = container.dataset.deliveryid;
-        const confirmedQty = Number(container.querySelector('.dl-confirm-qty').value);
-        const res = await apiCall('confirmDelivery', { deliveryId, confirmedQty });
-        if (res.ok) route(); else alert('Error: ' + res.error);
+        const card = btn.closest('.card');
+        const statusEl = card.querySelector('.dlv-status');
+        const qty = Number(card.querySelector('.dlv-qty').value);
+        const customerCode = card.querySelector('.dlv-cust').value;
+        const max = Number(btn.dataset.max);
+
+        statusEl.classList.remove('hidden');
+        if (!qty || qty <= 0) { statusEl.innerText = 'Enter how many units are going out.'; return; }
+        if (qty > max) { statusEl.innerText = 'Only ' + max + ' built unit(s) are available.'; return; }
+
+        btn.disabled = true;
+        btn.innerText = 'Sending…';
+        const res = await apiCall('markOut', { consignmentGroup: btn.dataset.group, customerCode, qty });
+        if (res.ok) {
+          statusEl.innerText = qty + ' unit(s) marked out to ' + customerCode + '.';
+          invalidateGroups();
+          await route();
+        } else {
+          statusEl.innerText = 'Could not save: ' + (res.error || 'unknown error');
+          btn.disabled = false;
+          btn.innerText = 'Mark out';
+        }
+      };
+    });
+
+    document.querySelectorAll('.cfm-btn').forEach(btn => {
+      btn.onclick = async () => {
+        const tr = btn.closest('tr');
+        const statusEl = document.getElementById('cfm-status');
+        const confirmedQty = Number(tr.querySelector('.cfm-qty').value);
+        btn.disabled = true;
+        btn.innerText = 'Saving…';
+        const res = await apiCall('confirmDelivery', { deliveryId: btn.dataset.deliveryid, confirmedQty });
+        if (statusEl) statusEl.classList.remove('hidden');
+        if (res.ok) {
+          if (statusEl) {
+            statusEl.innerText = res.status === 'discrepancy'
+              ? 'Confirmed, but fewer units than were sent — flagged as a discrepancy.'
+              : 'Delivery confirmed.';
+          }
+          invalidateGroups();
+          await route();
+        } else {
+          if (statusEl) statusEl.innerText = 'Could not save: ' + (res.error || 'unknown error');
+          btn.disabled = false;
+          btn.innerText = 'Confirm';
+        }
       };
     });
   }
