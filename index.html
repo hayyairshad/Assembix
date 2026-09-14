@@ -518,6 +518,11 @@ async function renderDashboard() {
     </div>`;
   }
 
+  // Parts China Master says have landed but which nobody has counted into
+  // Assembix. These block everything downstream while looking like nothing
+  // is wrong, so they get their own number.
+  const uncounted = groups.reduce((s, g) => s + g.parts.filter(p => p.needsCount).length, 0);
+
   const buildableNow = groups.reduce((s, g) => s + g.buildableUnits, 0);
   const readyToSend  = groups.reduce((s, g) => s + Math.max(0, g.totalBuilt - g.totalOut), 0);
   const awaitingParts = groups.filter(g => g.parts.some(p => p.qtyReceived > 0) && g.buildableUnits <= 0).length;
@@ -547,10 +552,16 @@ async function renderDashboard() {
       <div class="stat"><div class="stat-label">Waiting on parts</div>
         <div class="stat-value" style="color:${awaitingParts ? 'var(--warning)' : 'var(--dark)'};">${awaitingParts}</div>
         <div class="stat-note">partly arrived, blocked</div></div>
-      <div class="stat"><div class="stat-label">Arriving in 3 weeks</div>
-        <div class="stat-value">${upcoming.length}</div><div class="stat-note">consignments inbound</div></div>
+      <div class="stat"><div class="stat-label">Short loads to count</div>
+        <div class="stat-value" style="color:${uncounted ? 'var(--warning)' : 'var(--dark)'};">${uncounted}</div>
+        <div class="stat-note">fewer units than expected</div></div>
     </div>
 
+    ${uncounted > 0 ? `<div class="note" style="margin-bottom:18px;border-left:3px solid var(--warning);">
+      <b>${uncounted} short load${uncounted === 1 ? '' : 's'} need counting.</b>
+      Fewer units arrived than the Total says, so they can't be counted automatically.
+      Enter the real figures on <a href="#/receiving">Receiving</a>.
+    </div>` : ''}
     ${s.needsReview > 0 ? `<div class="note" style="margin-bottom:18px;"><b>${s.needsReview} line(s) couldn't be read from China Master.</b> <a href="#/needsreview">Review them</a> — they're excluded from every count above until resolved.</div>` : ''}
 
     <div class="grid grid-2">
@@ -814,17 +825,37 @@ async function renderReceiving() {
     return ax - bx;
   });
 
+  // China Master's status tells us whether a part is physically here yet.
+  // "Already Recd" (normalised to Received) means it has landed — so if nobody
+  // has counted it into Assembix, that is the most urgent job on this page,
+  // not something still in transit.
+  // China Master auto-counts anything marked received, so the only parts that
+  // genuinely need a human number are short loads — where fewer units turned up
+  // than the Total says.
+  const awaitingCount = g => g.parts.filter(p => p.needsCount).length;
+  groups.sort((a, b) => {
+    const d = awaitingCount(b) - awaitingCount(a);
+    if (d !== 0) return d;
+    const ax = a.nextEta ? new Date(a.nextEta).getTime() : Infinity;
+    const bx = b.nextEta ? new Date(b.nextEta).getTime() : Infinity;
+    return ax - bx;
+  });
+
+  const totalAwaiting = groups.reduce((s, g) => s + awaitingCount(g), 0);
+
   const cards = groups.map(g => {
     const partRows = g.parts.map(p => {
       const rel = relDays(p.eta);
       const outstanding = Math.max(0, p.qtyExpected - p.qtyReceived);
+      const landedUncounted = p.needsCount;
+      const isAuto = p.autoCounted > 0;
       return `
-        <tr data-rowid="${esc(p.rowId || '')}">
+        <tr data-rowid="${esc(p.rowId || '')}"${landedUncounted ? ' style="background:#F3FAF4;"' : ''}>
           <td><b>Part ${esc(p.partLetter)}</b><div style="color:var(--text-soft);font-size:11.5px;">${esc(p.partName)}</div></td>
-          <td>${importChip(p.importStatus)}</td>
+          <td>${importChip(p.importStatus)}${landedUncounted ? '<div><span class="chip chip-warn" style="margin-top:4px;">Short load — needs a real count</span></div>' : ''}</td>
           <td>${esc(fmtDay(p.eta))}${rel ? ` <span class="chip ${rel.cls}">${esc(rel.text)}</span>` : ''}</td>
           <td style="text-align:right;">${p.qtyExpected || '—'}</td>
-          <td style="text-align:right;"><b>${p.qtyReceived}</b></td>
+          <td style="text-align:right;"><b>${p.qtyReceived}</b>${isAuto ? '<div style="font-size:11px;color:var(--text-soft);">from China Master</div>' : ''}</td>
           <td style="text-align:right;${outstanding > 0 ? 'color:var(--warning);font-weight:600;' : ''}">${outstanding || '—'}</td>
           <td style="white-space:nowrap;">
             <input type="number" min="1" class="rcv-qty" placeholder="qty" style="width:92px;display:inline-block;">
@@ -854,10 +885,16 @@ async function renderReceiving() {
   }).join('');
 
   return `
+    ${totalAwaiting ? `<div class="note" style="margin-bottom:18px;border-left:3px solid var(--warning);">
+      <b>${totalAwaiting} short load${totalAwaiting === 1 ? '' : 's'} need a real count.</b>
+      Fewer units arrived than the Total says, so someone has to enter what actually turned up.
+      They're at the top of the list below.
+    </div>` : ''}
     <div class="note" style="margin-bottom:18px;">
-      <b>This is the one page where your team types.</b> When a shipment lands, enter how many
-      of that part actually arrived. Everything else on the site is calculated from these numbers.
-      Quantities add up, so recording 50 then 30 gives 80 — they are never overwritten by a Dropbox sync.
+      <b>Most lines count themselves.</b> When China Master marks a line received, the full Total
+      is taken as arrived — no retyping. You only need to enter a number when a short load means
+      fewer units turned up, or when you're counting a part in before the sheet catches up.
+      Anything you enter overrides the sheet, adds up across entries, and is never overwritten by a sync.
     </div>
     ${cards}`;
 }
