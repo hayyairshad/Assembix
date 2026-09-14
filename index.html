@@ -103,7 +103,6 @@ background:var(--surface);border-bottom:1px solid var(--border);
 padding:16px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
 }
 .content-h{font-weight:700;font-size:19px;color:var(--dark);margin:0;}
-.content-sub{font-size:13px;color:var(--text-soft);margin:3px 0 0;}
 .content{padding:28px;flex:1;}
 
 /* ===== COMPONENTS ===== */
@@ -126,6 +125,22 @@ padding:20px;box-shadow:0 1px 3px rgba(124,45,18,0.04);
 .card-h{font-weight:700;font-size:15px;color:var(--dark);margin:0 0 4px;font-family:"Plus Jakarta Sans",sans-serif;}
 .card-sub{font-size:12.5px;color:var(--text-soft);margin:0 0 16px;line-height:1.5;}
 
+/* Receiving nests: consignment -> model -> parts */
+.consign-block{margin-bottom:22px;}
+.consign-head{
+display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;
+padding:0 2px 10px;border-bottom:2px solid var(--border);margin-bottom:14px;
+}
+.consign-head h2{margin:0;font-size:17px;font-weight:800;color:var(--dark);}
+.consign-head .meta{font-size:12.5px;color:var(--text-soft);}
+.model-block{
+border:1px solid var(--border);border-radius:11px;background:var(--surface);
+padding:16px 18px;margin-bottom:12px;
+}
+.model-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:10px;}
+.model-title{font-family:"Plus Jakarta Sans",sans-serif;font-weight:700;font-size:14.5px;color:var(--dark);}
+.model-meta{font-size:12px;color:var(--text-soft);}
+
 .grid{display:grid;gap:16px;}
 .grid-4{grid-template-columns:repeat(auto-fill,minmax(190px,1fr));}
 .grid-3{grid-template-columns:repeat(auto-fill,minmax(240px,1fr));}
@@ -134,7 +149,6 @@ padding:20px;box-shadow:0 1px 3px rgba(124,45,18,0.04);
 .stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
 .stat-label{font-size:11.5px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-soft);font-weight:600;}
 .stat-value{font-size:26px;font-weight:800;color:var(--dark);margin-top:5px;line-height:1;}
-.stat-note{font-size:12px;color:var(--text-soft);margin-top:6px;}
 
 label{display:block;font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;
 color:var(--text-soft);margin-bottom:6px;}
@@ -163,14 +177,6 @@ font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-s
 }
 td{padding:12px;border-bottom:1px solid #F8EDE4;font-size:13.5px;}
 tbody tr:last-child td{border-bottom:none;}
-
-.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;}
-.tab{
-padding:7px 14px;border-radius:999px;border:1px solid var(--border);background:var(--surface);
-font-size:12.5px;font-weight:600;color:var(--text-soft);cursor:pointer;transition:0.15s ease;
-}
-.tab:hover{border-color:var(--accent);color:var(--text);}
-.tab.active{background:var(--primary);border-color:var(--primary);color:#fff;}
 
 .empty{
 border:1px dashed var(--border);border-radius:12px;padding:44px 20px;text-align:center;
@@ -240,10 +246,7 @@ border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 14px;
 
   <div class="main">
     <div class="topbar">
-      <div>
-        <h1 class="content-h" id="page-title">Dashboard</h1>
-        <p class="content-sub" id="page-sub"></p>
-      </div>
+      <div><h1 class="content-h" id="page-title">Dashboard</h1></div>
       <div id="page-actions"></div>
     </div>
     <div class="content" id="content"></div>
@@ -256,33 +259,26 @@ const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDAt4paCuEsZ0H
 const GOOGLE_CLIENT_ID = "766825494798-2vq54u2u9kmfegir98uig2ubr9gr6hj4.apps.googleusercontent.com";
 
 const PAGES = [
-  { id: 'dashboard',    label: 'Dashboard',     group: 'Overview',  sub: 'Where everything stands right now.' },
-  { id: 'consignments', label: 'Consignments',  group: 'Incoming',  sub: 'Everything on its way from China Master, soonest arrival first.' },
-  { id: 'receiving',    label: 'Receiving',     group: 'Warehouse', sub: 'Record what actually turned up, part by part.' },
-  { id: 'assembly',     label: 'Assembly',      group: 'Warehouse', sub: 'Parts on hand, and how many complete units they make.' },
-  { id: 'delivery',     label: 'Delivery',      group: 'Output',    sub: 'Units out to FR and BB, counted against what each is owed.' },
-  { id: 'needsreview',  label: 'Needs review',  group: 'Output',    sub: "Lines from China Master that couldn't be read automatically." },
-  { id: 'reports',      label: 'Reports',       group: 'Output',    sub: 'Every event per consignment and part, filterable.' },
-  { id: 'models',       label: 'Models & parts', group: 'Setup',    sub: 'Sync China Master from Dropbox, and define each model\'s parts.' }
+  { id: 'dashboard',    label: 'Dashboard',      group: 'Overview'  },
+  { id: 'consignments', label: 'Consignments',   group: 'Incoming'  },
+  { id: 'receiving',    label: 'Receiving',      group: 'Warehouse' },
+  { id: 'assembly',     label: 'Assembly',       group: 'Warehouse' },
+  { id: 'delivery',     label: 'Delivery',       group: 'Output'    },
+  { id: 'needsreview',  label: 'Needs review',   group: 'Output'    },
+  { id: 'reports',      label: 'Reports',        group: 'Output'    },
+  { id: 'models',       label: 'Models & parts', group: 'Setup'     }
 ];
 
 let idToken = localStorage.getItem('assembix_idToken') || null;
 let user = null;
 let currentPage = 'dashboard';
-let cache = { models: [], customers: [] }; // small lookups reused across pages
 
-// Apps Script round-trips are inherently a couple seconds (cold execution +
-// opening the spreadsheet) — that latency can't be removed client-side. What
-// we CAN fix is the perceived wait: cache each page's last-rendered HTML and
-// paint it instantly on revisit, then quietly refetch and swap in the real
-// thing underneath. First-ever visit to a page still shows the spinner.
-let pageCache = {};
+/* FIX 6 — one backend call holds everything every page needs.
+   The old page fired listConsignments, getConsignmentRows, listDeliveries and
+   getDashboard back to back, each 3-6s, stacking into 20-30s. Now: a single
+   getAppData round-trip, and every page renders from this object. */
+let APP = null;
 
-// Google ID tokens are only valid for about an hour. On a long working day a
-// tab left open will start failing, and the old behaviour was to keep firing
-// requests with no token and surface the backend's "Missing idToken" as if it
-// were a data problem. Instead: detect an expired session and ask the user to
-// sign in again, once, without losing the page they were on.
 let sessionExpired = false;
 
 function handleSessionExpiry() {
@@ -291,8 +287,7 @@ function handleSessionExpiry() {
   idToken = null;
   localStorage.removeItem('assembix_idToken');
   user = null;
-  groupCache = { data: null, at: 0 };
-  pageCache = {};
+  APP = null;
 
   const app = document.getElementById('app');
   const login = document.getElementById('scr-login');
@@ -331,6 +326,12 @@ async function apiCall(action, payload = {}) {
   }
 }
 
+async function loadApp() {
+  const res = await apiCall('getAppData');
+  if (res.ok) APP = res;
+  return res;
+}
+
 /* =========================
    AUTH
    ========================= */
@@ -354,17 +355,12 @@ function handleCredentialResponse(response) {
   completeLogin();
 }
 
-let bootstrapDashboard = null; // dashboard data fetched during login, reused for first paint
-
 async function completeLogin() {
   const statusEl = document.getElementById('login-status');
   statusEl.innerHTML = `<div class="spinner"></div>Signing you in…`;
   try {
-    // One round-trip for user + models + customers + dashboard.
-    const result = await apiCall('bootstrap');
+    const result = await loadApp();
     if (!result.ok) {
-      // Most common cause here: a stale/expired saved token. Clear it and
-      // send the user back to a fresh sign-in instead of showing a blank app.
       statusEl.innerText = result.error || "Authorization failed";
       idToken = null;
       localStorage.removeItem('assembix_idToken');
@@ -373,10 +369,6 @@ async function completeLogin() {
     }
 
     user = result.user;
-    cache.models = result.models || [];
-    cache.customers = result.customers || [];
-    bootstrapDashboard = result.dashboard || null;
-
     statusEl.innerText = "";
     document.getElementById('scr-login').classList.add('hidden');
     document.getElementById('app').classList.remove('hidden');
@@ -385,10 +377,8 @@ async function completeLogin() {
 
     renderNav();
     window.addEventListener('hashchange', route);
-    await route();
-    prefetchPages(); // warm the rest in the background — navigation then feels instant
+    route();
   } catch (e) {
-    // Network/parse failure — don't leave a blank screen. Reset to login.
     statusEl.innerText = "Could not reach the server. Try signing in again.";
     idToken = null;
     localStorage.removeItem('assembix_idToken');
@@ -427,58 +417,39 @@ function renderNav() {
   });
 }
 
-async function route() {
-  if (!user || !idToken) return;
+// Every page renders synchronously from APP — no per-page fetches.
+function route() {
+  if (!user || !idToken || !APP) return;
   const id = window.location.hash.replace(/^#\/?/, '') || 'dashboard';
   const page = PAGES.find(p => p.id === id);
   if (!page) { window.location.hash = '#/dashboard'; return; }
 
   currentPage = page.id;
   document.getElementById('page-title').innerText = page.label;
-  document.getElementById('page-sub').innerText = page.sub;
   document.getElementById('page-actions').innerHTML =
-    `<button class="btn btn-sm" id="page-refresh" title="Fetch the latest data">Refresh</button>`;
-  const refreshBtn = document.getElementById('page-refresh');
-  if (refreshBtn) {
-    refreshBtn.onclick = async () => {
-      refreshBtn.disabled = true;
-      refreshBtn.innerText = 'Refreshing…';
-      invalidateGroups();
-      await route();
-    };
-  }
+    `<button class="btn btn-sm" id="page-refresh">Refresh</button>`;
+  document.getElementById('page-refresh').onclick = async () => {
+    const b = document.getElementById('page-refresh');
+    b.disabled = true; b.innerText = 'Refreshing…';
+    await reload();
+  };
   renderNav();
 
-  const content = document.getElementById('content');
-  const renderer = RENDERERS[page.id];
-  const requestedPage = page.id; // guard against a slow fetch landing after the user has moved on
+  document.getElementById('content').innerHTML = RENDERERS[page.id]();
+  wirePageHandlers(page.id);
+}
 
-  const cached = pageCache[requestedPage];
-  if (cached) {
-    // Instant paint of what we last knew, wired up and clickable right away.
-    content.innerHTML = cached;
-    wirePageHandlers(requestedPage);
-  } else {
-    content.innerHTML = `<div class="loading-wrap"><div class="spinner"></div>Loading…</div>`;
+async function reload() {
+  document.getElementById('content').innerHTML = `<div class="loading-wrap"><div class="spinner"></div>Loading…</div>`;
+  const res = await loadApp();
+  if (!res.ok) {
+    document.getElementById('content').innerHTML = `<div class="empty">Could not load: ${esc(res.error)}</div>`;
+    return;
   }
-
-  const html = renderer ? await renderer() : '';
-  if (currentPage !== requestedPage) return; // user already navigated elsewhere — drop this response
-
-  content.innerHTML = html;
-  pageCache[requestedPage] = html;
-  wirePageHandlers(requestedPage);
-  prefetchPages(); // keep the other pages warm as the user moves around
+  route();
 }
 
-async function refreshModels() {
-  const res = await apiCall('listModels');
-  if (res.ok) cache.models = res.models;
-}
-async function refreshCustomers() {
-  const res = await apiCall('listCustomers');
-  if (res.ok) cache.customers = res.customers;
-}
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
 function chip(status) {
   const map = {
@@ -486,127 +457,126 @@ function chip(status) {
     'Ready to Deliver': 'chip-info', 'Delivered': 'chip-ok', 'Delivery discrepancy': 'chip-bad'
   };
   let cls = map[status];
-  if (!cls) cls = status.indexOf('Towards') === 0 ? 'chip-warn' : 'chip-idle';
-  return `<span class="chip ${cls}">${status}</span>`;
+  if (!cls) cls = String(status).indexOf('Towards') === 0 ? 'chip-warn' : 'chip-idle';
+  return `<span class="chip ${cls}">${esc(status)}</span>`;
 }
 
-function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function importChip(status) {
+  const map = {
+    'Production': 'chip-idle', 'Loaded': 'chip-info', 'F-Bank': 'chip-info',
+    'L-Bank': 'chip-info', 'Clearance': 'chip-warn', 'Received': 'chip-ok'
+  };
+  return `<span class="chip ${map[status] || 'chip-idle'}">${esc(status || '—')}</span>`;
+}
+
+/* FIX 4 — dates arrive as plain yyyy-MM-dd strings and are parsed as local
+   calendar dates. Nothing goes through UTC, so nothing shifts a day at UTC+5. */
+function parseYmd(v) {
+  if (!v) return null;
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(v));
+  if (!m) return null;
+  return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+}
+
+function fmtDay(v) {
+  const d = parseYmd(v);
+  if (!d) return '—';
+  return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function relDays(v) {
+  const d = parseYmd(v);
+  if (!d) return null;
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const days = Math.round((d - today) / 86400000);
+  if (days === 0) return { days, text: 'today', cls: 'chip-warn' };
+  if (days === 1) return { days, text: 'tomorrow', cls: 'chip-warn' };
+  if (days > 1) return { days, text: 'in ' + days + ' days', cls: days <= 7 ? 'chip-warn' : 'chip-idle' };
+  if (days === -1) return { days, text: 'yesterday', cls: 'chip-info' };
+  return { days, text: Math.abs(days) + ' days ago', cls: 'chip-info' };
+}
+
+function modelLabel(g) {
+  const sig = g.signatureModel || g.modelName || '';
+  const fac = g.factoryModel || '';
+  if (sig && fac) return esc(sig) + ' <span style="color:var(--text-soft);font-weight:500;">(' + esc(fac) + ')</span>';
+  return esc(sig || fac || '—');
+}
+
+// FIX 7 — Receiving and Assembly nest: consignment heading, each model under
+// it, that model's parts and dates under the model. A container carrying more
+// than one product no longer collapses into one flat block.
+function byConsignment(groups) {
+  const order = [];
+  const map = {};
+  groups.forEach(g => {
+    const c = g.consignmentGroup;
+    if (!map[c]) { map[c] = []; order.push(c); }
+    map[c].push(g);
+  });
+  return order.map(c => ({ consignment: c, models: map[c] }));
+}
 
 /* =========================
    DASHBOARD
    ========================= */
 
-async function renderDashboard() {
-  // The dashboard is built from the same group data the warehouse pages use,
-  // so opening it warms the cache for Receiving, Assembly and Delivery too.
-  let groups, dash;
-  try {
-    const dashPromise = bootstrapDashboard
-      ? Promise.resolve(bootstrapDashboard)
-      : apiCall('getDashboard');
-    bootstrapDashboard = null;
-    [groups, dash] = await Promise.all([getGroups(), dashPromise]);
-  } catch (e) {
-    return `<div class="empty">Could not load dashboard: ${esc(e.message)}</div>`;
-  }
-  if (!dash.ok) return `<div class="empty">Could not load dashboard: ${esc(dash.error)}</div>`;
-
+function renderDashboard() {
+  const groups = APP.consignments || [];
   if (!groups.length) {
-    return `<div class="empty" style="padding:60px 24px;">
-      <div style="font-size:15px;color:var(--text);font-weight:600;margin-bottom:8px;">Nothing loaded yet</div>
-      Sync China Master from the <a href="#/models">Models &amp; parts</a> page to pull consignments in from Dropbox.
-    </div>`;
+    return `<div class="empty">Nothing loaded yet. Sync China Master from the
+      <a href="#/models">Models &amp; parts</a> page.</div>`;
   }
 
-  // Parts China Master says have landed but which nobody has counted into
-  // Assembix. These block everything downstream while looking like nothing
-  // is wrong, so they get their own number.
   const uncounted = groups.reduce((s, g) => s + g.parts.filter(p => p.needsCount).length, 0);
-
   const buildableNow = groups.reduce((s, g) => s + g.buildableUnits, 0);
-  const readyToSend  = groups.reduce((s, g) => s + Math.max(0, g.totalBuilt - g.totalOut), 0);
-  const awaitingParts = groups.filter(g => g.parts.some(p => p.qtyReceived > 0) && g.buildableUnits <= 0).length;
+  const readyToSend = groups.reduce((s, g) => s + Math.max(0, g.totalBuilt - g.totalOut), 0);
+  const awaitingParts = groups.filter(g => g.anyArrived && g.buildableUnits <= 0).length;
 
-  // Arrivals inside a fortnight — the number that decides warehouse planning.
   const upcoming = groups
     .filter(g => g.nextEta)
     .map(g => ({ g, rel: relDays(g.nextEta) }))
     .filter(x => x.rel && x.rel.days >= -3 && x.rel.days <= 21)
     .sort((a, b) => a.rel.days - b.rel.days);
 
-  const demand = { FR: 0, BB: 0 }, confirmed = { FR: 0, BB: 0 };
-  groups.forEach(g => {
-    demand.FR += g.frQty || 0; demand.BB += g.bbQty || 0;
-    ['FR','BB'].forEach(c => { const d = g.deliveredTo && g.deliveredTo[c]; if (d) confirmed[c] += d.confirmed; });
-  });
-
-  const s = dash.stats;
-
   return `
     <div class="grid grid-4" style="margin-bottom:18px;">
       <div class="stat"><div class="stat-label">Can build now</div>
-        <div class="stat-value" style="color:${buildableNow ? 'var(--success)' : 'var(--dark)'};">${buildableNow}</div>
-        <div class="stat-note">complete units from parts on hand</div></div>
+        <div class="stat-value" style="color:${buildableNow ? 'var(--success)' : 'var(--dark)'};">${buildableNow}</div></div>
       <div class="stat"><div class="stat-label">Ready to send</div>
-        <div class="stat-value">${readyToSend}</div><div class="stat-note">built, not yet out</div></div>
+        <div class="stat-value">${readyToSend}</div></div>
       <div class="stat"><div class="stat-label">Waiting on parts</div>
-        <div class="stat-value" style="color:${awaitingParts ? 'var(--warning)' : 'var(--dark)'};">${awaitingParts}</div>
-        <div class="stat-note">partly arrived, blocked</div></div>
+        <div class="stat-value" style="color:${awaitingParts ? 'var(--warning)' : 'var(--dark)'};">${awaitingParts}</div></div>
       <div class="stat"><div class="stat-label">Short loads to count</div>
-        <div class="stat-value" style="color:${uncounted ? 'var(--warning)' : 'var(--dark)'};">${uncounted}</div>
-        <div class="stat-note">fewer units than expected</div></div>
+        <div class="stat-value" style="color:${uncounted ? 'var(--warning)' : 'var(--dark)'};">${uncounted}</div></div>
     </div>
 
-    ${uncounted > 0 ? `<div class="note" style="margin-bottom:18px;border-left:3px solid var(--warning);">
-      <b>${uncounted} short load${uncounted === 1 ? '' : 's'} need counting.</b>
-      Fewer units arrived than the Total says, so they can't be counted automatically.
-      Enter the real figures on <a href="#/receiving">Receiving</a>.
-    </div>` : ''}
-    ${s.needsReview > 0 ? `<div class="note" style="margin-bottom:18px;"><b>${s.needsReview} line(s) couldn't be read from China Master.</b> <a href="#/needsreview">Review them</a> — they're excluded from every count above until resolved.</div>` : ''}
-
-    <div class="grid grid-2">
-      <div class="card">
-        <h3 class="card-h">Arriving soon</h3>
-        <p class="card-sub">Plan the current build around these — clear the floor before the next container lands.</p>
-        ${upcoming.length ? `<table><thead><tr><th>Consignment</th><th>Model</th><th>Arrives</th></tr></thead><tbody>
-          ${upcoming.slice(0, 8).map(x => `<tr>
-            <td><code>${esc(x.g.consignmentGroup)}</code></td>
-            <td>${esc(x.g.signatureModel || x.g.modelName)}</td>
-            <td>${esc(fmtDay(x.g.nextEta))} <span class="chip ${x.rel.cls}">${esc(x.rel.text)}</span></td>
-          </tr>`).join('')}
-        </tbody></table>` : `<div class="empty">Nothing arriving in the next three weeks.</div>`}
-      </div>
-
-      <div class="card">
-        <h3 class="card-h">Customer progress</h3>
-        <p class="card-sub">Confirmed against what China Master says each customer is owed.</p>
-        ${['FR','BB'].map(c => {
-          const pct = demand[c] ? Math.min(100, Math.round((confirmed[c] / demand[c]) * 100)) : 0;
-          return `<div style="margin-bottom:16px;">
-            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
-              <b>${c}</b><span style="color:var(--text-soft);">${confirmed[c]} of ${demand[c]} units</span>
-            </div>
-            <div style="height:9px;background:#F5EBE3;border-radius:999px;overflow:hidden;">
-              <div style="height:100%;width:${pct}%;background:var(--success);"></div>
-            </div>
-          </div>`;
-        }).join('')}
-      </div>
+    <div class="card">
+      <h3 class="card-h">Arriving soon</h3>
+      ${upcoming.length ? `<table><thead><tr><th>Consignment</th><th>Model</th><th>Arrives</th></tr></thead><tbody>
+        ${upcoming.slice(0, 10).map(x => `<tr>
+          <td><code>${esc(x.g.consignmentGroup)}</code></td>
+          <td>${modelLabel(x.g)}</td>
+          <td>${esc(fmtDay(x.g.nextEta))} <span class="chip ${x.rel.cls}">${esc(x.rel.text)}</span></td>
+        </tr>`).join('')}
+      </tbody></table>` : `<div class="empty">Nothing arriving in the next three weeks.</div>`}
     </div>
 
-    <div class="card" style="margin-top:18px;">
-      <h3 class="card-h">Every consignment at a glance</h3>
-      <p class="card-sub">One row per consignment group, with parts on hand and what they add up to.</p>
+    <div class="card">
+      <h3 class="card-h">Every model at a glance</h3>
       <div style="overflow-x:auto;">
       <table>
         <thead><tr><th>Consignment</th><th>Supplier</th><th>Model</th><th>Parts on hand</th>
+          <th style="text-align:right;">FR</th><th style="text-align:right;">BB</th>
           <th style="text-align:right;">Can build</th><th style="text-align:right;">Built</th><th>Stage</th></tr></thead>
         <tbody>
           ${groups.map(g => `<tr>
             <td><code>${esc(g.consignmentGroup)}</code></td>
             <td>${esc(g.supplier)}</td>
-            <td>${esc(g.signatureModel || g.modelName)}</td>
+            <td>${modelLabel(g)}</td>
             <td>${g.parts.map(p => `<span class="chip ${p.qtyReceived > 0 ? 'chip-ok' : 'chip-idle'}">${esc(p.partLetter)} ${p.qtyReceived}</span>`).join(' ')}</td>
+            <td style="text-align:right;">${g.frQty || '—'}</td>
+            <td style="text-align:right;">${g.bbQty || '—'}</td>
             <td style="text-align:right;font-weight:700;${g.buildableUnits ? 'color:var(--success);' : ''}">${g.buildableUnits}</td>
             <td style="text-align:right;">${g.totalBuilt}</td>
             <td>${chip(g.status)}</td>
@@ -618,18 +588,354 @@ async function renderDashboard() {
 }
 
 /* =========================
+   CONSIGNMENTS
+   ========================= */
+
+function renderConsignments() {
+  const rows = APP.rows || [];
+  if (!rows.length) {
+    return `<div class="empty">No consignments yet. Sync China Master from the
+      <a href="#/models">Models &amp; parts</a> page.</div>`;
+  }
+
+  const arriving = rows.filter(r => r.importStatus !== 'Received' && r.qtyReceived <= 0);
+  const soon = arriving.filter(r => { const rel = relDays(r.eta); return rel && rel.days >= 0 && rel.days <= 14; });
+  const shortLoads = rows.filter(r => r.shortLoad);
+
+  const body = rows.map(r => {
+    const rel = relDays(r.eta);
+    return `
+      <tr${r.shortLoad ? ' style="background:#FFFBF5;"' : ''}>
+        <td><code>${esc(r.packaging)}</code>${r.shortLoad ? ' <span class="chip chip-warn">Short load</span>' : ''}</td>
+        <td>${esc(r.supplier)}</td>
+        <td>${esc(r.product)}</td>
+        <td><b>${esc(r.signatureModel)}</b><div style="color:var(--text-soft);font-size:11.5px;">${esc(r.factoryModel || '—')}</div></td>
+        <td style="text-align:right;">${r.frQty || '—'}</td>
+        <td style="text-align:right;">${r.bbQty || '—'}</td>
+        <td style="text-align:right;"><b>${r.totalQty || '—'}</b></td>
+        <td>${importChip(r.importStatus)}</td>
+        <td>${esc(fmtDay(r.etd))}</td>
+        <td>${esc(fmtDay(r.eta))}${rel ? `<div><span class="chip ${rel.cls}" style="margin-top:4px;">${esc(rel.text)}</span></div>` : ''}</td>
+        <td>${esc(r.mgr || '—')}</td>
+      </tr>`;
+  }).join('');
+
+  return `
+    <div class="grid grid-4" style="margin-bottom:18px;">
+      <div class="stat"><div class="stat-label">Lines in total</div><div class="stat-value">${rows.length}</div></div>
+      <div class="stat"><div class="stat-label">Still to arrive</div><div class="stat-value">${arriving.length}</div></div>
+      <div class="stat"><div class="stat-label">Arriving within 14 days</div><div class="stat-value">${soon.length}</div></div>
+      <div class="stat"><div class="stat-label">Short loads</div><div class="stat-value">${shortLoads.length}</div></div>
+    </div>
+
+    <div class="card">
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr>
+            <th>Packaging</th><th>Supplier</th><th>Product</th><th>Model</th>
+            <th style="text-align:right;">FR</th><th style="text-align:right;">BB</th><th style="text-align:right;">Total</th>
+            <th>Status</th><th>ETD</th><th>ETA</th><th>MGR</th>
+          </tr></thead>
+          <tbody>${body}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+/* =========================
+   RECEIVING
+   FIX 8 — anything the sheet marks Received skips this page entirely and
+   shows up in Assembly, ready to build. Receiving carries only what has not
+   arrived yet, and short loads that need a real count.
+   ========================= */
+
+function renderReceiving() {
+  const groups = (APP.consignments || []).filter(g => g.parts.some(p => !p.arrived || p.needsCount));
+  if (!groups.length) return `<div class="empty">Nothing outstanding.</div>`;
+
+  const blocks = byConsignment(groups).map(block => {
+    const models = block.models.map(g => {
+      const parts = g.parts.filter(p => !p.arrived || p.needsCount);
+      const partRows = parts.map(p => {
+        const rel = relDays(p.eta);
+        const outstanding = Math.max(0, p.qtyExpected - p.qtyReceived);
+        return `
+          <tr${p.needsCount ? ' style="background:#FFFBF5;"' : ''}>
+            <td><b>Part ${esc(p.partLetter)}</b><div style="color:var(--text-soft);font-size:11.5px;">${esc(p.partName)}</div></td>
+            <td>${importChip(p.importStatus)}${p.needsCount ? ' <span class="chip chip-warn">Short load</span>' : ''}</td>
+            <td>${esc(fmtDay(p.etd))}</td>
+            <td>${esc(fmtDay(p.eta))}${rel ? ` <span class="chip ${rel.cls}">${esc(rel.text)}</span>` : ''}</td>
+            <td style="text-align:right;">${p.qtyExpected || '—'}</td>
+            <td style="text-align:right;"><b>${p.qtyReceived}</b></td>
+            <td style="text-align:right;${outstanding > 0 ? 'color:var(--warning);font-weight:600;' : ''}">${outstanding || '—'}</td>
+            <td style="white-space:nowrap;">
+              <input type="number" min="1" class="rcv-qty" placeholder="qty" style="width:88px;display:inline-block;">
+              <button class="btn btn-sm rcv-btn" data-rowid="${esc(p.rowId || '')}" ${p.rowId ? '' : 'disabled'}>Receive</button>
+            </td>
+          </tr>`;
+      }).join('');
+
+      return `
+        <div class="model-block">
+          <div class="model-head">
+            <div class="model-title">${modelLabel(g)}</div>
+            <div class="model-meta">${esc(g.supplier)} · ${esc(g.product || '—')} · FR ${g.frQty || 0} · BB ${g.bbQty || 0} · total ${g.totalQty || '—'}</div>
+          </div>
+          <table>
+            <thead><tr>
+              <th>Part</th><th>Status</th><th>ETD</th><th>ETA</th>
+              <th style="text-align:right;">Expected</th><th style="text-align:right;">Received</th>
+              <th style="text-align:right;">Outstanding</th><th style="width:180px;"></th>
+            </tr></thead>
+            <tbody>${partRows}</tbody>
+          </table>
+          <div class="rcv-status note hidden" style="margin-top:12px;"></div>
+        </div>`;
+    }).join('');
+
+    return `
+      <div class="consign-block">
+        <div class="consign-head">
+          <h2>${esc(block.consignment)}</h2>
+          <span class="meta">${block.models.length} model${block.models.length === 1 ? '' : 's'}</span>
+        </div>
+        ${models}
+      </div>`;
+  }).join('');
+
+  return blocks;
+}
+
+/* =========================
+   ASSEMBLY
+   ========================= */
+
+function renderAssembly() {
+  const active = (APP.consignments || []).filter(g => g.parts.some(p => p.qtyReceived > 0));
+  if (!active.length) return `<div class="empty">Nothing to assemble yet.</div>`;
+
+  const totalBuildable = active.reduce((s, g) => s + g.buildableUnits, 0);
+  const blocked = active.filter(g => g.buildableUnits <= 0).length;
+
+  const partBar = p => {
+    const units = Math.floor(p.qtyReceived / (p.qtyPerUnit || 1));
+    return `
+      <div style="border:1px solid var(--border);border-radius:10px;padding:12px;">
+        <div style="font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-soft);font-weight:700;">Part ${esc(p.partLetter)}</div>
+        <div style="font-size:22px;font-weight:800;color:var(--dark);margin-top:4px;line-height:1;">${p.qtyReceived}</div>
+        <div style="font-size:11.5px;color:var(--text-soft);margin-top:5px;">${units} unit${units === 1 ? '' : 's'}</div>
+      </div>`;
+  };
+
+  const blocks = byConsignment(active).map(block => {
+    const models = block.models.map(g => {
+      const canBuild = g.buildableUnits > 0;
+      // FIX 3 — buildable is the minimum across parts, never the sum.
+      return `
+        <div class="model-block">
+          <div class="model-head">
+            <div>
+              <div class="model-title">${modelLabel(g)}</div>
+              <div class="model-meta">${esc(g.supplier)} · ${esc(g.product || '—')} · ${g.totalBuilt} built</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-soft);font-weight:700;">Can build</div>
+              <div style="font-size:28px;font-weight:800;line-height:1;color:${canBuild ? 'var(--success)' : 'var(--text-soft)'};">${g.buildableUnits}</div>
+            </div>
+          </div>
+
+          <div class="grid grid-4" style="margin:14px 0;">${g.parts.map(partBar).join('')}</div>
+
+          ${canBuild ? `
+            <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+              <div style="flex:0 0 150px;">
+                <label>Units to build</label>
+                <input type="number" class="asm-qty" min="1" max="${g.buildableUnits}" value="${g.buildableUnits}">
+              </div>
+              <button class="btn btn-primary asm-btn" data-groupkey="${esc(g.groupKey)}" data-max="${g.buildableUnits}">Build units</button>
+            </div>
+          ` : (g.blockingPart
+              ? `<div class="note">Part ${esc(g.blockingPart.partLetter)} is ${g.blockingPart.shortfallUnits} unit${g.blockingPart.shortfallUnits === 1 ? '' : 's'} behind.</div>`
+              : '')}
+          <div class="asm-status note hidden" style="margin-top:12px;"></div>
+        </div>`;
+    }).join('');
+
+    return `
+      <div class="consign-block">
+        <div class="consign-head">
+          <h2>${esc(block.consignment)}</h2>
+          <span class="meta">${block.models.length} model${block.models.length === 1 ? '' : 's'}</span>
+        </div>
+        ${models}
+      </div>`;
+  }).join('');
+
+  return `
+    <div class="grid grid-4" style="margin-bottom:18px;">
+      <div class="stat"><div class="stat-label">Ready to build</div><div class="stat-value">${totalBuildable}</div></div>
+      <div class="stat"><div class="stat-label">Waiting on parts</div><div class="stat-value">${blocked}</div></div>
+      <div class="stat"><div class="stat-label">Built to date</div><div class="stat-value">${active.reduce((s, g) => s + g.totalBuilt, 0)}</div></div>
+    </div>
+    ${blocks}`;
+}
+
+/* =========================
+   DELIVERY
+   FIX 9 — FR and BB per model. "We owe FR 200 of AC12", not one combined total.
+   ========================= */
+
+function renderDelivery() {
+  const groups = APP.consignments || [];
+  const deliveries = APP.deliveries || [];
+
+  const rows = groups.map(g => {
+    const fr = (g.deliveredTo && g.deliveredTo.FR) || { out: 0, confirmed: 0 };
+    const bb = (g.deliveredTo && g.deliveredTo.BB) || { out: 0, confirmed: 0 };
+    return `
+      <tr>
+        <td><code>${esc(g.consignmentGroup)}</code></td>
+        <td>${modelLabel(g)}</td>
+        <td style="text-align:right;">${g.frQty || 0}</td>
+        <td style="text-align:right;">${fr.out}</td>
+        <td style="text-align:right;${Math.max(0, (g.frQty || 0) - fr.confirmed) ? 'color:var(--warning);font-weight:600;' : ''}">${Math.max(0, (g.frQty || 0) - fr.confirmed)}</td>
+        <td style="text-align:right;">${g.bbQty || 0}</td>
+        <td style="text-align:right;">${bb.out}</td>
+        <td style="text-align:right;${Math.max(0, (g.bbQty || 0) - bb.confirmed) ? 'color:var(--warning);font-weight:600;' : ''}">${Math.max(0, (g.bbQty || 0) - bb.confirmed)}</td>
+      </tr>`;
+  }).join('');
+
+  const ready = groups.filter(g => g.totalBuilt - g.totalOut > 0);
+  const readyBlocks = ready.length ? byConsignment(ready).map(block => `
+    <div class="consign-block">
+      <div class="consign-head"><h2>${esc(block.consignment)}</h2></div>
+      ${block.models.map(g => {
+        const available = g.totalBuilt - g.totalOut;
+        return `
+        <div class="model-block">
+          <div class="model-head">
+            <div>
+              <div class="model-title">${modelLabel(g)}</div>
+              <div class="model-meta">${available} built · FR ${g.frQty || 0} · BB ${g.bbQty || 0}</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+            <div style="flex:0 0 130px;">
+              <label>Customer</label>
+              <select class="dlv-cust"><option value="FR">FR</option><option value="BB">BB</option></select>
+            </div>
+            <div style="flex:0 0 130px;">
+              <label>Units out</label>
+              <input type="number" class="dlv-qty" min="1" max="${available}" value="${available}">
+            </div>
+            <button class="btn btn-primary dlv-btn" data-groupkey="${esc(g.groupKey)}" data-max="${available}">Mark out</button>
+          </div>
+          <div class="dlv-status note hidden" style="margin-top:12px;"></div>
+        </div>`;
+      }).join('')}
+    </div>`).join('') : `<div class="empty">No built units waiting to go out.</div>`;
+
+  const pending = deliveries.filter(d => d.Status === 'pending');
+  const groupName = key => {
+    const g = groups.find(x => x.groupKey === key);
+    return g ? (g.consignmentGroup + ' · ' + (g.signatureModel || g.factoryModel || g.modelName)) : String(key).replace('::', ' · ');
+  };
+
+  const pendingTable = pending.length ? `
+    <div class="card">
+      <h3 class="card-h">Awaiting confirmation</h3>
+      <table>
+        <thead><tr><th>Consignment · model</th><th>Customer</th><th style="text-align:right;">Sent</th><th>When</th><th style="width:220px;"></th></tr></thead>
+        <tbody>
+          ${pending.map(d => `
+            <tr>
+              <td>${esc(groupName(d.GroupKey))}</td>
+              <td><b>${esc(d.CustomerCode)}</b></td>
+              <td style="text-align:right;">${esc(d.QtyOut)}</td>
+              <td>${esc(fmtDay(d.TimestampDay))}</td>
+              <td style="white-space:nowrap;">
+                <input type="number" class="cfm-qty" min="0" value="${esc(d.QtyOut)}" style="width:88px;display:inline-block;">
+                <button class="btn btn-sm cfm-btn" data-deliveryid="${esc(d.DeliveryID)}">Confirm</button>
+              </td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+      <div id="cfm-status" class="note hidden" style="margin-top:12px;"></div>
+    </div>` : '';
+
+  return `
+    <div class="card">
+      <h3 class="card-h">Owed per model</h3>
+      <div style="overflow-x:auto;">
+      <table>
+        <thead><tr>
+          <th>Consignment</th><th>Model</th>
+          <th style="text-align:right;">FR owed</th><th style="text-align:right;">FR sent</th><th style="text-align:right;">FR left</th>
+          <th style="text-align:right;">BB owed</th><th style="text-align:right;">BB sent</th><th style="text-align:right;">BB left</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      </div>
+    </div>
+    ${readyBlocks}
+    ${pendingTable}`;
+}
+
+/* =========================
+   NEEDS REVIEW
+   ========================= */
+
+function renderNeedsReview() {
+  const rows = APP.needsReview || [];
+  if (!rows.length) return `<div class="empty">Nothing needs review.</div>`;
+  return `
+    <div class="card">
+      <table>
+        <thead><tr><th>Packaging</th><th>Reason</th><th>Corrected</th><th></th></tr></thead>
+        <tbody>
+          ${rows.map(r => `
+            <tr data-rowid="${esc(r.RowID)}">
+              <td><code>${esc(r.SheetRowName)}</code></td>
+              <td style="color:var(--warning);">${esc(r.ReviewReason)}</td>
+              <td><input type="text" class="nr-fix" style="max-width:180px;"></td>
+              <td><button class="btn btn-sm nr-resolve">Resolve</button></td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+/* =========================
+   REPORTS
+   ========================= */
+
+function renderReports() {
+  return `
+    <div class="card">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+        <input id="rp-search" type="text" placeholder="Search" style="max-width:280px;">
+        <button class="btn" id="rp-filter">Search</button>
+      </div>
+      <table>
+        <thead><tr><th>When</th><th>Consignment · model</th><th>Part</th><th>Event</th><th>Qty</th><th>By</th></tr></thead>
+        <tbody id="rp-body">${reportRows(APP.events || [])}</tbody>
+      </table>
+    </div>`;
+}
+
+function reportRows(events) {
+  if (!events.length) return `<tr><td colspan="6" style="color:var(--text-soft);padding:22px 12px;">No events logged.</td></tr>`;
+  return events.map(e => `<tr><td>${esc(e.Timestamp)}</td><td>${esc(e.ConsignmentGroup)}</td><td>${esc(e.PartLetter)}</td><td>${esc(e.EventType)}</td><td>${esc(e.Qty)}</td><td>${esc(e.User)}</td></tr>`).join('');
+}
+
+/* =========================
    MODELS & PARTS
    ========================= */
 
-async function renderModels() {
-  // Dropbox is the live source of consignment data — China Master is pulled
-  // straight from it, so nobody types consignments into Assembix by hand.
-  // Runs automatically each morning on a trigger; this button is for when
-  // someone knows the file just changed and doesn't want to wait.
+function renderModels() {
   const dropboxCard = (user && user.level <= 1) ? `
     <div class="card" style="border:1px solid var(--primary);">
       <h3 class="card-h">China Master sync</h3>
-      <p class="card-sub">Pulls the latest consignment data from Dropbox. Runs automatically every morning — use this to sync right now. Received quantities and priorities you've set in Assembix are never overwritten.</p>
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
         <button class="btn btn-primary" id="dbx-sync-btn">Sync now</button>
         <button class="btn btn-sm" id="dbx-check-btn">Check connection</button>
@@ -640,16 +946,16 @@ async function renderModels() {
   const seedCard = (user && user.level === 0) ? `
     <div class="card">
       <h3 class="card-h">Sample data</h3>
-      <p class="card-sub">Loads the 17-row sample sheet. Only needed if Dropbox is unavailable — the sync above is the real source.</p>
       <button class="btn btn-sm" id="seed-sample-btn">Load sample data</button>
       <div id="seed-sample-status" class="note hidden" style="margin-top:12px;"></div>
     </div>` : '';
 
-  const listHtml = cache.models.length ? `
+  const models = APP.models || [];
+  const listHtml = models.length ? `
     <div class="card">
       <h3 class="card-h">Existing models</h3>
       <table><thead><tr><th>Model</th><th>Sheet code</th><th>Parts</th></tr></thead><tbody>
-        ${cache.models.map(m => `<tr><td>${esc(m.modelName)}</td><td><code>${esc(m.sheetCode)}</code></td>
+        ${models.map(m => `<tr><td>${esc(m.modelName)}</td><td><code>${esc(m.sheetCode)}</code></td>
           <td>${m.parts.map(p => `<span class="chip chip-idle">${esc(p.partLetter)} · ${esc(p.partName)}</span>`).join(' ')}</td></tr>`).join('')}
       </tbody></table>
     </div>` : '';
@@ -660,11 +966,10 @@ async function renderModels() {
     ${listHtml}
     <div class="card">
       <h3 class="card-h">New model</h3>
-      <p class="card-sub">Sheet code must be unique and cannot contain a hyphen — it's used in the naming parser (e.g. <code>{SheetCode}-{Lot}{PartLetter}</code>).</p>
       <div class="form-row">
-        <div class="field"><label>Model name</label><input id="mdl-name" type="text" placeholder="e.g. RS-150"></div>
-        <div class="field"><label>Sheet code</label><input id="mdl-sheetcode" type="text" placeholder="e.g. Careline"></div>
-        <div class="field"><label>Product line</label><input id="mdl-line" type="text" placeholder="optional"></div>
+        <div class="field"><label>Model name</label><input id="mdl-name" type="text"></div>
+        <div class="field"><label>Sheet code</label><input id="mdl-sheetcode" type="text"></div>
+        <div class="field"><label>Product line</label><input id="mdl-line" type="text"></div>
       </div>
       <table id="mdl-parts-table">
         <thead><tr><th style="width:90px">Letter</th><th>Part name</th><th style="width:120px">Code prefix</th><th style="width:100px">Per unit</th><th></th></tr></thead>
@@ -682,472 +987,12 @@ function addModelPartRow(letter, name, prefix, qty) {
   const tbody = document.querySelector('#mdl-parts-table tbody');
   const row = document.createElement('tr');
   row.innerHTML = `
-    <td><input type="text" maxlength="1" value="${esc(letter || '')}" placeholder="A"></td>
-    <td><input type="text" value="${esc(name || '')}" placeholder="e.g. Body"></td>
-    <td><input type="text" value="${esc(prefix || '')}" placeholder="BDY"></td>
+    <td><input type="text" maxlength="1" value="${esc(letter || '')}"></td>
+    <td><input type="text" value="${esc(name || '')}"></td>
+    <td><input type="text" value="${esc(prefix || '')}"></td>
     <td><input type="number" value="${qty || 1}" min="1"></td>
     <td><button class="btn btn-sm" onclick="this.closest('tr').remove()">×</button></td>`;
   tbody.appendChild(row);
-}
-
-/* =========================
-   SHARED CONSIGNMENT DATA
-   Receiving, Assembly and Delivery are three views of the same underlying
-   group data, so they share one fetch. Navigating between them after the
-   first load is instant instead of a fresh 2-4s Apps Script round-trip.
-   ========================= */
-
-let groupCache = { data: null, at: 0 };
-const GROUP_TTL = 45 * 1000;
-
-async function getGroups(force) {
-  const fresh = groupCache.data && (Date.now() - groupCache.at < GROUP_TTL);
-  if (fresh && !force) return groupCache.data;
-  const res = await apiCall('listConsignments');
-  if (!res.ok) throw new Error(res.error || 'Could not load consignments');
-  groupCache = { data: res.consignments, at: Date.now() };
-  return res.consignments;
-}
-function invalidateGroups() {
-  groupCache = { data: null, at: 0 };
-  pageCache = {};
-  bootstrapDashboard = null;
-}
-
-function fmtDay(v) {
-  if (!v) return '—';
-  const d = new Date(v);
-  if (isNaN(d.getTime())) return '—';
-  return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
-}
-
-// How far away a date is, in plain words, so staff can plan around it
-// without doing arithmetic in their heads.
-function relDays(v) {
-  if (!v) return null;
-  const d = new Date(v);
-  if (isNaN(d.getTime())) return null;
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  const then = new Date(d); then.setHours(0, 0, 0, 0);
-  const days = Math.round((then - today) / 86400000);
-  if (days === 0) return { days, text: 'today', cls: 'chip-warn' };
-  if (days === 1) return { days, text: 'tomorrow', cls: 'chip-warn' };
-  if (days > 1) return { days, text: 'in ' + days + ' days', cls: days <= 7 ? 'chip-warn' : 'chip-idle' };
-  if (days === -1) return { days, text: 'yesterday', cls: 'chip-info' };
-  return { days, text: Math.abs(days) + ' days ago', cls: 'chip-info' };
-}
-
-function importChip(status) {
-  const map = {
-    'Production': 'chip-idle', 'Loaded': 'chip-info', 'F-Bank': 'chip-info',
-    'L-Bank': 'chip-info', 'Clearance': 'chip-warn', 'Received': 'chip-ok'
-  };
-  return `<span class="chip ${map[status] || 'chip-idle'}">${esc(status || '—')}</span>`;
-}
-
-/* =========================
-   CONSIGNMENTS  (what is coming in)
-   ========================= */
-
-async function renderConsignments() {
-  const res = await apiCall('getConsignmentRows');
-  if (!res.ok) return `<div class="empty">Could not load: ${esc(res.error)}</div>`;
-  if (!res.rows.length) {
-    return `<div class="empty">No consignments yet. Sync China Master from the
-      <a href="#/models">Models &amp; parts</a> page to pull them in from Dropbox.</div>`;
-  }
-
-  const rows = res.rows;
-  const arriving = rows.filter(r => r.qtyReceived <= 0 && r.eta);
-  const soon = arriving.filter(r => { const rel = relDays(r.eta); return rel && rel.days >= 0 && rel.days <= 14; });
-  const landed = rows.filter(r => r.qtyReceived > 0);
-  const shortLoads = rows.filter(r => r.shortLoad);
-
-  const syncNote = res.lastSync
-    ? `Last synced from Dropbox ${esc(fmtDate(res.lastSync))}.`
-    : `Not yet synced from Dropbox — showing whatever is in the sheet.`;
-
-  const body = rows.map(r => {
-    const rel = relDays(r.eta);
-    return `
-      <tr${r.shortLoad ? ' style="background:#FFFBF5;"' : ''}>
-        <td><code>${esc(r.packaging)}</code>${r.shortLoad ? ' <span class="chip chip-warn">Short load</span>' : ''}</td>
-        <td>${esc(r.supplier)}</td>
-        <td>${esc(r.product)}</td>
-        <td><b>${esc(r.signatureModel)}</b><div style="color:var(--text-soft);font-size:11.5px;">factory ${esc(r.factoryModel || '—')}</div></td>
-        <td style="text-align:right;">${r.frQty || '—'}</td>
-        <td style="text-align:right;">${r.bbQty || '—'}</td>
-        <td style="text-align:right;"><b>${r.totalQty || '—'}</b></td>
-        <td>${importChip(r.importStatus)}</td>
-        <td>${esc(fmtDay(r.etd))}</td>
-        <td>${esc(fmtDay(r.eta))}${rel ? `<div><span class="chip ${rel.cls}" style="margin-top:4px;">${esc(rel.text)}</span></div>` : ''}</td>
-        <td>${esc(r.mgr || '—')}</td>
-      </tr>`;
-  }).join('');
-
-  return `
-    <div class="grid grid-4" style="margin-bottom:18px;">
-      <div class="stat"><div class="stat-label">Lines in total</div><div class="stat-value">${rows.length}</div><div class="stat-note">straight from China Master</div></div>
-      <div class="stat"><div class="stat-label">Still to arrive</div><div class="stat-value">${arriving.length}</div><div class="stat-note">nothing received yet</div></div>
-      <div class="stat"><div class="stat-label">Arriving within 14 days</div><div class="stat-value">${soon.length}</div><div class="stat-note">plan warehouse space</div></div>
-      <div class="stat"><div class="stat-label">Short loads</div><div class="stat-value">${shortLoads.length}</div><div class="stat-note">fewer units than expected</div></div>
-    </div>
-
-    <div class="card">
-      <h3 class="card-h">Every consignment line</h3>
-      <p class="card-sub">Read-only — this is China Master exactly as it comes from Dropbox, sorted by arrival date so the next thing to land is at the top. ${syncNote}</p>
-      <div style="overflow-x:auto;">
-        <table>
-          <thead><tr>
-            <th>Packaging</th><th>Supplier</th><th>Product</th><th>Model</th>
-            <th style="text-align:right;">FR</th><th style="text-align:right;">BB</th><th style="text-align:right;">Total</th>
-            <th>Status</th><th>ETD</th><th>ETA</th><th>MGR</th>
-          </tr></thead>
-          <tbody>${body}</tbody>
-        </table>
-      </div>
-    </div>`;
-}
-
-/* =========================
-   RECEIVING  (what actually turned up)
-   ========================= */
-
-async function renderReceiving() {
-  let groups;
-  try { groups = await getGroups(); }
-  catch (e) { return `<div class="empty">Could not load: ${esc(e.message)}</div>`; }
-  if (!groups.length) return `<div class="empty">Nothing to receive yet — sync China Master first.</div>`;
-
-  groups.sort((a, b) => {
-    const ax = a.nextEta ? new Date(a.nextEta).getTime() : Infinity;
-    const bx = b.nextEta ? new Date(b.nextEta).getTime() : Infinity;
-    return ax - bx;
-  });
-
-  // China Master's status tells us whether a part is physically here yet.
-  // "Already Recd" (normalised to Received) means it has landed — so if nobody
-  // has counted it into Assembix, that is the most urgent job on this page,
-  // not something still in transit.
-  // China Master auto-counts anything marked received, so the only parts that
-  // genuinely need a human number are short loads — where fewer units turned up
-  // than the Total says.
-  const awaitingCount = g => g.parts.filter(p => p.needsCount).length;
-  groups.sort((a, b) => {
-    const d = awaitingCount(b) - awaitingCount(a);
-    if (d !== 0) return d;
-    const ax = a.nextEta ? new Date(a.nextEta).getTime() : Infinity;
-    const bx = b.nextEta ? new Date(b.nextEta).getTime() : Infinity;
-    return ax - bx;
-  });
-
-  const totalAwaiting = groups.reduce((s, g) => s + awaitingCount(g), 0);
-
-  const cards = groups.map(g => {
-    const partRows = g.parts.map(p => {
-      const rel = relDays(p.eta);
-      const outstanding = Math.max(0, p.qtyExpected - p.qtyReceived);
-      const landedUncounted = p.needsCount;
-      const isAuto = p.autoCounted > 0;
-      return `
-        <tr data-rowid="${esc(p.rowId || '')}"${landedUncounted ? ' style="background:#F3FAF4;"' : ''}>
-          <td><b>Part ${esc(p.partLetter)}</b><div style="color:var(--text-soft);font-size:11.5px;">${esc(p.partName)}</div></td>
-          <td>${importChip(p.importStatus)}${landedUncounted ? '<div><span class="chip chip-warn" style="margin-top:4px;">Short load — needs a real count</span></div>' : ''}</td>
-          <td>${esc(fmtDay(p.eta))}${rel ? ` <span class="chip ${rel.cls}">${esc(rel.text)}</span>` : ''}</td>
-          <td style="text-align:right;">${p.qtyExpected || '—'}</td>
-          <td style="text-align:right;"><b>${p.qtyReceived}</b>${isAuto ? '<div style="font-size:11px;color:var(--text-soft);">from China Master</div>' : ''}</td>
-          <td style="text-align:right;${outstanding > 0 ? 'color:var(--warning);font-weight:600;' : ''}">${outstanding || '—'}</td>
-          <td style="white-space:nowrap;">
-            <input type="number" min="1" class="rcv-qty" placeholder="qty" style="width:92px;display:inline-block;">
-            <button class="btn btn-sm rcv-btn" data-rowid="${esc(p.rowId || '')}" ${p.rowId ? '' : 'disabled'}>Receive</button>
-          </td>
-        </tr>`;
-    }).join('');
-
-    const rel = relDays(g.nextEta);
-    return `
-      <div class="card">
-        <h3 class="card-h">${esc(g.consignmentGroup)} · ${esc(g.signatureModel || g.modelName)}</h3>
-        <p class="card-sub">
-          ${esc(g.supplier)} · ${esc(g.product || '—')} · target ${g.totalQty || '—'} units
-          ${g.nextEta ? ` · next part arrives ${esc(fmtDay(g.nextEta))}${rel ? ` (${esc(rel.text)})` : ''}` : ''}
-        </p>
-        <table>
-          <thead><tr>
-            <th>Part</th><th>Import status</th><th>ETA</th>
-            <th style="text-align:right;">Expected</th><th style="text-align:right;">Received</th>
-            <th style="text-align:right;">Outstanding</th><th style="width:190px;">Record arrival</th>
-          </tr></thead>
-          <tbody>${partRows}</tbody>
-        </table>
-        <div class="rcv-status note hidden" style="margin-top:12px;"></div>
-      </div>`;
-  }).join('');
-
-  return `
-    ${totalAwaiting ? `<div class="note" style="margin-bottom:18px;border-left:3px solid var(--warning);">
-      <b>${totalAwaiting} short load${totalAwaiting === 1 ? '' : 's'} need a real count.</b>
-      Fewer units arrived than the Total says, so someone has to enter what actually turned up.
-      They're at the top of the list below.
-    </div>` : ''}
-    <div class="note" style="margin-bottom:18px;">
-      <b>Most lines count themselves.</b> When China Master marks a line received, the full Total
-      is taken as arrived — no retyping. You only need to enter a number when a short load means
-      fewer units turned up, or when you're counting a part in before the sheet catches up.
-      Anything you enter overrides the sheet, adds up across entries, and is never overwritten by a sync.
-    </div>
-    ${cards}`;
-}
-
-/* =========================
-   ASSEMBLY  (what can be built)
-   ========================= */
-
-async function renderAssembly() {
-  let groups;
-  try { groups = await getGroups(); }
-  catch (e) { return `<div class="empty">Could not load: ${esc(e.message)}</div>`; }
-
-  const active = groups.filter(g => g.parts.some(p => p.qtyReceived > 0));
-  const buildable = active.filter(g => g.buildableUnits > 0);
-  const blocked = active.filter(g => g.buildableUnits <= 0);
-
-  if (!active.length) {
-    return `<div class="empty">Nothing to assemble yet. Record some arrivals on the
-      <a href="#/receiving">Receiving</a> page and buildable units will appear here.</div>`;
-  }
-
-  const partBar = p => {
-    const units = Math.floor(p.qtyReceived / (p.qtyPerUnit || 1));
-    return `
-      <div style="border:1px solid var(--border);border-radius:10px;padding:12px;">
-        <div style="font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-soft);font-weight:700;">Part ${esc(p.partLetter)}</div>
-        <div style="font-size:22px;font-weight:800;color:var(--dark);margin-top:4px;line-height:1;">${p.qtyReceived}</div>
-        <div style="font-size:11.5px;color:var(--text-soft);margin-top:5px;">on hand → ${units} unit${units === 1 ? '' : 's'}</div>
-      </div>`;
-  };
-
-  const card = g => {
-    const canBuild = g.buildableUnits > 0;
-    const blockMsg = g.blockingPart
-      ? `Held up by <b>part ${esc(g.blockingPart.partLetter)}</b> — ${g.blockingPart.shortfallUnits} more unit${g.blockingPart.shortfallUnits === 1 ? '' : 's'} worth would unlock the rest.`
-      : 'Waiting on parts to arrive.';
-
-    return `
-      <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;">
-          <div>
-            <h3 class="card-h">${esc(g.consignmentGroup)} · ${esc(g.signatureModel || g.modelName)}</h3>
-            <p class="card-sub" style="margin-bottom:0;">${esc(g.supplier)} · ${esc(g.product || '—')} · ${g.totalBuilt} built so far</p>
-          </div>
-          <div style="text-align:right;">
-            <div style="font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-soft);font-weight:700;">Can build now</div>
-            <div style="font-size:30px;font-weight:800;line-height:1;color:${canBuild ? 'var(--success)' : 'var(--text-soft)'};">${g.buildableUnits}</div>
-          </div>
-        </div>
-
-        <div class="grid grid-4" style="margin:16px 0;">${g.parts.map(partBar).join('')}</div>
-
-        ${canBuild ? `
-          <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
-            <div style="flex:0 0 150px;">
-              <label>Units to build</label>
-              <input type="number" class="asm-qty" min="1" max="${g.buildableUnits}" value="${g.buildableUnits}">
-            </div>
-            <button class="btn btn-primary asm-btn" data-group="${esc(g.consignmentGroup)}" data-max="${g.buildableUnits}">Build units</button>
-          </div>
-        ` : `<div class="note">${blockMsg}</div>`}
-        <div class="asm-status note hidden" style="margin-top:12px;"></div>
-      </div>`;
-  };
-
-  const totalBuildable = buildable.reduce((s, g) => s + g.buildableUnits, 0);
-
-  return `
-    <div class="grid grid-4" style="margin-bottom:18px;">
-      <div class="stat"><div class="stat-label">Ready to build</div><div class="stat-value">${totalBuildable}</div><div class="stat-note">units, across ${buildable.length} consignment${buildable.length === 1 ? '' : 's'}</div></div>
-      <div class="stat"><div class="stat-label">Waiting on parts</div><div class="stat-value">${blocked.length}</div><div class="stat-note">partly arrived, can't build yet</div></div>
-      <div class="stat"><div class="stat-label">Built to date</div><div class="stat-value">${active.reduce((s, g) => s + g.totalBuilt, 0)}</div><div class="stat-note">complete units</div></div>
-    </div>
-
-    ${buildable.length ? `<h3 style="font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-soft);margin:0 0 12px;">Ready to build</h3>${buildable.map(card).join('')}` : ''}
-    ${blocked.length ? `<h3 style="font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-soft);margin:26px 0 12px;">Waiting on parts</h3>${blocked.map(card).join('')}` : ''}`;
-}
-
-/* =========================
-   DELIVERY  (what goes out to FR and BB)
-   ========================= */
-
-async function renderDelivery() {
-  let groups, delRes;
-  try {
-    [groups, delRes] = await Promise.all([getGroups(), apiCall('listDeliveries')]);
-  } catch (e) { return `<div class="empty">Could not load: ${esc(e.message)}</div>`; }
-
-  const deliveries = (delRes && delRes.ok) ? delRes.deliveries : [];
-
-  // Demand comes straight from China Master's FR / BB columns.
-  const demand = { FR: 0, BB: 0 }, sent = { FR: 0, BB: 0 }, confirmed = { FR: 0, BB: 0 };
-  groups.forEach(g => {
-    demand.FR += g.frQty || 0;
-    demand.BB += g.bbQty || 0;
-    ['FR', 'BB'].forEach(c => {
-      const d = g.deliveredTo && g.deliveredTo[c];
-      if (d) { sent[c] += d.out; confirmed[c] += d.confirmed; }
-    });
-  });
-
-  const custCard = c => {
-    const owed = Math.max(0, demand[c] - confirmed[c]);
-    const pct = demand[c] ? Math.min(100, Math.round((confirmed[c] / demand[c]) * 100)) : 0;
-    return `
-      <div class="card">
-        <h3 class="card-h">${c}</h3>
-        <p class="card-sub">Demand taken from China Master, so it updates itself on every sync.</p>
-        <div style="height:9px;background:#F5EBE3;border-radius:999px;overflow:hidden;margin-bottom:14px;">
-          <div style="height:100%;width:${pct}%;background:var(--success);"></div>
-        </div>
-        <div class="grid grid-3">
-          <div><div class="stat-label">Owed</div><div class="stat-value">${demand[c]}</div></div>
-          <div><div class="stat-label">Sent</div><div class="stat-value">${sent[c]}</div></div>
-          <div><div class="stat-label">Still to go</div><div class="stat-value" style="color:${owed ? 'var(--warning)' : 'var(--success)'};">${owed}</div></div>
-        </div>
-      </div>`;
-  };
-
-  const ready = groups.filter(g => g.totalBuilt - g.totalOut > 0);
-  const readyCards = ready.length ? ready.map(g => {
-    const available = g.totalBuilt - g.totalOut;
-    return `
-      <div class="card">
-        <h3 class="card-h">${esc(g.consignmentGroup)} · ${esc(g.signatureModel || g.modelName)}</h3>
-        <p class="card-sub">${available} built unit${available === 1 ? '' : 's'} ready to send. FR needs ${g.frQty || 0}, BB needs ${g.bbQty || 0}.</p>
-        <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
-          <div style="flex:0 0 130px;">
-            <label>Customer</label>
-            <select class="dlv-cust"><option value="FR">FR</option><option value="BB">BB</option></select>
-          </div>
-          <div style="flex:0 0 130px;">
-            <label>Units out</label>
-            <input type="number" class="dlv-qty" min="1" max="${available}" value="${available}">
-          </div>
-          <button class="btn btn-primary dlv-btn" data-group="${esc(g.consignmentGroup)}" data-max="${available}">Mark out</button>
-        </div>
-        <div class="dlv-status note hidden" style="margin-top:12px;"></div>
-      </div>`;
-  }).join('') : `<div class="empty">No built units waiting to go out. Build some on the <a href="#/assembly">Assembly</a> page.</div>`;
-
-  const pending = deliveries.filter(d => d.Status === 'pending');
-  const pendingTable = pending.length ? `
-    <div class="card">
-      <h3 class="card-h">Awaiting customer confirmation</h3>
-      <p class="card-sub">Sent out but not yet confirmed received. Until FR and BB get their own portals, your team confirms on their behalf.</p>
-      <table>
-        <thead><tr><th>Consignment</th><th>Customer</th><th style="text-align:right;">Sent</th><th>When</th><th style="width:230px;">Confirm received</th></tr></thead>
-        <tbody>
-          ${pending.map(d => `
-            <tr data-deliveryid="${esc(d.DeliveryID)}">
-              <td><code>${esc(d.ConsignmentGroup)}</code></td>
-              <td><b>${esc(d.CustomerCode)}</b></td>
-              <td style="text-align:right;">${esc(d.QtyOut)}</td>
-              <td>${esc(fmtDay(d.Timestamp))}</td>
-              <td style="white-space:nowrap;">
-                <input type="number" class="cfm-qty" min="0" value="${esc(d.QtyOut)}" style="width:92px;display:inline-block;">
-                <button class="btn btn-sm cfm-btn" data-deliveryid="${esc(d.DeliveryID)}">Confirm</button>
-              </td>
-            </tr>`).join('')}
-        </tbody>
-      </table>
-      <div id="cfm-status" class="note hidden" style="margin-top:12px;"></div>
-    </div>` : '';
-
-  return `
-    <div class="grid grid-2" style="margin-bottom:18px;">${custCard('FR')}${custCard('BB')}</div>
-    <h3 style="font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-soft);margin:0 0 12px;">Ready to send</h3>
-    ${readyCards}
-    ${pendingTable}`;
-}
-
-/* =========================
-   NEEDS REVIEW
-   ========================= */
-
-async function renderNeedsReview() {
-  const res = await apiCall('getNeedsReview');
-  if (!res.ok) return `<div class="empty">Could not load: ${esc(res.error)}</div>`;
-  if (!res.rows.length) return `<div class="empty">Nothing needs review.</div>`;
-  return `
-    <div class="card">
-      <h3 class="card-h">Unresolved rows</h3>
-      <p class="card-sub">These didn't match a known sheet code + part letter, or had no hyphen to split on. Correct the name to resolve.</p>
-      <table>
-        <thead><tr><th>Original name</th><th>Reason</th><th>Corrected name</th><th></th></tr></thead>
-        <tbody>
-          ${res.rows.map(r => `
-            <tr data-rowid="${esc(r.RowID)}">
-              <td><code>${esc(r.SheetRowName)}</code></td>
-              <td style="color:var(--warning);">${esc(r.ReviewReason)}</td>
-              <td><input type="text" class="nr-fix" placeholder="e.g. Careline-3A" style="max-width:180px;"></td>
-              <td><button class="btn btn-sm nr-resolve">Resolve</button></td>
-            </tr>`).join('')}
-        </tbody>
-      </table>
-    </div>`;
-}
-
-/* =========================
-   REPORTS
-   ========================= */
-
-async function renderReports() {
-  const res = await apiCall('getReports', {});
-  if (!res.ok) return `<div class="empty">Could not load: ${esc(res.error)}</div>`;
-  return `
-    <div class="card">
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
-        <input id="rp-search" type="text" placeholder="Search consignment, part or event" style="max-width:280px;">
-        <button class="btn" id="rp-filter">Search</button>
-      </div>
-      <table>
-        <thead><tr><th>When</th><th>Consignment</th><th>Part</th><th>Event</th><th>Qty</th><th>By</th></tr></thead>
-        <tbody id="rp-body">
-          ${reportRows(res.events)}
-        </tbody>
-      </table>
-    </div>`;
-}
-
-function reportRows(events) {
-  if (!events.length) return `<tr><td colspan="6" style="color:var(--text-soft);padding:22px 12px;">No events logged.</td></tr>`;
-  return events.map(e => `<tr><td>${esc(fmtDate(e.Timestamp))}</td><td>${esc(e.ConsignmentGroup)}</td><td>${esc(e.PartLetter)}</td><td>${esc(e.EventType)}</td><td>${esc(e.Qty)}</td><td>${esc(e.User)}</td></tr>`).join('');
-}
-
-/* =========================
-   PREFETCH
-   Apps Script round-trips are 2-4s and that latency cannot be removed from
-   the client side. What can be removed is the *waiting*: once the first page
-   is on screen, quietly render the others into pageCache so switching pages
-   is instant. Runs one at a time so it never competes with a click the user
-   actually made.
-   ========================= */
-
-let prefetching = false;
-
-async function prefetchPages() {
-  if (prefetching || !user || !idToken) return;
-  prefetching = true;
-  try {
-    for (const id of ['consignments', 'receiving', 'assembly', 'delivery']) {
-      if (pageCache[id]) continue;
-      if (currentPage === id) continue;
-      try {
-        const html = await RENDERERS[id]();
-        pageCache[id] = html;
-      } catch (e) { /* a failed prefetch is invisible — the page just loads normally */ }
-    }
-  } finally {
-    prefetching = false;
-  }
 }
 
 /* =========================
@@ -1167,18 +1012,16 @@ const RENDERERS = {
 
 /* =========================
    PAGE HANDLER WIRING
-   (runs after each page's HTML is injected)
    ========================= */
 
 function wirePageHandlers(pageId) {
   if (pageId === 'models') {
     const dbxSync = document.getElementById('dbx-sync-btn');
     const dbxCheck = document.getElementById('dbx-check-btn');
-    const dbxStatus = () => document.getElementById('dbx-status');
 
     if (dbxCheck) {
       dbxCheck.onclick = async () => {
-        const el = dbxStatus();
+        const el = document.getElementById('dbx-status');
         dbxCheck.disabled = true;
         el.classList.remove('hidden');
         el.innerText = 'Checking…';
@@ -1188,7 +1031,7 @@ function wirePageHandlers(pageId) {
         } else {
           const when = res.modified ? new Date(res.modified).toLocaleString() : 'unknown';
           const last = res.lastSync ? new Date(res.lastSync).toLocaleString() : 'never';
-          el.innerText = 'Connected. Found "' + res.name + '", last changed in Dropbox ' + when + '. Last sync: ' + last + '.';
+          el.innerText = 'Connected. "' + res.name + '", changed ' + when + '. Last sync: ' + last + '.';
         }
         dbxCheck.disabled = false;
       };
@@ -1196,30 +1039,26 @@ function wirePageHandlers(pageId) {
 
     if (dbxSync) {
       dbxSync.onclick = async () => {
-        const el = dbxStatus();
+        const el = document.getElementById('dbx-status');
         dbxSync.disabled = true;
         dbxSync.innerText = 'Syncing…';
         el.classList.remove('hidden');
-        el.innerText = 'Fetching China Master from Dropbox — this takes a few seconds.';
+        el.innerText = 'Fetching China Master…';
 
         const res = await apiCall('syncFromDropbox');
         if (!res.ok) {
           el.innerText = 'Sync failed: ' + (res.error || 'unknown error');
-        } else {
-          let msg = res.added + ' new row(s), ' + res.updated + ' updated.';
-          if (res.needsReview > 0) {
-            msg += ' ' + res.needsReview + " row(s) couldn't be read and are waiting in Needs review.";
-          }
-          if (res.skipped > 0) msg += ' ' + res.skipped + ' blank row(s) ignored.';
-          el.innerText = msg;
-          // Consignment data changed underneath every page — drop all caches
-          // so the dashboard and boards re-fetch rather than showing stale counts.
-          pageCache = {};
-          bootstrapDashboard = null;
-          await refreshModels();
+          dbxSync.disabled = false;
+          dbxSync.innerText = 'Sync now';
+          return;
         }
+        let msg = res.added + ' new row(s), ' + res.updated + ' updated.';
+        if (res.needsReview > 0) msg += ' ' + res.needsReview + ' need review.';
+        if (res.skipped > 0) msg += ' ' + res.skipped + ' blank row(s) ignored.';
+        el.innerText = msg;
         dbxSync.disabled = false;
         dbxSync.innerText = 'Sync now';
+        await loadApp();
       };
     }
 
@@ -1231,21 +1070,14 @@ function wirePageHandlers(pageId) {
         const res = await apiCall('seedSampleData');
         const statusEl = document.getElementById('seed-sample-status');
         statusEl.classList.remove('hidden');
-        if (!res.ok) {
-          statusEl.innerText = 'Error: ' + res.error;
-        } else if (res.alreadySeeded) {
-          statusEl.innerText = res.message;
-        } else {
-          statusEl.innerText = `Loaded ${res.parsedCount} row(s). ${res.needsReviewCount} row(s) went to Needs Review.`;
-        }
+        statusEl.innerText = !res.ok ? ('Error: ' + res.error)
+          : (res.alreadySeeded ? res.message : `Loaded ${res.parsedCount} row(s). ${res.needsReviewCount} need review.`);
         seedBtn.disabled = false;
         seedBtn.innerText = 'Load sample data';
-        await refreshModels();
-        pageCache = {};            // sample data touches Models/ConsignmentRows/Dashboard
-        bootstrapDashboard = null; // don't reuse the login-time snapshot — it predates the seed
-        route();
+        await reload();
       };
     }
+
     addModelPartRow('A', '', '', 1);
     document.getElementById('mdl-addpart').onclick = () => addModelPartRow();
     document.getElementById('mdl-save').onclick = async () => {
@@ -1262,7 +1094,7 @@ function wirePageHandlers(pageId) {
       const statusEl = document.getElementById('mdl-status');
       statusEl.classList.remove('hidden');
       statusEl.innerText = res.ok ? 'Model saved.' : ('Error: ' + res.error);
-      if (res.ok) { await refreshModels(); route(); }
+      if (res.ok) await reload();
     };
   }
 
@@ -1270,41 +1102,35 @@ function wirePageHandlers(pageId) {
     document.querySelectorAll('.nr-resolve').forEach(btn => {
       btn.onclick = async () => {
         const row = btn.closest('tr');
-        const rowId = row.dataset.rowid;
-        const corrected = row.querySelector('.nr-fix').value;
-        const res = await apiCall('resolveNeedsReview', { rowId, correctedSheetRowName: corrected });
-        if (res.ok) route(); else alert('Error: ' + res.error);
+        const res = await apiCall('resolveNeedsReview', {
+          rowId: row.dataset.rowid,
+          correctedSheetRowName: row.querySelector('.nr-fix').value
+        });
+        if (res.ok) await reload(); else alert('Error: ' + res.error);
       };
     });
   }
 
-  // Receiving: the one page where staff type. Each row records an arrival
-  // against a specific packaging line.
   if (pageId === 'receiving') {
     document.querySelectorAll('.rcv-btn').forEach(btn => {
       btn.onclick = async () => {
         const tr = btn.closest('tr');
-        const card = btn.closest('.card');
-        const statusEl = card.querySelector('.rcv-status');
+        const statusEl = btn.closest('.model-block').querySelector('.rcv-status');
         const input = tr.querySelector('.rcv-qty');
         const qty = Number(input.value);
 
         statusEl.classList.remove('hidden');
-        if (!qty || qty <= 0) { statusEl.innerText = 'Enter how many units arrived.'; return; }
+        if (!qty || qty <= 0) { statusEl.innerText = 'Enter a quantity.'; return; }
 
         btn.disabled = true;
-        const prev = btn.innerText;
         btn.innerText = 'Saving…';
         const res = await apiCall('recordReceipt', { rowId: btn.dataset.rowid, qty });
         if (res.ok) {
-          statusEl.innerText = 'Recorded. ' + res.totalReceived + ' received in total for this part.';
-          input.value = '';
-          invalidateGroups();
-          await route();
+          await reload();
         } else {
-          statusEl.innerText = 'Could not save: ' + (res.error || 'unknown error');
+          statusEl.innerText = res.error || 'Could not save.';
           btn.disabled = false;
-          btn.innerText = prev;
+          btn.innerText = 'Receive';
         }
       };
     });
@@ -1313,24 +1139,22 @@ function wirePageHandlers(pageId) {
   if (pageId === 'assembly') {
     document.querySelectorAll('.asm-btn').forEach(btn => {
       btn.onclick = async () => {
-        const card = btn.closest('.card');
-        const statusEl = card.querySelector('.asm-status');
-        const qty = Number(card.querySelector('.asm-qty').value);
+        const block = btn.closest('.model-block');
+        const statusEl = block.querySelector('.asm-status');
+        const qty = Number(block.querySelector('.asm-qty').value);
         const max = Number(btn.dataset.max);
 
         statusEl.classList.remove('hidden');
-        if (!qty || qty <= 0) { statusEl.innerText = 'Enter how many units to build.'; return; }
-        if (qty > max) { statusEl.innerText = 'Only ' + max + ' can be built with the parts on hand.'; return; }
+        if (!qty || qty <= 0) { statusEl.innerText = 'Enter a quantity.'; return; }
+        if (qty > max) { statusEl.innerText = 'Maximum is ' + max + '.'; return; }
 
         btn.disabled = true;
         btn.innerText = 'Building…';
-        const res = await apiCall('recordBuild', { consignmentGroup: btn.dataset.group, qty, remarks: '' });
+        const res = await apiCall('recordBuild', { groupKey: btn.dataset.groupkey, qty, remarks: '' });
         if (res.ok) {
-          statusEl.innerText = qty + ' unit' + (qty === 1 ? '' : 's') + ' built.';
-          invalidateGroups();
-          await route();
+          await reload();
         } else {
-          statusEl.innerText = 'Could not save: ' + (res.error || 'unknown error');
+          statusEl.innerText = res.error || 'Could not save.';
           btn.disabled = false;
           btn.innerText = 'Build units';
         }
@@ -1341,25 +1165,23 @@ function wirePageHandlers(pageId) {
   if (pageId === 'delivery') {
     document.querySelectorAll('.dlv-btn').forEach(btn => {
       btn.onclick = async () => {
-        const card = btn.closest('.card');
-        const statusEl = card.querySelector('.dlv-status');
-        const qty = Number(card.querySelector('.dlv-qty').value);
-        const customerCode = card.querySelector('.dlv-cust').value;
+        const block = btn.closest('.model-block');
+        const statusEl = block.querySelector('.dlv-status');
+        const qty = Number(block.querySelector('.dlv-qty').value);
+        const customerCode = block.querySelector('.dlv-cust').value;
         const max = Number(btn.dataset.max);
 
         statusEl.classList.remove('hidden');
-        if (!qty || qty <= 0) { statusEl.innerText = 'Enter how many units are going out.'; return; }
-        if (qty > max) { statusEl.innerText = 'Only ' + max + ' built unit(s) are available.'; return; }
+        if (!qty || qty <= 0) { statusEl.innerText = 'Enter a quantity.'; return; }
+        if (qty > max) { statusEl.innerText = 'Maximum is ' + max + '.'; return; }
 
         btn.disabled = true;
         btn.innerText = 'Sending…';
-        const res = await apiCall('markOut', { consignmentGroup: btn.dataset.group, customerCode, qty });
+        const res = await apiCall('markOut', { groupKey: btn.dataset.groupkey, customerCode, qty });
         if (res.ok) {
-          statusEl.innerText = qty + ' unit(s) marked out to ' + customerCode + '.';
-          invalidateGroups();
-          await route();
+          await reload();
         } else {
-          statusEl.innerText = 'Could not save: ' + (res.error || 'unknown error');
+          statusEl.innerText = res.error || 'Could not save.';
           btn.disabled = false;
           btn.innerText = 'Mark out';
         }
@@ -1374,17 +1196,10 @@ function wirePageHandlers(pageId) {
         btn.disabled = true;
         btn.innerText = 'Saving…';
         const res = await apiCall('confirmDelivery', { deliveryId: btn.dataset.deliveryid, confirmedQty });
-        if (statusEl) statusEl.classList.remove('hidden');
         if (res.ok) {
-          if (statusEl) {
-            statusEl.innerText = res.status === 'discrepancy'
-              ? 'Confirmed, but fewer units than were sent — flagged as a discrepancy.'
-              : 'Delivery confirmed.';
-          }
-          invalidateGroups();
-          await route();
+          await reload();
         } else {
-          if (statusEl) statusEl.innerText = 'Could not save: ' + (res.error || 'unknown error');
+          if (statusEl) { statusEl.classList.remove('hidden'); statusEl.innerText = res.error || 'Could not save.'; }
           btn.disabled = false;
           btn.innerText = 'Confirm';
         }
