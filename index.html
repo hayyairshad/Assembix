@@ -601,8 +601,16 @@ function renderConsignments() {
   const arriving = rows.filter(r => r.importStatus !== 'Received' && r.qtyReceived <= 0);
   const soon = arriving.filter(r => { const rel = relDays(r.eta); return rel && rel.days >= 0 && rel.days <= 14; });
   const shortLoads = rows.filter(r => r.shortLoad);
-
-  const body = rows.map(r => {
+const sortBy = window.__consignSort || 'eta';
+const dir = (a,b)=>String(a).localeCompare(String(b));
+const sorted = rows.slice().sort((a,b)=>{
+  if (sortBy==='eta')        return dir(a.eta||'9999', b.eta||'9999');
+  if (sortBy==='consignment')return dir(a.consignmentGroup, b.consignmentGroup);
+  if (sortBy==='model')      return dir(a.signatureModel, b.signatureModel);
+  if (sortBy==='status')     return dir(a.importStatus, b.importStatus);
+  return 0;
+});
+  const body = sorted.map(r =>  {
     const rel = relDays(r.eta);
     return `
       <tr${r.shortLoad ? ' style="background:#FFFBF5;"' : ''}>
@@ -613,7 +621,7 @@ function renderConsignments() {
         <td style="text-align:right;">${r.frQty || '—'}</td>
         <td style="text-align:right;">${r.bbQty || '—'}</td>
         <td style="text-align:right;"><b>${r.totalQty || '—'}</b></td>
-        <td>${importChip(r.importStatus)}</td>
+       <td><code>${esc(r.packaging)}</code>${r.shortLoad ? ' <span class="chip chip-warn">Short load</span>' : ''}</td>
         <td>${esc(fmtDay(r.etd))}</td>
         <td>${esc(fmtDay(r.eta))}${rel ? `<div><span class="chip ${rel.cls}" style="margin-top:4px;">${esc(rel.text)}</span></div>` : ''}</td>
         <td>${esc(r.mgr || '—')}</td>
@@ -629,6 +637,17 @@ function renderConsignments() {
     </div>
 
     <div class="card">
+      <div style="display:flex;gap:10px;align-items:end;margin-bottom:14px;">
+  <div style="flex:0 0 200px;">
+    <label>Sort by</label>
+    <select id="cn-sort">
+      <option value="eta">ETA</option>
+      <option value="consignment">Consignment</option>
+      <option value="model">Model</option>
+      <option value="status">Status</option>
+    </select>
+  </div>
+</div>
       <div style="overflow-x:auto;">
         <table>
           <thead><tr>
@@ -1015,6 +1034,17 @@ const RENDERERS = {
    ========================= */
 
 function wirePageHandlers(pageId) {
+    if (pageId === 'consignments') {
+    const s = document.getElementById('cn-sort');
+    if (s) {
+      s.value = window.__consignSort || 'eta';
+      s.onchange = () => {
+        window.__consignSort = s.value;
+        document.getElementById('content').innerHTML = RENDERERS.consignments();
+        wirePageHandlers('consignments');
+      };
+    }
+  }
   if (pageId === 'models') {
     const dbxSync = document.getElementById('dbx-sync-btn');
     const dbxCheck = document.getElementById('dbx-check-btn');
