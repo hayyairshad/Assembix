@@ -214,6 +214,9 @@ background:var(--surface);border:1px solid var(--border);border-radius:12px;
 padding:18px;display:flex;flex-direction:column;gap:6px;
 border-left:4px solid var(--border);
 }
+a.tile,a.stage,a.arrive-tile{text-decoration:none;color:inherit;transition:border-color .15s ease,box-shadow .15s ease;}
+a.tile:hover,a.stage:hover,a.arrive-tile:hover{border-color:var(--accent);box-shadow:0 2px 8px rgba(124,45,18,0.08);}
+a.tile:hover .t-label,a.arrive-tile:hover .a-model{color:var(--primary-dark);}
 .tile .t-label{font-size:12.5px;color:var(--text-soft);font-weight:600;}
 .tile .t-value{font-size:30px;font-weight:800;line-height:1;color:var(--dark);font-family:"Plus Jakarta Sans",sans-serif;}
 .tile .t-foot{font-size:11.5px;color:var(--text-soft);}
@@ -543,9 +546,18 @@ function renderNav() {
 }
 
 // Every page renders synchronously from APP — no per-page fetches.
+// A hash may carry a filter: #/receiving?q=Short%20load
 function route() {
   if (!user || !idToken || !APP) return;
-  const id = window.location.hash.replace(/^#\/?/, '') || 'dashboard';
+  const raw = window.location.hash.replace(/^#\/?/, '') || 'dashboard';
+  const qIdx = raw.indexOf('?');
+  const id = (qIdx === -1 ? raw : raw.slice(0, qIdx)) || 'dashboard';
+  let preset = '';
+  if (qIdx !== -1) {
+    const m = /(?:^|&)q=([^&]*)/.exec(raw.slice(qIdx + 1));
+    if (m) { try { preset = decodeURIComponent(m[1].replace(/\+/g, ' ')); } catch (e) { preset = m[1]; } }
+  }
+
   const page = PAGES.find(p => p.id === id);
   if (!page) { window.location.hash = '#/dashboard'; return; }
 
@@ -571,6 +583,15 @@ function route() {
   document.getElementById('content').innerHTML = RENDERERS[page.id]();
   wirePageHandlers(page.id);
   wirePageSearch();
+
+  if (preset) {
+    const input = document.getElementById('page-search');
+    if (input) {
+      input.value = preset;
+      document.getElementById('page-search-clear').classList.remove('hidden');
+      applyPageFilter(preset.toLowerCase());
+    }
+  }
 }
 
 /* =========================
@@ -590,6 +611,11 @@ function wirePageSearch() {
     const q = input.value.trim().toLowerCase();
     clear.classList.toggle('hidden', !q);
     applyPageFilter(q);
+    // Drop the filter out of the URL so a refresh doesn't bring it back.
+    if (!q && window.location.hash.indexOf('?') !== -1) {
+      const clean = window.location.hash.split('?')[0];
+      history.replaceState(null, '', clean);
+    }
   };
 
   input.oninput = run;
@@ -783,49 +809,55 @@ function renderDashboard() {
     return syncBar + `<div class="empty">Nothing loaded yet. Sync China Master to bring in consignments.</div>`;
   }
 
-  /* --- Grid 1: the numbers that matter today --- */
+  /* --- Grid 1: the numbers that matter today.
+         Each tile opens the page the number came from, carrying a filter
+         where one narrows it usefully. --- */
   const tiles = `
     <div class="grid grid-4">
-      <div class="tile tile-accent">
+      <a class="tile tile-accent" href="#/receiving">
         <div class="t-label">Total arriving</div>
         <div class="t-value">${stats.totalArriving || 0}</div>
         <div class="t-foot">models still waiting on parts</div>
-      </div>
-      <div class="tile ${stats.shortLoadsToCount ? 'tile-warn' : ''}">
+      </a>
+      <a class="tile ${stats.shortLoadsToCount ? 'tile-warn' : ''}" href="#/receiving?q=${encodeURIComponent('Short load')}">
         <div class="t-label">Short loads to count</div>
         <div class="t-value">${stats.shortLoadsToCount || 0}</div>
         <div class="t-foot">need a count from the floor</div>
-      </div>
-      <div class="tile ${stats.canBuildNow ? 'tile-good' : ''}">
+      </a>
+      <a class="tile ${stats.canBuildNow ? 'tile-good' : ''}" href="#/assembly">
         <div class="t-label">Can build now</div>
         <div class="t-value">${stats.canBuildNow || 0}</div>
         <div class="t-foot">units from parts on hand</div>
-      </div>
-      <div class="tile ${stats.readyToSend ? 'tile-good' : ''}">
+      </a>
+      <a class="tile ${stats.readyToSend ? 'tile-good' : ''}" href="#/delivery">
         <div class="t-label">Ready to send</div>
         <div class="t-value">${stats.readyToSend || 0}</div>
         <div class="t-foot">built, not yet out</div>
-      </div>
-      <div class="tile tile-fr">
+      </a>
+      <a class="tile tile-fr" href="#/delivery">
         <div class="t-label">FR still owed</div>
         <div class="t-value">${stats.frOwed || 0}</div>
         <div class="t-foot">units across all models</div>
-      </div>
-      <div class="tile tile-bb">
+      </a>
+      <a class="tile tile-bb" href="#/delivery">
         <div class="t-label">BB still owed</div>
         <div class="t-value">${stats.bbOwed || 0}</div>
         <div class="t-foot">units across all models</div>
-      </div>
+      </a>
     </div>`;
 
-  /* --- Grid 2: where everything sits on the import journey --- */
+  /* --- Grid 2: where everything sits on the import journey.
+         Opens Consignments filtered to that stage. Note the tile counts
+         models while Consignments lists packaging lines, so the number of
+         rows there will be higher. --- */
   const stageStrip = STAGES.map(s => {
     const n = byStage[s] || 0;
     const cls = s === 'Received' && n ? 'stage stage-done' : (n ? 'stage' : 'stage stage-empty');
-    return `<div class="${cls}"><div class="s-count">${n}</div><div class="s-name">${esc(s)}</div></div>`;
+    if (!n) return `<div class="${cls}"><div class="s-count">0</div><div class="s-name">${esc(s)}</div></div>`;
+    return `<a class="${cls}" href="#/consignments?q=${encodeURIComponent(s)}"><div class="s-count">${n}</div><div class="s-name">${esc(s)}</div></a>`;
   }).join('');
 
-  /* --- Grid 3: what is still coming --- */
+  /* --- Grid 3: what is still coming. Each opens Receiving on that consignment. --- */
   const arriving = groups.filter(g => !g.allArrived)
     .sort((a, b) => String(a.nextEta || '9999').localeCompare(String(b.nextEta || '9999')));
 
@@ -833,7 +865,7 @@ function renderDashboard() {
     const rel = relDays(g.nextEta);
     const waiting = g.parts.filter(p => !p.arrived);
     return `
-      <div class="arrive-tile">
+      <a class="arrive-tile" href="#/receiving?q=${encodeURIComponent(g.consignmentGroup)}">
         <div class="a-top">
           <code>${esc(g.consignmentGroup)}</code>
           ${importChip(g.importStage)}
@@ -847,7 +879,7 @@ function renderDashboard() {
           ${g.nextEta ? `Next part due ${esc(fmtDay(g.nextEta))}${rel ? ` <span class="chip ${rel.cls}">${esc(rel.text)}</span>` : ''}`
             : `${waiting.length} part${waiting.length === 1 ? '' : 's'} with no ETA`}
         </div>
-      </div>`;
+      </a>`;
   }).join('') : `<div class="empty">Every model has fully arrived.</div>`;
 
   /* --- Charts --- */
