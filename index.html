@@ -263,6 +263,44 @@ padding-right:6px;color:#fff;font-size:10.5px;font-weight:700;min-width:2px;}
 .legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;font-size:12px;color:var(--text-soft);}
 .legend i{width:11px;height:11px;border-radius:3px;display:inline-block;margin-right:6px;vertical-align:-1px;}
 
+/* Search */
+.search-wrap{position:relative;display:inline-flex;align-items:center;}
+.search-wrap input{
+padding:7px 30px 7px 32px;font-size:13px;border-radius:8px;width:230px;
+}
+.search-wrap .s-icon{position:absolute;left:10px;width:15px;height:15px;stroke:var(--text-soft);
+fill:none;stroke-width:2;stroke-linecap:round;pointer-events:none;}
+.search-wrap .s-clear{
+position:absolute;right:6px;border:none;background:none;cursor:pointer;color:var(--text-soft);
+font-size:16px;line-height:1;padding:2px 5px;border-radius:5px;
+}
+.search-wrap .s-clear:hover{background:#FBF1E9;color:var(--text);}
+.search-count{font-size:11.5px;color:var(--text-soft);margin-left:10px;white-space:nowrap;}
+
+.master-search{
+background:var(--surface);border:1px solid var(--border);border-radius:12px;
+padding:16px 18px;margin-bottom:22px;
+}
+.master-search .ms-input{position:relative;display:flex;align-items:center;}
+.master-search .ms-input input{padding:11px 14px 11px 38px;font-size:14.5px;}
+.master-search .ms-input svg{position:absolute;left:13px;width:17px;height:17px;
+stroke:var(--text-soft);fill:none;stroke-width:2;stroke-linecap:round;pointer-events:none;}
+.ms-results{margin-top:16px;}
+.ms-group{margin-bottom:18px;}
+.ms-group:last-child{margin-bottom:0;}
+.ms-group h4{
+margin:0 0 9px;font-size:12.5px;font-weight:700;color:var(--dark);
+font-family:"Plus Jakarta Sans",sans-serif;
+}
+.ms-hit{
+display:flex;justify-content:space-between;gap:12px;align-items:baseline;flex-wrap:wrap;
+padding:9px 11px;border:1px solid var(--border);border-radius:9px;margin-bottom:6px;
+font-size:13px;text-decoration:none;color:var(--text);background:#FFFBF7;
+}
+.ms-hit:hover{border-color:var(--accent);background:#FFF7ED;}
+.ms-hit .h-meta{font-size:11.5px;color:var(--text-soft);}
+.ms-more{font-size:11.5px;color:var(--text-soft);padding:3px 2px;}
+
 .act-item{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid #F8EDE4;font-size:13px;}
 .act-item:last-child{border-bottom:none;}
 .act-when{color:var(--text-soft);font-size:11.5px;white-space:nowrap;flex:0 0 110px;}
@@ -513,8 +551,16 @@ function route() {
 
   currentPage = page.id;
   document.getElementById('page-title').innerText = page.label;
-  document.getElementById('page-actions').innerHTML =
-    `<button class="btn btn-sm" id="page-refresh">Refresh</button>`;
+  document.getElementById('page-actions').innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <div class="search-wrap">
+        <svg class="s-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="search" id="page-search" placeholder="Filter this page" autocomplete="off">
+        <button class="s-clear hidden" id="page-search-clear" title="Clear" aria-label="Clear search">×</button>
+      </div>
+      <span class="search-count" id="page-search-count"></span>
+      <button class="btn btn-sm" id="page-refresh">Refresh</button>
+    </div>`;
   document.getElementById('page-refresh').onclick = async () => {
     const b = document.getElementById('page-refresh');
     b.disabled = true; b.innerText = 'Refreshing…';
@@ -524,6 +570,89 @@ function route() {
 
   document.getElementById('content').innerHTML = RENDERERS[page.id]();
   wirePageHandlers(page.id);
+  wirePageSearch();
+}
+
+/* =========================
+   PER-PAGE FILTER
+
+   Hides anything on the current page that doesn't contain the typed text:
+   table rows first, then the cards and tiles, then any consignment heading
+   left with nothing under it. Purely visual — it never refetches.
+   ========================= */
+
+function wirePageSearch() {
+  const input = document.getElementById('page-search');
+  const clear = document.getElementById('page-search-clear');
+  if (!input) return;
+
+  const run = () => {
+    const q = input.value.trim().toLowerCase();
+    clear.classList.toggle('hidden', !q);
+    applyPageFilter(q);
+  };
+
+  input.oninput = run;
+  input.onkeydown = e => { if (e.key === 'Escape') { input.value = ''; run(); } };
+  clear.onclick = () => { input.value = ''; run(); input.focus(); };
+}
+
+function applyPageFilter(q) {
+  const content = document.getElementById('content');
+  const countEl = document.getElementById('page-search-count');
+  if (!content) return;
+
+  const blockSel = '.model-block, .arrive-tile, .ms-hit';
+  const all = [
+    ...content.querySelectorAll('tbody tr'),
+    ...content.querySelectorAll(blockSel)
+  ];
+
+  if (!q) {
+    all.forEach(el => el.classList.remove('hidden'));
+    content.querySelectorAll('.consign-block, .card, .dash-section').forEach(el => el.classList.remove('hidden'));
+    const msg = content.querySelector('#page-search-empty');
+    if (msg) msg.remove();
+    if (countEl) countEl.innerText = '';
+    return;
+  }
+
+  let shown = 0;
+  all.forEach(el => {
+    const hit = el.textContent.toLowerCase().indexOf(q) !== -1;
+    el.classList.toggle('hidden', !hit);
+    if (hit) shown++;
+  });
+
+  // A consignment heading with every model hidden under it is just noise.
+  content.querySelectorAll('.consign-block').forEach(block => {
+    const kids = block.querySelectorAll('.model-block');
+    const anyVisible = [...kids].some(k => !k.classList.contains('hidden'));
+    block.classList.toggle('hidden', kids.length > 0 && !anyVisible);
+  });
+
+  // Same for a card or dashboard section whose rows have all gone.
+  content.querySelectorAll('.card, .dash-section').forEach(card => {
+    const kids = card.querySelectorAll('tbody tr, ' + blockSel);
+    if (!kids.length) return;
+    const anyVisible = [...kids].some(k => !k.classList.contains('hidden'));
+    card.classList.toggle('hidden', !anyVisible);
+  });
+
+  let msg = content.querySelector('#page-search-empty');
+  if (!shown) {
+    if (!msg) {
+      msg = document.createElement('div');
+      msg.id = 'page-search-empty';
+      msg.className = 'empty';
+      content.prepend(msg);
+    }
+    msg.innerText = 'Nothing on this page matches “' + q + '”.';
+  } else if (msg) {
+    msg.remove();
+  }
+
+  if (countEl) countEl.innerText = shown ? shown + ' match' + (shown === 1 ? '' : 'es') : '';
 }
 
 async function reload() {
@@ -640,6 +769,16 @@ function renderDashboard() {
     </div>
     <div id="dash-sync-status" class="note hidden" style="margin:-12px 0 22px;"></div>` : '';
 
+  const masterSearch = `
+    <div class="master-search">
+      <div class="ms-input">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="search" id="ms-q" autocomplete="off"
+          placeholder="Search everything — consignment, model, supplier, part, customer, person">
+      </div>
+      <div class="ms-results" id="ms-results"></div>
+    </div>`;
+
   if (!groups.length) {
     return syncBar + `<div class="empty">Nothing loaded yet. Sync China Master to bring in consignments.</div>`;
   }
@@ -745,6 +884,7 @@ function renderDashboard() {
 
   return `
     ${syncBar}
+    ${masterSearch}
 
     <div class="dash-section">
       ${tiles}
@@ -1305,9 +1445,93 @@ function wireSyncButtons(syncId, checkId, statusId) {
    PAGE HANDLER WIRING
    ========================= */
 
+/* =========================
+   MASTER SEARCH (Dashboard)
+
+   Looks across every part of the file at once — packaging lines, models,
+   deliveries and the event log — and links straight to the page that holds
+   each hit. Different from the topbar box, which only filters what is
+   already on screen.
+   ========================= */
+
+function msHit(href, title, meta) {
+  return `<a class="ms-hit" href="${href}"><span>${title}</span><span class="h-meta">${meta}</span></a>`;
+}
+
+function msGroup(name, hits, total) {
+  if (!hits.length) return '';
+  return `
+    <div class="ms-group">
+      <h4>${esc(name)} · ${total}</h4>
+      ${hits.join('')}
+      ${total > hits.length ? `<div class="ms-more">${total - hits.length} more — open the page to see them all.</div>` : ''}
+    </div>`;
+}
+
+function runMasterSearch(q) {
+  const el = document.getElementById('ms-results');
+  if (!el) return;
+
+  if (!q) { el.innerHTML = ''; return; }
+
+  const has = (...vals) => vals.some(v => String(v == null ? '' : v).toLowerCase().indexOf(q) !== -1);
+  const LIMIT = 5;
+
+  // Models (consignment + factory model)
+  const models = (APP.consignments || []).filter(g =>
+    has(g.consignmentGroup, g.factoryModel, g.signatureModel, g.modelName, g.supplier, g.product, g.container, g.status, g.importStage));
+  const modelHits = models.slice(0, LIMIT).map(g => msHit(
+    '#/assembly',
+    esc(plainModel(g)) + ' <span style="color:var(--text-soft);">' + esc(g.consignmentGroup) + '</span>',
+    esc(g.supplier) + ' · ' + g.buildableUnits + ' buildable · ' + esc(g.status)));
+
+  // Packaging lines
+  const lines = (APP.rows || []).filter(r =>
+    has(r.packaging, r.supplier, r.product, r.factoryModel, r.signatureModel, r.consignmentGroup, r.importStatus, r.container, r.mgr, r.partLetter));
+  const lineHits = lines.slice(0, LIMIT).map(r => msHit(
+    '#/consignments',
+    '<code>' + esc(r.packaging) + '</code> ' + esc(r.signatureModel || ''),
+    esc(r.importStatus) + (r.shortLoad ? ' · short load' : '') + ' · ETA ' + esc(fmtDay(r.eta))));
+
+  // Deliveries
+  const dels = (APP.deliveries || []).filter(d =>
+    has(d.GroupKey, d.CustomerCode, d.Status, d.DeliveryID));
+  const delHits = dels.slice(0, LIMIT).map(d => msHit(
+    '#/delivery',
+    esc(String(d.GroupKey).replace('::', ' · ')) + ' → ' + esc(d.CustomerCode),
+    d.QtyOut + ' out · ' + esc(d.Status) + ' · ' + esc(d.Timestamp || '')));
+
+  // Event log
+  const evs = (APP.events || []).filter(e =>
+    has(e.ConsignmentGroup, e.EventType, e.User, e.PartLetter, e.Qty));
+  const evHits = evs.slice(0, LIMIT).map(e => msHit(
+    '#/reports',
+    esc(e.EventType) + (e.Qty !== '' && e.Qty != null ? ' · ' + esc(e.Qty) : ''),
+    esc(e.ConsignmentGroup || 'whole file') + ' · ' + esc(e.Timestamp || '')));
+
+  const total = models.length + lines.length + dels.length + evs.length;
+  if (!total) {
+    el.innerHTML = `<div class="empty" style="padding:26px 20px;">Nothing matches “${esc(q)}”.</div>`;
+    return;
+  }
+
+  el.innerHTML =
+    msGroup('Models', modelHits, models.length) +
+    msGroup('Packaging lines', lineHits, lines.length) +
+    msGroup('Deliveries', delHits, dels.length) +
+    msGroup('Activity', evHits, evs.length);
+}
+
 function wirePageHandlers(pageId) {
   if (pageId === 'dashboard') {
     wireSyncButtons('dash-sync', 'dash-check', 'dash-sync-status');
+
+    const ms = document.getElementById('ms-q');
+    if (ms) {
+      const go = () => runMasterSearch(ms.value.trim().toLowerCase());
+      ms.oninput = go;
+      ms.onkeydown = e => { if (e.key === 'Escape') { ms.value = ''; go(); } };
+    }
   }
 
   if (pageId === 'consignments') {
