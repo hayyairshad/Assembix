@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Assembix</title>
+<title>AssembiX</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
 <script src="https://accounts.google.com/gsi/client" async defer onload="initGoogleSignIn()"
 onerror="handleGsiLoadError()"></script>
@@ -29,6 +29,8 @@ onerror="handleGsiLoadError()"></script>
 --danger-bg:#FEE2E2;
 --info:#1D4ED8;
 --info-bg:#DBEAFE;
+--fr:#C2410C;
+--bb:#0F766E;
 }
 *{box-sizing:border-box;}
 body{
@@ -116,6 +118,7 @@ display:inline-flex;align-items:center;gap:7px;transition:0.15s ease;white-space
 .btn-primary:hover{background:var(--primary-dark);border-color:var(--primary-dark);}
 .btn-sm{padding:6px 11px;font-size:12px;}
 .btn:disabled{opacity:0.55;cursor:not-allowed;}
+.btn:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--primary);outline-offset:2px;}
 
 .card{
 background:var(--surface);border:1px solid var(--border);border-radius:13px;
@@ -196,6 +199,87 @@ border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 14px;
 @keyframes spin{to{transform:rotate(360deg);}}
 #login-status .spinner{margin-bottom:8px;}
 
+/* ===== DASHBOARD ===== */
+.dash-section{margin-bottom:26px;}
+.dash-head{
+display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px;
+}
+.dash-head h2{
+margin:0;font-size:15px;font-weight:700;color:var(--dark);font-family:"Plus Jakarta Sans",sans-serif;
+}
+.dash-head .sub{font-size:12.5px;color:var(--text-soft);}
+
+.tile{
+background:var(--surface);border:1px solid var(--border);border-radius:12px;
+padding:18px;display:flex;flex-direction:column;gap:6px;
+border-left:4px solid var(--border);
+}
+.tile .t-label{font-size:12.5px;color:var(--text-soft);font-weight:600;}
+.tile .t-value{font-size:30px;font-weight:800;line-height:1;color:var(--dark);font-family:"Plus Jakarta Sans",sans-serif;}
+.tile .t-foot{font-size:11.5px;color:var(--text-soft);}
+.tile-accent{border-left-color:var(--primary);}
+.tile-good{border-left-color:var(--success);}
+.tile-good .t-value{color:var(--success);}
+.tile-warn{border-left-color:var(--warning);}
+.tile-warn .t-value{color:var(--warning);}
+.tile-fr{border-left-color:var(--fr);}
+.tile-bb{border-left-color:var(--bb);}
+
+.stage-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;}
+.stage{
+background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:14px;
+text-align:left;position:relative;
+}
+.stage .s-count{font-size:24px;font-weight:800;color:var(--dark);line-height:1;font-family:"Plus Jakarta Sans",sans-serif;}
+.stage .s-name{font-size:12px;color:var(--text-soft);margin-top:5px;font-weight:600;}
+.stage-empty .s-count{color:var(--text-faint);}
+.stage-done{background:var(--success-bg);border-color:#BBF7D0;}
+.stage-done .s-count{color:var(--success);}
+.stage-done .s-name{color:var(--success);}
+
+.arrive-tile{
+background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:15px 16px;
+display:flex;flex-direction:column;gap:7px;
+}
+.arrive-tile .a-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;}
+.arrive-tile code{font-size:12.5px;font-weight:700;color:var(--dark);}
+.arrive-tile .a-model{font-size:13px;font-weight:600;color:var(--text);}
+.arrive-tile .a-meta{font-size:11.5px;color:var(--text-soft);}
+.arrive-tile .a-parts{display:flex;gap:5px;flex-wrap:wrap;}
+
+/* Bars: FR vs BB, and demand vs built vs delivered */
+.bar-row{margin-bottom:15px;}
+.bar-row:last-child{margin-bottom:0;}
+.bar-label{font-size:12.5px;font-weight:600;color:var(--text);margin-bottom:7px;display:flex;justify-content:space-between;gap:10px;}
+.bar-label span:last-child{color:var(--text-soft);font-weight:500;font-size:11.5px;}
+.bar-track{background:#FBF1E9;border-radius:5px;height:15px;margin-bottom:5px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:5px;display:flex;align-items:center;justify-content:flex-end;
+padding-right:6px;color:#fff;font-size:10.5px;font-weight:700;min-width:2px;}
+.bar-fr .bar-fill{background:var(--fr);}
+.bar-bb .bar-fill{background:var(--bb);}
+.bar-demand .bar-fill{background:var(--accent);color:var(--dark);}
+.bar-built .bar-fill{background:var(--primary);}
+.bar-deliv .bar-fill{background:var(--success);}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;font-size:12px;color:var(--text-soft);}
+.legend i{width:11px;height:11px;border-radius:3px;display:inline-block;margin-right:6px;vertical-align:-1px;}
+
+.act-item{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid #F8EDE4;font-size:13px;}
+.act-item:last-child{border-bottom:none;}
+.act-when{color:var(--text-soft);font-size:11.5px;white-space:nowrap;flex:0 0 110px;}
+.act-what b{font-weight:600;}
+.act-where{color:var(--text-soft);font-size:11.5px;}
+
+.sync-bar{
+display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+background:var(--surface);border:1px solid var(--accent);border-radius:12px;padding:14px 18px;margin-bottom:22px;
+}
+.sync-bar .s-text{font-size:13px;color:var(--text-soft);}
+.sync-bar .s-text b{color:var(--text);font-weight:600;}
+
+@media (prefers-reduced-motion: reduce){
+*{animation-duration:0.01ms !important;transition-duration:0.01ms !important;}
+}
+
 @media (max-width:820px){
 .app-shell{flex-direction:column;}
 .sidebar{width:100%;height:auto;position:static;flex-direction:column;}
@@ -205,6 +289,7 @@ border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 14px;
 .sidebar-foot{margin-top:14px;}
 .content{padding:18px;}
 .topbar{padding:14px 18px;}
+.act-when{flex:0 0 90px;}
 }
 </style>
 </head>
@@ -215,7 +300,7 @@ border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 14px;
   <div class="login-card">
     <div class="brand">
       <div class="brand-mark">A</div>
-      <div class="brand-word" style="color:var(--dark)">Assembix</div>
+      <div class="brand-word" style="color:var(--dark)">AssembiX</div>
     </div>
     <h2>Sign in</h2>
     <p>Use your authorised Google account to continue.</p>
@@ -230,7 +315,7 @@ border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 14px;
   <aside class="sidebar">
     <div class="brand">
       <div class="brand-mark">A</div>
-      <div class="brand-word">Assembix</div>
+      <div class="brand-word">AssembiX</div>
     </div>
 
     <nav class="nav" id="nav"></nav>
@@ -254,7 +339,7 @@ border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 14px;
 </div>
 
 <script>
-/* Fill APPS_SCRIPT_URL after deploying the Assembix Apps Script project. */
+/* Fill APPS_SCRIPT_URL after deploying the AssembiX Apps Script project. */
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDAt4paCuEsZ0HZG4eWyWAMX_AVevyEBNVdUPyM6t6EJoMi8r1fpEc-R3epfe5XmMv/exec";
 const GOOGLE_CLIENT_ID = "766825494798-2vq54u2u9kmfegir98uig2ubr9gr6hj4.apps.googleusercontent.com";
 
@@ -269,6 +354,8 @@ const PAGES = [
   { id: 'models',       label: 'Models & parts', group: 'Setup'     }
 ];
 
+/* The storage key still says assembix_ on purpose. Renaming it would sign
+   everybody out once for no gain — it is internal and never shown. */
 let idToken = localStorage.getItem('assembix_idToken') || null;
 let user = null;
 let currentPage = 'dashboard';
@@ -503,6 +590,10 @@ function modelLabel(g) {
   return esc(sig || fac || '—');
 }
 
+function plainModel(g) {
+  return g.signatureModel || g.factoryModel || g.modelName || '—';
+}
+
 // FIX 7 — Receiving and Assembly nest: consignment heading, each model under
 // it, that model's parts and dates under the model. A container carrying more
 // than one product no longer collapses into one flat block.
@@ -521,69 +612,187 @@ function byConsignment(groups) {
    DASHBOARD
    ========================= */
 
+const STAGES = ['Production', 'Loaded', 'F-Bank', 'L-Bank', 'Clearance', 'Received'];
+
+function bar(cls, value, max, caption) {
+  const pct = max > 0 ? Math.max(value > 0 ? 3 : 0, Math.round((value / max) * 100)) : 0;
+  return `
+    <div class="${cls}">
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;">${value > 0 ? value : ''}</div></div>
+      ${caption ? `<div style="font-size:11px;color:var(--text-soft);">${esc(caption)}</div>` : ''}
+    </div>`;
+}
+
 function renderDashboard() {
   const groups = APP.consignments || [];
+  const stats = (APP.dashboard && APP.dashboard.stats) || {};
+  const byStage = (APP.dashboard && APP.dashboard.byStage) || {};
+
+  const syncBar = (user && user.level <= 1) ? `
+    <div class="sync-bar">
+      <div class="s-text">
+        China Master last synced <b>${APP.lastSync ? esc(new Date(APP.lastSync).toLocaleString()) : 'never'}</b>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-sm" id="dash-check">Check connection</button>
+        <button class="btn btn-primary btn-sm" id="dash-sync">Sync China Master</button>
+      </div>
+    </div>
+    <div id="dash-sync-status" class="note hidden" style="margin:-12px 0 22px;"></div>` : '';
+
   if (!groups.length) {
-    return `<div class="empty">Nothing loaded yet. Sync China Master from the
-      <a href="#/models">Models &amp; parts</a> page.</div>`;
+    return syncBar + `<div class="empty">Nothing loaded yet. Sync China Master to bring in consignments.</div>`;
   }
 
-  const uncounted = groups.reduce((s, g) => s + g.parts.filter(p => p.needsCount).length, 0);
-  const buildableNow = groups.reduce((s, g) => s + g.buildableUnits, 0);
-  const readyToSend = groups.reduce((s, g) => s + Math.max(0, g.totalBuilt - g.totalOut), 0);
-  const awaitingParts = groups.filter(g => g.anyArrived && g.buildableUnits <= 0).length;
+  /* --- Grid 1: the numbers that matter today --- */
+  const tiles = `
+    <div class="grid grid-4">
+      <div class="tile tile-accent">
+        <div class="t-label">Total arriving</div>
+        <div class="t-value">${stats.totalArriving || 0}</div>
+        <div class="t-foot">models still waiting on parts</div>
+      </div>
+      <div class="tile ${stats.shortLoadsToCount ? 'tile-warn' : ''}">
+        <div class="t-label">Short loads to count</div>
+        <div class="t-value">${stats.shortLoadsToCount || 0}</div>
+        <div class="t-foot">need a count from the floor</div>
+      </div>
+      <div class="tile ${stats.canBuildNow ? 'tile-good' : ''}">
+        <div class="t-label">Can build now</div>
+        <div class="t-value">${stats.canBuildNow || 0}</div>
+        <div class="t-foot">units from parts on hand</div>
+      </div>
+      <div class="tile ${stats.readyToSend ? 'tile-good' : ''}">
+        <div class="t-label">Ready to send</div>
+        <div class="t-value">${stats.readyToSend || 0}</div>
+        <div class="t-foot">built, not yet out</div>
+      </div>
+      <div class="tile tile-fr">
+        <div class="t-label">FR still owed</div>
+        <div class="t-value">${stats.frOwed || 0}</div>
+        <div class="t-foot">units across all models</div>
+      </div>
+      <div class="tile tile-bb">
+        <div class="t-label">BB still owed</div>
+        <div class="t-value">${stats.bbOwed || 0}</div>
+        <div class="t-foot">units across all models</div>
+      </div>
+    </div>`;
 
-  const upcoming = groups
-    .filter(g => g.nextEta)
-    .map(g => ({ g, rel: relDays(g.nextEta) }))
-    .filter(x => x.rel && x.rel.days >= -3 && x.rel.days <= 21)
-    .sort((a, b) => a.rel.days - b.rel.days);
+  /* --- Grid 2: where everything sits on the import journey --- */
+  const stageStrip = STAGES.map(s => {
+    const n = byStage[s] || 0;
+    const cls = s === 'Received' && n ? 'stage stage-done' : (n ? 'stage' : 'stage stage-empty');
+    return `<div class="${cls}"><div class="s-count">${n}</div><div class="s-name">${esc(s)}</div></div>`;
+  }).join('');
+
+  /* --- Grid 3: what is still coming --- */
+  const arriving = groups.filter(g => !g.allArrived)
+    .sort((a, b) => String(a.nextEta || '9999').localeCompare(String(b.nextEta || '9999')));
+
+  const arriveTiles = arriving.length ? arriving.map(g => {
+    const rel = relDays(g.nextEta);
+    const waiting = g.parts.filter(p => !p.arrived);
+    return `
+      <div class="arrive-tile">
+        <div class="a-top">
+          <code>${esc(g.consignmentGroup)}</code>
+          ${importChip(g.importStage)}
+        </div>
+        <div class="a-model">${modelLabel(g)}</div>
+        <div class="a-meta">${esc(g.supplier)} · ${esc(g.product || '—')} · ${g.totalQty || '—'} expected</div>
+        <div class="a-parts">
+          ${g.parts.map(p => `<span class="chip ${p.arrived ? 'chip-ok' : (p.needsCount ? 'chip-warn' : 'chip-idle')}">${esc(p.partLetter)}${p.arrived ? ' ✓' : (p.needsCount ? ' count' : '')}</span>`).join('')}
+        </div>
+        <div class="a-meta">
+          ${g.nextEta ? `Next part due ${esc(fmtDay(g.nextEta))}${rel ? ` <span class="chip ${rel.cls}">${esc(rel.text)}</span>` : ''}`
+            : `${waiting.length} part${waiting.length === 1 ? '' : 's'} with no ETA`}
+        </div>
+      </div>`;
+  }).join('') : `<div class="empty">Every model has fully arrived.</div>`;
+
+  /* --- Charts --- */
+  const demandMax = Math.max(1, ...groups.map(g => Math.max(g.frQty || 0, g.bbQty || 0)));
+  const frbbChart = groups.map(g => `
+    <div class="bar-row">
+      <div class="bar-label"><span>${modelLabel(g)}</span><span>${esc(g.consignmentGroup)}</span></div>
+      ${bar('bar-fr', g.frQty || 0, demandMax, '')}
+      ${bar('bar-bb', g.bbQty || 0, demandMax, '')}
+    </div>`).join('');
+
+  const progressMax = Math.max(1, ...groups.map(g => Math.max((g.frQty || 0) + (g.bbQty || 0), g.totalBuilt || 0)));
+  const progressChart = groups.map(g => {
+    const demand = (g.frQty || 0) + (g.bbQty || 0);
+    return `
+      <div class="bar-row">
+        <div class="bar-label"><span>${modelLabel(g)}</span><span>${chip(g.status)}</span></div>
+        ${bar('bar-demand', demand, progressMax, 'ordered')}
+        ${bar('bar-built', g.totalBuilt || 0, progressMax, 'built')}
+        ${bar('bar-deliv', g.totalConfirmed || 0, progressMax, 'confirmed by customer')}
+      </div>`;
+  }).join('');
+
+  /* --- Recent activity, this person only --- */
+  const mine = (APP.events || []).filter(e => String(e.User || '').toLowerCase() === String(user.email).toLowerCase()).slice(0, 12);
+  const activity = mine.length ? mine.map(e => `
+    <div class="act-item">
+      <div class="act-when">${esc(e.Timestamp || '—')}</div>
+      <div class="act-what">
+        <b>${esc(e.EventType)}</b>${e.Qty !== '' && e.Qty != null ? ' · ' + esc(e.Qty) : ''}
+        <div class="act-where">${esc(e.ConsignmentGroup || 'whole file')}${e.PartLetter ? ' · part ' + esc(e.PartLetter) : ''}</div>
+      </div>
+    </div>`).join('') : `<div class="empty">You haven't recorded anything yet.</div>`;
 
   return `
-    <div class="grid grid-4" style="margin-bottom:18px;">
-      <div class="stat"><div class="stat-label">Can build now</div>
-        <div class="stat-value" style="color:${buildableNow ? 'var(--success)' : 'var(--dark)'};">${buildableNow}</div></div>
-      <div class="stat"><div class="stat-label">Ready to send</div>
-        <div class="stat-value">${readyToSend}</div></div>
-      <div class="stat"><div class="stat-label">Waiting on parts</div>
-        <div class="stat-value" style="color:${awaitingParts ? 'var(--warning)' : 'var(--dark)'};">${awaitingParts}</div></div>
-      <div class="stat"><div class="stat-label">Short loads to count</div>
-        <div class="stat-value" style="color:${uncounted ? 'var(--warning)' : 'var(--dark)'};">${uncounted}</div></div>
+    ${syncBar}
+
+    <div class="dash-section">
+      ${tiles}
     </div>
 
-    <div class="card">
-      <h3 class="card-h">Arriving soon</h3>
-      ${upcoming.length ? `<table><thead><tr><th>Consignment</th><th>Model</th><th>Arrives</th></tr></thead><tbody>
-        ${upcoming.slice(0, 10).map(x => `<tr>
-          <td><code>${esc(x.g.consignmentGroup)}</code></td>
-          <td>${modelLabel(x.g)}</td>
-          <td>${esc(fmtDay(x.g.nextEta))} <span class="chip ${x.rel.cls}">${esc(x.rel.text)}</span></td>
-        </tr>`).join('')}
-      </tbody></table>` : `<div class="empty">Nothing arriving in the next three weeks.</div>`}
-    </div>
-
-    <div class="card">
-      <h3 class="card-h">Every model at a glance</h3>
-      <div style="overflow-x:auto;">
-      <table>
-        <thead><tr><th>Consignment</th><th>Supplier</th><th>Model</th><th>Parts on hand</th>
-          <th style="text-align:right;">FR</th><th style="text-align:right;">BB</th>
-          <th style="text-align:right;">Can build</th><th style="text-align:right;">Built</th><th>Stage</th></tr></thead>
-        <tbody>
-          ${groups.map(g => `<tr>
-            <td><code>${esc(g.consignmentGroup)}</code></td>
-            <td>${esc(g.supplier)}</td>
-            <td>${modelLabel(g)}</td>
-            <td>${g.parts.map(p => `<span class="chip ${p.qtyReceived > 0 ? 'chip-ok' : 'chip-idle'}">${esc(p.partLetter)} ${p.qtyReceived}</span>`).join(' ')}</td>
-            <td style="text-align:right;">${g.frQty || '—'}</td>
-            <td style="text-align:right;">${g.bbQty || '—'}</td>
-            <td style="text-align:right;font-weight:700;${g.buildableUnits ? 'color:var(--success);' : ''}">${g.buildableUnits}</td>
-            <td style="text-align:right;">${g.totalBuilt}</td>
-            <td>${chip(g.status)}</td>
-          </tr>`).join('')}
-        </tbody>
-      </table>
+    <div class="dash-section">
+      <div class="dash-head">
+        <h2>Where every model sits</h2>
+        <span class="sub">counted by consignment and factory model, at its furthest-behind part</span>
       </div>
+      <div class="stage-strip">${stageStrip}</div>
+    </div>
+
+    <div class="dash-section">
+      <div class="dash-head">
+        <h2>Still to arrive</h2>
+        <span class="sub">${arriving.length} model${arriving.length === 1 ? '' : 's'}</span>
+      </div>
+      <div class="grid grid-3">${arriveTiles}</div>
+    </div>
+
+    <div class="grid grid-2 dash-section">
+      <div class="card">
+        <h3 class="card-h">Who each model is for</h3>
+        <p class="card-sub">Units owed to each standing customer.</p>
+        <div class="legend">
+          <span><i style="background:var(--fr);"></i>FR</span>
+          <span><i style="background:var(--bb);"></i>BB</span>
+        </div>
+        ${frbbChart}
+      </div>
+
+      <div class="card">
+        <h3 class="card-h">Ordered, built, delivered</h3>
+        <p class="card-sub">How far each model has travelled from order to customer.</p>
+        <div class="legend">
+          <span><i style="background:var(--accent);"></i>Ordered</span>
+          <span><i style="background:var(--primary);"></i>Built</span>
+          <span><i style="background:var(--success);"></i>Confirmed</span>
+        </div>
+        ${progressChart}
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 class="card-h">Your recent activity</h3>
+      <p class="card-sub">What you have recorded, newest first.</p>
+      ${activity}
     </div>`;
 }
 
@@ -595,33 +804,35 @@ function renderConsignments() {
   const rows = APP.rows || [];
   if (!rows.length) {
     return `<div class="empty">No consignments yet. Sync China Master from the
-      <a href="#/models">Models &amp; parts</a> page.</div>`;
+      <a href="#/dashboard">Dashboard</a>.</div>`;
   }
 
   const arriving = rows.filter(r => r.importStatus !== 'Received' && r.qtyReceived <= 0);
   const soon = arriving.filter(r => { const rel = relDays(r.eta); return rel && rel.days >= 0 && rel.days <= 14; });
   const shortLoads = rows.filter(r => r.shortLoad);
-const sortBy = window.__consignSort || 'eta';
-const dir = (a,b)=>String(a).localeCompare(String(b));
-const sorted = rows.slice().sort((a,b)=>{
-  if (sortBy==='eta')        return dir(a.eta||'9999', b.eta||'9999');
-  if (sortBy==='consignment')return dir(a.consignmentGroup, b.consignmentGroup);
-  if (sortBy==='model')      return dir(a.signatureModel, b.signatureModel);
-  if (sortBy==='status')     return dir(a.importStatus, b.importStatus);
-  return 0;
-});
-  const body = sorted.map(r =>  {
+
+  const sortBy = window.__consignSort || 'eta';
+  const dir = (a, b) => String(a).localeCompare(String(b));
+  const sorted = rows.slice().sort((a, b) => {
+    if (sortBy === 'eta')         return dir(a.eta || '9999', b.eta || '9999');
+    if (sortBy === 'consignment') return dir(a.consignmentGroup, b.consignmentGroup);
+    if (sortBy === 'model')       return dir(a.signatureModel, b.signatureModel);
+    if (sortBy === 'status')      return dir(a.importStatus, b.importStatus);
+    return 0;
+  });
+
+  const body = sorted.map(r => {
     const rel = relDays(r.eta);
     return `
       <tr${r.shortLoad ? ' style="background:#FFFBF5;"' : ''}>
-        <td><code>${esc(r.packaging)}</code>${r.shortLoad ? ' <span class="chip chip-warn">Short load</span>' : ''}</td>
+        <td><code>${esc(r.packaging)}</code></td>
         <td>${esc(r.supplier)}</td>
         <td>${esc(r.product)}</td>
         <td><b>${esc(r.signatureModel)}</b><div style="color:var(--text-soft);font-size:11.5px;">${esc(r.factoryModel || '—')}</div></td>
         <td style="text-align:right;">${r.frQty || '—'}</td>
         <td style="text-align:right;">${r.bbQty || '—'}</td>
         <td style="text-align:right;"><b>${r.totalQty || '—'}</b></td>
-       <td><code>${esc(r.packaging)}</code>${r.shortLoad ? ' <span class="chip chip-warn">Short load</span>' : ''}</td>
+        <td>${r.shortLoad ? '<span class="chip chip-warn">Short load</span>' : importChip(r.importStatus)}</td>
         <td>${esc(fmtDay(r.etd))}</td>
         <td>${esc(fmtDay(r.eta))}${rel ? `<div><span class="chip ${rel.cls}" style="margin-top:4px;">${esc(rel.text)}</span></div>` : ''}</td>
         <td>${esc(r.mgr || '—')}</td>
@@ -638,16 +849,16 @@ const sorted = rows.slice().sort((a,b)=>{
 
     <div class="card">
       <div style="display:flex;gap:10px;align-items:end;margin-bottom:14px;">
-  <div style="flex:0 0 200px;">
-    <label>Sort by</label>
-    <select id="cn-sort">
-      <option value="eta">ETA</option>
-      <option value="consignment">Consignment</option>
-      <option value="model">Model</option>
-      <option value="status">Status</option>
-    </select>
-  </div>
-</div>
+        <div style="flex:0 0 200px;">
+          <label>Sort by</label>
+          <select id="cn-sort">
+            <option value="eta">ETA</option>
+            <option value="consignment">Consignment</option>
+            <option value="model">Model</option>
+            <option value="status">Status</option>
+          </select>
+        </div>
+      </div>
       <div style="overflow-x:auto;">
         <table>
           <thead><tr>
@@ -670,7 +881,7 @@ const sorted = rows.slice().sort((a,b)=>{
 
 function renderReceiving() {
   const groups = (APP.consignments || []).filter(g => g.parts.some(p => !p.arrived || p.needsCount));
-  if (!groups.length) return `<div class="empty">Nothing outstanding.</div>`;
+  if (!groups.length) return `<div class="empty">Everything has arrived. Head to Assembly to build.</div>`;
 
   const blocks = byConsignment(groups).map(block => {
     const models = block.models.map(g => {
@@ -688,7 +899,7 @@ function renderReceiving() {
             <td style="text-align:right;"><b>${p.qtyReceived}</b></td>
             <td style="text-align:right;${outstanding > 0 ? 'color:var(--warning);font-weight:600;' : ''}">${outstanding || '—'}</td>
             <td style="white-space:nowrap;">
-              <input type="number" min="1" class="rcv-qty" placeholder="qty" style="width:88px;display:inline-block;">
+              <input type="number" min="1" max="${p.qtyExpected || ''}" class="rcv-qty" placeholder="counted" style="width:92px;display:inline-block;">
               <button class="btn btn-sm rcv-btn" data-rowid="${esc(p.rowId || '')}" ${p.rowId ? '' : 'disabled'}>Receive</button>
             </td>
           </tr>`;
@@ -704,7 +915,7 @@ function renderReceiving() {
             <thead><tr>
               <th>Part</th><th>Status</th><th>ETD</th><th>ETA</th>
               <th style="text-align:right;">Expected</th><th style="text-align:right;">Received</th>
-              <th style="text-align:right;">Outstanding</th><th style="width:180px;"></th>
+              <th style="text-align:right;">Outstanding</th><th style="width:190px;"></th>
             </tr></thead>
             <tbody>${partRows}</tbody>
           </table>
@@ -722,7 +933,12 @@ function renderReceiving() {
       </div>`;
   }).join('');
 
-  return blocks;
+  return `
+    <div class="note" style="margin-bottom:18px;">
+      The count you type <b>replaces</b> what is on the line — it is how many are physically on the floor,
+      not how many more turned up. Type the full count each time.
+    </div>
+    ${blocks}`;
 }
 
 /* =========================
@@ -731,7 +947,7 @@ function renderReceiving() {
 
 function renderAssembly() {
   const active = (APP.consignments || []).filter(g => g.parts.some(p => p.qtyReceived > 0));
-  if (!active.length) return `<div class="empty">Nothing to assemble yet.</div>`;
+  if (!active.length) return `<div class="empty">Nothing has arrived yet. Parts show up here once they land.</div>`;
 
   const totalBuildable = active.reduce((s, g) => s + g.buildableUnits, 0);
   const blocked = active.filter(g => g.buildableUnits <= 0).length;
@@ -740,7 +956,7 @@ function renderAssembly() {
     const units = Math.floor(p.qtyReceived / (p.qtyPerUnit || 1));
     return `
       <div style="border:1px solid var(--border);border-radius:10px;padding:12px;">
-        <div style="font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-soft);font-weight:700;">Part ${esc(p.partLetter)}</div>
+        <div style="font-size:11.5px;color:var(--text-soft);font-weight:700;">Part ${esc(p.partLetter)}</div>
         <div style="font-size:22px;font-weight:800;color:var(--dark);margin-top:4px;line-height:1;">${p.qtyReceived}</div>
         <div style="font-size:11.5px;color:var(--text-soft);margin-top:5px;">${units} unit${units === 1 ? '' : 's'}</div>
       </div>`;
@@ -758,7 +974,7 @@ function renderAssembly() {
               <div class="model-meta">${esc(g.supplier)} · ${esc(g.product || '—')} · ${g.totalBuilt} built</div>
             </div>
             <div style="text-align:right;">
-              <div style="font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-soft);font-weight:700;">Can build</div>
+              <div style="font-size:11.5px;color:var(--text-soft);font-weight:700;">Can build</div>
               <div style="font-size:28px;font-weight:800;line-height:1;color:${canBuild ? 'var(--success)' : 'var(--text-soft)'};">${g.buildableUnits}</div>
             </div>
           </div>
@@ -857,7 +1073,7 @@ function renderDelivery() {
   const pending = deliveries.filter(d => d.Status === 'pending');
   const groupName = key => {
     const g = groups.find(x => x.groupKey === key);
-    return g ? (g.consignmentGroup + ' · ' + (g.signatureModel || g.factoryModel || g.modelName)) : String(key).replace('::', ' · ');
+    return g ? (g.consignmentGroup + ' · ' + plainModel(g)) : String(key).replace('::', ' · ');
   };
 
   const pendingTable = pending.length ? `
@@ -906,7 +1122,7 @@ function renderDelivery() {
 
 function renderNeedsReview() {
   const rows = APP.needsReview || [];
-  if (!rows.length) return `<div class="empty">Nothing needs review.</div>`;
+  if (!rows.length) return `<div class="empty">Every line parsed cleanly.</div>`;
   return `
     <div class="card">
       <table>
@@ -932,7 +1148,7 @@ function renderReports() {
   return `
     <div class="card">
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
-        <input id="rp-search" type="text" placeholder="Search" style="max-width:280px;">
+        <input id="rp-search" type="text" placeholder="Search consignment, part or event" style="max-width:320px;">
         <button class="btn" id="rp-filter">Search</button>
       </div>
       <table>
@@ -955,6 +1171,7 @@ function renderModels() {
   const dropboxCard = (user && user.level <= 1) ? `
     <div class="card" style="border:1px solid var(--primary);">
       <h3 class="card-h">China Master sync</h3>
+      <p class="card-sub">Last synced ${APP.lastSync ? esc(new Date(APP.lastSync).toLocaleString()) : 'never'}.</p>
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
         <button class="btn btn-primary" id="dbx-sync-btn">Sync now</button>
         <button class="btn btn-sm" id="dbx-check-btn">Check connection</button>
@@ -973,9 +1190,10 @@ function renderModels() {
   const listHtml = models.length ? `
     <div class="card">
       <h3 class="card-h">Existing models</h3>
+      <p class="card-sub">Part names and per-unit counts only. What a unit actually needs comes from China Master.</p>
       <table><thead><tr><th>Model</th><th>Sheet code</th><th>Parts</th></tr></thead><tbody>
         ${models.map(m => `<tr><td>${esc(m.modelName)}</td><td><code>${esc(m.sheetCode)}</code></td>
-          <td>${m.parts.map(p => `<span class="chip chip-idle">${esc(p.partLetter)} · ${esc(p.partName)}</span>`).join(' ')}</td></tr>`).join('')}
+          <td>${m.parts.map(p => `<span class="chip chip-idle">${esc(p.partLetter)} · ${esc(p.partName)} · ${p.qtyPerUnit}/unit</span>`).join(' ')}</td></tr>`).join('')}
       </tbody></table>
     </div>` : '';
 
@@ -1030,11 +1248,69 @@ const RENDERERS = {
 };
 
 /* =========================
+   SYNC (shared by Dashboard and Models & parts)
+   ========================= */
+
+function wireSyncButtons(syncId, checkId, statusId) {
+  const syncBtn = document.getElementById(syncId);
+  const checkBtn = document.getElementById(checkId);
+  const el = document.getElementById(statusId);
+  if (!el) return;
+
+  if (checkBtn) {
+    checkBtn.onclick = async () => {
+      checkBtn.disabled = true;
+      el.classList.remove('hidden');
+      el.innerText = 'Checking…';
+      const res = await apiCall('testDropbox');
+      if (!res.ok) {
+        el.innerText = "Couldn't reach the file. " + (res.error || '');
+      } else {
+        const when = res.modified ? new Date(res.modified).toLocaleString() : 'unknown';
+        const last = res.lastSync ? new Date(res.lastSync).toLocaleString() : 'never';
+        el.innerText = 'Connected to "' + res.name + '", changed ' + when + '. Last sync: ' + last + '.';
+      }
+      checkBtn.disabled = false;
+    };
+  }
+
+  if (syncBtn) {
+    syncBtn.onclick = async () => {
+      const original = syncBtn.innerText;
+      syncBtn.disabled = true;
+      syncBtn.innerText = 'Syncing…';
+      el.classList.remove('hidden');
+      el.innerText = 'Fetching China Master…';
+
+      const res = await apiCall('syncFromDropbox');
+      if (!res.ok) {
+        el.innerText = 'Sync failed: ' + (res.error || 'unknown error');
+        syncBtn.disabled = false;
+        syncBtn.innerText = original;
+        return;
+      }
+      let msg = res.added + ' new line(s), ' + res.updated + ' updated.';
+      if (res.needsReview > 0) msg += ' ' + res.needsReview + ' need review.';
+      if (res.skipped > 0) msg += ' ' + res.skipped + ' blank row(s) ignored.';
+      if (res.staleCount > 0) msg += ' ' + res.staleCount + ' line(s) are no longer in the file — check them by hand.';
+      el.innerText = msg;
+      syncBtn.disabled = false;
+      syncBtn.innerText = original;
+      await reload();
+    };
+  }
+}
+
+/* =========================
    PAGE HANDLER WIRING
    ========================= */
 
 function wirePageHandlers(pageId) {
-    if (pageId === 'consignments') {
+  if (pageId === 'dashboard') {
+    wireSyncButtons('dash-sync', 'dash-check', 'dash-sync-status');
+  }
+
+  if (pageId === 'consignments') {
     const s = document.getElementById('cn-sort');
     if (s) {
       s.value = window.__consignSort || 'eta';
@@ -1045,52 +1321,9 @@ function wirePageHandlers(pageId) {
       };
     }
   }
+
   if (pageId === 'models') {
-    const dbxSync = document.getElementById('dbx-sync-btn');
-    const dbxCheck = document.getElementById('dbx-check-btn');
-
-    if (dbxCheck) {
-      dbxCheck.onclick = async () => {
-        const el = document.getElementById('dbx-status');
-        dbxCheck.disabled = true;
-        el.classList.remove('hidden');
-        el.innerText = 'Checking…';
-        const res = await apiCall('testDropbox');
-        if (!res.ok) {
-          el.innerText = "Couldn't reach the file. " + (res.error || '');
-        } else {
-          const when = res.modified ? new Date(res.modified).toLocaleString() : 'unknown';
-          const last = res.lastSync ? new Date(res.lastSync).toLocaleString() : 'never';
-          el.innerText = 'Connected. "' + res.name + '", changed ' + when + '. Last sync: ' + last + '.';
-        }
-        dbxCheck.disabled = false;
-      };
-    }
-
-    if (dbxSync) {
-      dbxSync.onclick = async () => {
-        const el = document.getElementById('dbx-status');
-        dbxSync.disabled = true;
-        dbxSync.innerText = 'Syncing…';
-        el.classList.remove('hidden');
-        el.innerText = 'Fetching China Master…';
-
-        const res = await apiCall('syncFromDropbox');
-        if (!res.ok) {
-          el.innerText = 'Sync failed: ' + (res.error || 'unknown error');
-          dbxSync.disabled = false;
-          dbxSync.innerText = 'Sync now';
-          return;
-        }
-        let msg = res.added + ' new row(s), ' + res.updated + ' updated.';
-        if (res.needsReview > 0) msg += ' ' + res.needsReview + ' need review.';
-        if (res.skipped > 0) msg += ' ' + res.skipped + ' blank row(s) ignored.';
-        el.innerText = msg;
-        dbxSync.disabled = false;
-        dbxSync.innerText = 'Sync now';
-        await loadApp();
-      };
-    }
+    wireSyncButtons('dbx-sync-btn', 'dbx-check-btn', 'dbx-status');
 
     const seedBtn = document.getElementById('seed-sample-btn');
     if (seedBtn) {
@@ -1150,7 +1383,7 @@ function wirePageHandlers(pageId) {
         const qty = Number(input.value);
 
         statusEl.classList.remove('hidden');
-        if (!qty || qty <= 0) { statusEl.innerText = 'Enter a quantity.'; return; }
+        if (!qty || qty <= 0) { statusEl.innerText = 'Enter how many are on the floor.'; return; }
 
         btn.disabled = true;
         btn.innerText = 'Saving…';
@@ -1175,8 +1408,8 @@ function wirePageHandlers(pageId) {
         const max = Number(btn.dataset.max);
 
         statusEl.classList.remove('hidden');
-        if (!qty || qty <= 0) { statusEl.innerText = 'Enter a quantity.'; return; }
-        if (qty > max) { statusEl.innerText = 'Maximum is ' + max + '.'; return; }
+        if (!qty || qty <= 0) { statusEl.innerText = 'Enter how many units to build.'; return; }
+        if (qty > max) { statusEl.innerText = 'Only ' + max + ' can be built from the parts on hand.'; return; }
 
         btn.disabled = true;
         btn.innerText = 'Building…';
@@ -1202,8 +1435,8 @@ function wirePageHandlers(pageId) {
         const max = Number(btn.dataset.max);
 
         statusEl.classList.remove('hidden');
-        if (!qty || qty <= 0) { statusEl.innerText = 'Enter a quantity.'; return; }
-        if (qty > max) { statusEl.innerText = 'Maximum is ' + max + '.'; return; }
+        if (!qty || qty <= 0) { statusEl.innerText = 'Enter how many units are going out.'; return; }
+        if (qty > max) { statusEl.innerText = 'Only ' + max + ' built unit(s) are waiting to go out.'; return; }
 
         btn.disabled = true;
         btn.innerText = 'Sending…';
