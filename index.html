@@ -148,6 +148,12 @@ padding:16px 18px;margin-bottom:12px;
 .grid-4{grid-template-columns:repeat(auto-fill,minmax(190px,1fr));}
 .grid-3{grid-template-columns:repeat(auto-fill,minmax(240px,1fr));}
 .grid-2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr));}
+/* Five headline tiles stay on one line, then break cleanly rather than
+   leaving a single orphan on a row of its own. */
+.grid-5{grid-template-columns:repeat(5,1fr);}
+@media (max-width:1240px){.grid-5{grid-template-columns:repeat(3,1fr);}}
+@media (max-width:760px){.grid-5{grid-template-columns:repeat(2,1fr);}}
+@media (max-width:460px){.grid-5{grid-template-columns:1fr;}}
 
 .stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
 .stat-label{font-size:11.5px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-soft);font-weight:600;}
@@ -227,6 +233,36 @@ a.tile:hover .t-label,a.arrive-tile:hover .a-model{color:var(--primary-dark);}
 .tile-warn .t-value{color:var(--warning);}
 .tile-fr{border-left-color:var(--fr);}
 .tile-bb{border-left-color:var(--bb);}
+/* Late is the one state worth shouting about, so it is the only tile that
+   changes its whole background rather than just an edge. */
+.tile-late{border-left-color:var(--danger);background:var(--danger-bg);border-color:#FBCFCF;}
+.tile-late .t-value{color:var(--danger);}
+.tile-late .t-label,.tile-late .t-foot{color:#8F2020;}
+
+/* The two standing customers. */
+.cust{
+display:block;text-decoration:none;color:inherit;background:var(--surface);
+border:1px solid var(--border);border-radius:13px;padding:18px 20px;
+border-top:4px solid var(--border);transition:border-color .15s ease,box-shadow .15s ease;
+}
+.cust:hover{box-shadow:0 2px 10px rgba(124,45,18,0.09);}
+.cust-fr{border-top-color:var(--fr);}
+.cust-bb{border-top-color:var(--bb);}
+.cust .c-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:14px;}
+.cust .c-code{font-family:"Plus Jakarta Sans",sans-serif;font-weight:800;font-size:19px;color:var(--dark);}
+.cust-fr .c-code{color:var(--fr);}
+.cust-bb .c-code{color:var(--bb);}
+.cust .c-tag{font-size:11.5px;color:var(--text-soft);}
+.cust .c-main{display:flex;gap:34px;flex-wrap:wrap;}
+.cust .c-num{font-family:"Plus Jakarta Sans",sans-serif;font-weight:800;font-size:31px;line-height:1;color:var(--dark);}
+.cust .c-num-soft{color:var(--success);}
+.cust .c-lab{font-size:11.5px;color:var(--text-soft);margin-top:6px;max-width:190px;line-height:1.45;}
+.cust .c-foot{
+margin-top:15px;padding-top:12px;border-top:1px solid var(--border);
+font-size:11.5px;color:var(--text-soft);
+}
+
+.arrive-late{border-color:#FBCFCF;background:#FFF8F7;}
 
 .stage-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;}
 .stage{
@@ -255,14 +291,19 @@ display:flex;flex-direction:column;gap:7px;
 .bar-row:last-child{margin-bottom:0;}
 .bar-label{font-size:12.5px;font-weight:600;color:var(--text);margin-bottom:7px;display:flex;justify-content:space-between;gap:10px;}
 .bar-label span:last-child{color:var(--text-soft);font-weight:500;font-size:11.5px;}
-.bar-track{background:#FBF1E9;border-radius:5px;height:15px;margin-bottom:5px;overflow:hidden;}
+.bar-track{background:#FBF1E9;border-radius:5px;height:15px;margin-bottom:5px;}
 .bar-fill{height:100%;border-radius:5px;display:flex;align-items:center;justify-content:flex-end;
-padding-right:6px;color:#fff;font-size:10.5px;font-weight:700;min-width:2px;}
-.bar-fr .bar-fill{background:var(--fr);}
-.bar-bb .bar-fill{background:var(--bb);}
-.bar-demand .bar-fill{background:var(--accent);color:var(--dark);}
-.bar-built .bar-fill{background:var(--primary);}
-.bar-deliv .bar-fill{background:var(--success);}
+padding-right:6px;color:#fff;font-size:10.5px;font-weight:700;position:relative;}
+/* Sits just past the end of its own bar, not at the end of the track. */
+.bar-out{position:absolute;left:100%;top:0;height:15px;line-height:15px;margin-left:6px;
+font-size:10.5px;font-weight:700;color:var(--text-soft);white-space:nowrap;}
+
+/* One track per model: the whole order is the track, built fills it, and
+   confirmed sits inside the built portion. */
+.prog-track{background:#FBF1E9;border-radius:5px;height:17px;position:relative;overflow:hidden;}
+.prog-landed{position:absolute;inset:0 auto 0 0;background:var(--accent);border-radius:5px;}
+.prog-built{position:absolute;inset:0 auto 0 0;background:var(--primary);border-radius:5px;}
+.prog-conf{position:absolute;inset:0 auto 0 0;background:var(--success);border-radius:5px;}
 .legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;font-size:12px;color:var(--text-soft);}
 .legend i{width:11px;height:11px;border-radius:3px;display:inline-block;margin-right:6px;vertical-align:-1px;}
 
@@ -384,15 +425,23 @@ background:var(--surface);border:1px solid var(--accent);border-radius:12px;padd
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDAt4paCuEsZ0HZG4eWyWAMX_AVevyEBNVdUPyM6t6EJoMi8r1fpEc-R3epfe5XmMv/exec";
 const GOOGLE_CLIENT_ID = "766825494798-2vq54u2u9kmfegir98uig2ubr9gr6hj4.apps.googleusercontent.com";
 
+/* `filter` decides whether the topbar filter box appears.
+
+   It is off on two pages on purpose. The Dashboard has the master search,
+   which searches everything rather than just what is on screen — two boxes
+   ten pixels apart fought each other, and typing in the topbar one silently
+   emptied the master results. Reports has its own Search button that queries
+   the server, which finds events the page has not loaded; a box that only
+   hides visible rows sitting next to it was worse than no box. */
 const PAGES = [
-  { id: 'dashboard',    label: 'Dashboard',      group: 'Overview'  },
-  { id: 'consignments', label: 'Consignments',   group: 'Incoming'  },
-  { id: 'receiving',    label: 'Receiving',      group: 'Warehouse' },
-  { id: 'assembly',     label: 'Assembly',       group: 'Warehouse' },
-  { id: 'delivery',     label: 'Delivery',       group: 'Output'    },
-  { id: 'needsreview',  label: 'Needs review',   group: 'Output'    },
-  { id: 'reports',      label: 'Reports',        group: 'Output'    },
-  { id: 'models',       label: 'Models & parts', group: 'Setup'     }
+  { id: 'dashboard',    label: 'Dashboard',      group: 'Overview',  filter: false },
+  { id: 'consignments', label: 'Consignments',   group: 'Incoming',  filter: true  },
+  { id: 'receiving',    label: 'Receiving',      group: 'Warehouse', filter: true  },
+  { id: 'assembly',     label: 'Assembly',       group: 'Warehouse', filter: true  },
+  { id: 'delivery',     label: 'Delivery',       group: 'Output',    filter: true  },
+  { id: 'needsreview',  label: 'Needs review',   group: 'Output',    filter: true  },
+  { id: 'reports',      label: 'Reports',        group: 'Output',    filter: false },
+  { id: 'models',       label: 'Models & parts', group: 'Setup',     filter: false }
 ];
 
 /* The storage key still says assembix_ on purpose. Renaming it would sign
@@ -565,12 +614,13 @@ function route() {
   document.getElementById('page-title').innerText = page.label;
   document.getElementById('page-actions').innerHTML = `
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      ${page.filter ? `
       <div class="search-wrap">
         <svg class="s-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
         <input type="search" id="page-search" placeholder="Filter this page" autocomplete="off">
         <button class="s-clear hidden" id="page-search-clear" title="Clear" aria-label="Clear search">×</button>
       </div>
-      <span class="search-count" id="page-search-count"></span>
+      <span class="search-count" id="page-search-count"></span>` : ''}
       <button class="btn btn-sm" id="page-refresh">Refresh</button>
     </div>`;
   document.getElementById('page-refresh').onclick = async () => {
@@ -584,14 +634,25 @@ function route() {
   wirePageHandlers(page.id);
   wirePageSearch();
 
-  if (preset) {
-    const input = document.getElementById('page-search');
-    if (input) {
-      input.value = preset;
-      document.getElementById('page-search-clear').classList.remove('hidden');
-      applyPageFilter(preset.toLowerCase());
-    }
+  const input = document.getElementById('page-search');
+  if (preset && input) {
+    input.value = preset;
+    document.getElementById('page-search-clear').classList.remove('hidden');
+    applyPageFilter(preset.toLowerCase());
   }
+}
+
+/* Redraw the current page without going back to the server, then put the
+   filter back over it. Anything that rebuilds the content — changing the
+   sort, say — must come through here. Re-rendering on its own used to bring
+   every hidden row back while the box still held the search text and the
+   counter still claimed a filter was on. */
+function reRender() {
+  document.getElementById('content').innerHTML = RENDERERS[currentPage]();
+  wirePageHandlers(currentPage);
+  const input = document.getElementById('page-search');
+  const q = input ? input.value.trim().toLowerCase() : '';
+  if (q) applyPageFilter(q);
 }
 
 /* =========================
@@ -628,7 +689,9 @@ function applyPageFilter(q) {
   const countEl = document.getElementById('page-search-count');
   if (!content) return;
 
-  const blockSel = '.model-block, .arrive-tile, .ms-hit';
+  // Summary tiles at the top of a page describe the whole page, so they are
+  // never filtered — only the rows and blocks that list individual things.
+  const blockSel = '.model-block, .arrive-tile';
   const all = [
     ...content.querySelectorAll('tbody tr'),
     ...content.querySelectorAll(blockSel)
@@ -643,12 +706,18 @@ function applyPageFilter(q) {
     return;
   }
 
-  let shown = 0;
+  const hits = [];
   all.forEach(el => {
     const hit = el.textContent.toLowerCase().indexOf(q) !== -1;
     el.classList.toggle('hidden', !hit);
-    if (hit) shown++;
+    if (hit) hits.push(el);
   });
+
+  /* Count only the innermost matches. A model block on Receiving contains the
+     part rows, so both matched and two visible rows were reported as "4
+     matches". Anything that contains another match is a container, not a
+     result. */
+  const shown = hits.filter(el => !hits.some(other => other !== el && el.contains(other))).length;
 
   // A consignment heading with every model hidden under it is just noise.
   content.querySelectorAll('.consign-block').forEach(block => {
@@ -726,6 +795,24 @@ function fmtDay(v) {
   return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
+/* The ETA chip.
+
+   Two rules, both learned from looking at the live page. A line that has
+   already arrived gets no chip at all — "168 days ago" next to a received
+   container was the loudest thing in the column and meant nothing. A line
+   that is late gets a red one that says so in plain words, because overdue
+   used to render in the same calm blue as "in 9 days", which buried the
+   single most expensive state in the business. */
+function etaChip(r) {
+  if (!r.eta || r.arrived) return '';
+  const rel = relDays(r.eta);
+  if (!rel) return '';
+  if (r.overdue) {
+    return `<div><span class="chip chip-bad" style="margin-top:4px;">${Math.abs(rel.days)} days late</span></div>`;
+  }
+  return `<div><span class="chip ${rel.cls}" style="margin-top:4px;">${esc(rel.text)}</span></div>`;
+}
+
 function relDays(v) {
   const d = parseYmd(v);
   if (!d) return null;
@@ -769,12 +856,16 @@ function byConsignment(groups) {
 
 const STAGES = ['Production', 'Loaded', 'F-Bank', 'L-Bank', 'Clearance', 'Received'];
 
-function bar(cls, value, max, caption) {
-  const pct = max > 0 ? Math.max(value > 0 ? 3 : 0, Math.round((value / max) * 100)) : 0;
+/* One bar. A zero draws an empty track rather than a two-pixel stub with a
+   "0" crammed into it, and the value only sits inside the fill when there is
+   room for it. */
+function barTrack(value, max, color) {
+  const pct = max > 0 && value > 0 ? Math.max(2, Math.round((value / max) * 100)) : 0;
+  const inside = pct >= 12;
   return `
-    <div class="${cls}">
-      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;">${value > 0 ? value : ''}</div></div>
-      ${caption ? `<div style="font-size:11px;color:var(--text-soft);">${esc(caption)}</div>` : ''}
+    <div class="bar-track">
+      <div class="bar-fill" style="width:${pct}%;background:${color};">${
+        inside ? value : (value > 0 ? `<span class="bar-out">${value}</span>` : '')}</div>
     </div>`;
 }
 
@@ -809,15 +900,22 @@ function renderDashboard() {
     return syncBar + `<div class="empty">Nothing loaded yet. Sync China Master to bring in consignments.</div>`;
   }
 
-  /* --- Grid 1: the numbers that matter today.
-         Each tile opens the page the number came from, carrying a filter
-         where one narrows it usefully. --- */
+  /* --- Grid 1: five numbers, in the order a day actually runs.
+         Arriving, late, to count, to build, to send. Each opens the page the
+         number came from, carrying a filter where one narrows it usefully. --- */
   const tiles = `
-    <div class="grid grid-4">
+    <div class="grid grid-5">
       <a class="tile tile-accent" href="#/receiving">
-        <div class="t-label">Total arriving</div>
+        <div class="t-label">Arriving</div>
         <div class="t-value">${stats.totalArriving || 0}</div>
         <div class="t-foot">models still waiting on parts</div>
+      </a>
+      <a class="tile ${stats.overdueParts ? 'tile-late' : ''}" href="#/consignments">
+        <div class="t-label">Overdue</div>
+        <div class="t-value">${stats.overdueParts || 0}</div>
+        <div class="t-foot">${stats.overdueParts
+          ? 'past ETA, still not here — worst is ' + stats.worstDaysLate + ' days'
+          : 'nothing is late'}</div>
       </a>
       <a class="tile ${stats.shortLoadsToCount ? 'tile-warn' : ''}" href="#/receiving?q=${encodeURIComponent('Short load')}">
         <div class="t-label">Short loads to count</div>
@@ -830,20 +928,49 @@ function renderDashboard() {
         <div class="t-foot">units from parts on hand</div>
       </a>
       <a class="tile ${stats.readyToSend ? 'tile-good' : ''}" href="#/delivery">
-        <div class="t-label">Ready to send</div>
+        <div class="t-label">Assembled, ready to send</div>
         <div class="t-value">${stats.readyToSend || 0}</div>
-        <div class="t-foot">built, not yet out</div>
+        <div class="t-foot">built and still on the floor</div>
       </a>
-      <a class="tile tile-fr" href="#/delivery">
-        <div class="t-label">FR still owed</div>
-        <div class="t-value">${stats.frOwed || 0}</div>
-        <div class="t-foot">units across all models</div>
-      </a>
-      <a class="tile tile-bb" href="#/delivery">
-        <div class="t-label">BB still owed</div>
-        <div class="t-value">${stats.bbOwed || 0}</div>
-        <div class="t-foot">units across all models</div>
-      </a>
+    </div>`;
+
+  /* --- The two customers, side by side.
+
+         This replaces a pair of tiles that read "FR still owed 1622". That
+         number was every unit ever ordered, including four models being made
+         in China — nothing anybody could act on. What a person actually needs
+         is what is built and waiting to go out, then what is owed on stock
+         that has landed, with the full order kept underneath for reference. --- */
+  const custBox = (code, cls) => {
+    const c = (APP.dashboard && APP.dashboard.customer && APP.dashboard.customer[code]) || {};
+    const ready = groups.reduce((s, g) => s + (g.readyToSend || 0), 0);
+    return `
+      <a class="cust ${cls}" href="#/delivery?q=${encodeURIComponent(code)}">
+        <div class="c-top">
+          <span class="c-code">${esc(code)}</span>
+          <span class="c-tag">${c.awaiting ? c.awaiting + ' awaiting confirmation' : 'nothing in transit'}</span>
+        </div>
+        <div class="c-main">
+          <div>
+            <div class="c-num">${c.deliverable || 0}</div>
+            <div class="c-lab">to deliver from stock that has landed</div>
+          </div>
+          <div>
+            <div class="c-num c-num-soft">${c.confirmed || 0}</div>
+            <div class="c-lab">confirmed received</div>
+          </div>
+        </div>
+        <div class="c-foot">${c.ordered || 0} ordered in total${ready ? ' · ' + ready + ' assembled and waiting to be split' : ''}</div>
+      </a>`;
+  };
+
+  const customers = `
+    <div class="dash-section">
+      <div class="dash-head">
+        <h2>FR and BB</h2>
+        <span class="sub">what is assembled and to be delivered</span>
+      </div>
+      <div class="grid grid-2">${custBox('FR', 'cust-fr')}${custBox('BB', 'cust-bb')}</div>
     </div>`;
 
   /* --- Grid 2: where everything sits on the import journey.
@@ -857,49 +984,80 @@ function renderDashboard() {
     return `<a class="${cls}" href="#/consignments?q=${encodeURIComponent(s)}"><div class="s-count">${n}</div><div class="s-name">${esc(s)}</div></a>`;
   }).join('');
 
-  /* --- Grid 3: what is still coming. Each opens Receiving on that consignment. --- */
+  /* --- Grid 3: what is still coming. Late ones first, and each opens
+         Receiving on that consignment. --- */
   const arriving = groups.filter(g => !g.allArrived)
-    .sort((a, b) => String(a.nextEta || '9999').localeCompare(String(b.nextEta || '9999')));
+    .sort((a, b) => {
+      if (!!b.overdueParts !== !!a.overdueParts) return b.overdueParts - a.overdueParts;
+      if (a.overdueParts && b.overdueParts) return b.worstDaysLate - a.worstDaysLate;
+      return String(a.nextEta || '9999').localeCompare(String(b.nextEta || '9999'));
+    });
 
   const arriveTiles = arriving.length ? arriving.map(g => {
+    const late = g.overdueParts > 0;
     const rel = relDays(g.nextEta);
     const waiting = g.parts.filter(p => !p.arrived);
+    // The model leads, not the consignment code — ACE-49-50 carries two
+    // different products and the repeated code read as a duplicate tile.
     return `
-      <a class="arrive-tile" href="#/receiving?q=${encodeURIComponent(g.consignmentGroup)}">
+      <a class="arrive-tile${late ? ' arrive-late' : ''}" href="#/receiving?q=${encodeURIComponent(g.consignmentGroup)}">
         <div class="a-top">
-          <code>${esc(g.consignmentGroup)}</code>
-          ${importChip(g.importStage)}
+          <span class="a-model">${modelLabel(g)}</span>
+          ${late ? `<span class="chip chip-bad">${g.worstDaysLate} days late</span>` : importChip(g.importStage)}
         </div>
-        <div class="a-model">${modelLabel(g)}</div>
-        <div class="a-meta">${esc(g.supplier)} · ${esc(g.product || '—')} · ${g.totalQty || '—'} expected</div>
+        <div class="a-meta"><code>${esc(g.consignmentGroup)}</code> · ${esc(g.supplier)} · ${g.totalQty || '—'} expected</div>
         <div class="a-parts">
-          ${g.parts.map(p => `<span class="chip ${p.arrived ? 'chip-ok' : (p.needsCount ? 'chip-warn' : 'chip-idle')}">${esc(p.partLetter)}${p.arrived ? ' ✓' : (p.needsCount ? ' count' : '')}</span>`).join('')}
+          ${g.parts.map(p => `<span class="chip ${p.arrived ? 'chip-ok' : (p.overdue ? 'chip-bad' : (p.needsCount ? 'chip-warn' : 'chip-idle'))}">${esc(p.partLetter)}${p.arrived ? ' in' : (p.needsCount ? ' count' : (p.overdue ? ' late' : ''))}</span>`).join('')}
         </div>
         <div class="a-meta">
-          ${g.nextEta ? `Next part due ${esc(fmtDay(g.nextEta))}${rel ? ` <span class="chip ${rel.cls}">${esc(rel.text)}</span>` : ''}`
+          ${g.nextEta
+            ? (late ? `Due ${esc(fmtDay(g.nextEta))}, still not here`
+                    : `Next part due ${esc(fmtDay(g.nextEta))}${rel ? ` · ${esc(rel.text)}` : ''}`)
             : `${waiting.length} part${waiting.length === 1 ? '' : 's'} with no ETA`}
         </div>
       </a>`;
   }).join('') : `<div class="empty">Every model has fully arrived.</div>`;
 
-  /* --- Charts --- */
+  /* --- Charts.
+
+         The old "ordered, built, delivered" panel drew three bars per model,
+         and since almost nothing is built yet, twenty-one bars were empty
+         track with captions repeating the legend directly above them. One
+         track per model now: the full order is the track, built fills it,
+         confirmed sits inside that, and the numbers are read off the right. --- */
   const demandMax = Math.max(1, ...groups.map(g => Math.max(g.frQty || 0, g.bbQty || 0)));
   const frbbChart = groups.map(g => `
     <div class="bar-row">
       <div class="bar-label"><span>${modelLabel(g)}</span><span>${esc(g.consignmentGroup)}</span></div>
-      ${bar('bar-fr', g.frQty || 0, demandMax, '')}
-      ${bar('bar-bb', g.bbQty || 0, demandMax, '')}
+      <div class="bar-fr">${barTrack(g.frQty || 0, demandMax, 'var(--fr)')}</div>
+      <div class="bar-bb">${barTrack(g.bbQty || 0, demandMax, 'var(--bb)')}</div>
     </div>`).join('');
 
-  const progressMax = Math.max(1, ...groups.map(g => Math.max((g.frQty || 0) + (g.bbQty || 0), g.totalBuilt || 0)));
+  /* Parts landed comes first in the track because on this data it is the only
+     layer with anything in it — showing built and confirmed alone drew seven
+     empty rows that each said "0 built of 250". Landed is measured across all
+     of a model's parts, so a model with one part of two fully in reads 50%,
+     which is the true picture of how far the consignment has got. */
   const progressChart = groups.map(g => {
-    const demand = (g.frQty || 0) + (g.bbQty || 0);
+    const target = g.totalQty || ((g.frQty || 0) + (g.bbQty || 0));
+    const expected = g.parts.reduce((s, p) => s + (p.qtyExpected || 0), 0);
+    const landed = g.parts.reduce((s, p) => s + (p.qtyReceived || 0), 0);
+    const landedPct = expected > 0 ? Math.min(100, (landed / expected) * 100) : 0;
+    const built = g.totalBuilt || 0;
+    const conf = g.totalConfirmed || 0;
+    const pct = n => target > 0 ? Math.min(100, (n / target) * 100) : 0;
     return `
       <div class="bar-row">
-        <div class="bar-label"><span>${modelLabel(g)}</span><span>${chip(g.status)}</span></div>
-        ${bar('bar-demand', demand, progressMax, 'ordered')}
-        ${bar('bar-built', g.totalBuilt || 0, progressMax, 'built')}
-        ${bar('bar-deliv', g.totalConfirmed || 0, progressMax, 'confirmed by customer')}
+        <div class="bar-label">
+          <span>${modelLabel(g)}</span>
+          <span>${Math.round(landedPct)}% of parts in${built ? ' · ' + built + ' built' : ''}${conf ? ' · ' + conf + ' confirmed' : ''}</span>
+        </div>
+        <div class="prog-track" role="img"
+             aria-label="${esc(plainModel(g))}: ${Math.round(landedPct)} percent of parts landed, ${built} built and ${conf} confirmed out of ${target} ordered">
+          <div class="prog-landed" style="width:${landedPct}%;"></div>
+          <div class="prog-built" style="width:${pct(built)}%;"></div>
+          <div class="prog-conf" style="width:${pct(conf)}%;"></div>
+        </div>
       </div>`;
   }).join('');
 
@@ -922,6 +1080,8 @@ function renderDashboard() {
       ${tiles}
     </div>
 
+    ${customers}
+
     <div class="dash-section">
       <div class="dash-head">
         <h2>Where every model sits</h2>
@@ -933,7 +1093,8 @@ function renderDashboard() {
     <div class="dash-section">
       <div class="dash-head">
         <h2>Still to arrive</h2>
-        <span class="sub">${arriving.length} model${arriving.length === 1 ? '' : 's'}</span>
+        <span class="sub">${arriving.length} model${arriving.length === 1 ? '' : 's'}${
+          stats.overdueParts ? ' · ' + stats.overdueModels + ' with a late part' : ''}</span>
       </div>
       <div class="grid grid-3">${arriveTiles}</div>
     </div>
@@ -950,10 +1111,10 @@ function renderDashboard() {
       </div>
 
       <div class="card">
-        <h3 class="card-h">Ordered, built, delivered</h3>
-        <p class="card-sub">How far each model has travelled from order to customer.</p>
+        <h3 class="card-h">How far each model has got</h3>
+        <p class="card-sub">Parts landing, then units built, then what the customer has confirmed.</p>
         <div class="legend">
-          <span><i style="background:var(--accent);"></i>Ordered</span>
+          <span><i style="background:var(--accent);"></i>Parts landed</span>
           <span><i style="background:var(--primary);"></i>Built</span>
           <span><i style="background:var(--success);"></i>Confirmed</span>
         </div>
@@ -979,24 +1140,23 @@ function renderConsignments() {
       <a href="#/dashboard">Dashboard</a>.</div>`;
   }
 
-  const arriving = rows.filter(r => r.importStatus !== 'Received' && r.qtyReceived <= 0);
+  const arriving = rows.filter(r => !r.arrived);
+  const overdue = rows.filter(r => r.overdue);
   const soon = arriving.filter(r => { const rel = relDays(r.eta); return rel && rel.days >= 0 && rel.days <= 14; });
   const shortLoads = rows.filter(r => r.shortLoad);
 
-  const sortBy = window.__consignSort || 'eta';
+  const sortBy = window.__consignSort || 'urgency';
   const dir = (a, b) => String(a).localeCompare(String(b));
   const sorted = rows.slice().sort((a, b) => {
     if (sortBy === 'eta')         return dir(a.eta || '9999', b.eta || '9999');
     if (sortBy === 'consignment') return dir(a.consignmentGroup, b.consignmentGroup);
     if (sortBy === 'model')       return dir(a.signatureModel, b.signatureModel);
     if (sortBy === 'status')      return dir(a.importStatus, b.importStatus);
-    return 0;
+    return 0; // 'urgency' — the server already sorted it that way
   });
 
-  const body = sorted.map(r => {
-    const rel = relDays(r.eta);
-    return `
-      <tr${r.shortLoad ? ' style="background:#FFFBF5;"' : ''}>
+  const body = sorted.map(r => `
+      <tr${r.overdue ? ' style="background:#FFF6F5;"' : (r.shortLoad ? ' style="background:#FFFBF5;"' : '')}>
         <td><code>${esc(r.packaging)}</code></td>
         <td>${esc(r.supplier)}</td>
         <td>${esc(r.product)}</td>
@@ -1006,31 +1166,37 @@ function renderConsignments() {
         <td style="text-align:right;"><b>${r.totalQty || '—'}</b></td>
         <td>${r.shortLoad ? '<span class="chip chip-warn">Short load</span>' : importChip(r.importStatus)}</td>
         <td>${esc(fmtDay(r.etd))}</td>
-        <td>${esc(fmtDay(r.eta))}${rel ? `<div><span class="chip ${rel.cls}" style="margin-top:4px;">${esc(rel.text)}</span></div>` : ''}</td>
+        <td>${esc(fmtDay(r.eta))}${etaChip(r)}</td>
         <td>${esc(r.mgr || '—')}</td>
-      </tr>`;
-  }).join('');
+      </tr>`).join('');
 
   return `
     <div class="grid grid-4" style="margin-bottom:18px;">
       <div class="stat"><div class="stat-label">Lines in total</div><div class="stat-value">${rows.length}</div></div>
-      <div class="stat"><div class="stat-label">Still to arrive</div><div class="stat-value">${arriving.length}</div></div>
-      <div class="stat"><div class="stat-label">Arriving within 14 days</div><div class="stat-value">${soon.length}</div></div>
+      <div class="stat"><div class="stat-label">Lines still to arrive</div><div class="stat-value">${arriving.length}</div></div>
+      <div class="stat"><div class="stat-label">Overdue</div>
+        <div class="stat-value" style="color:${overdue.length ? 'var(--danger)' : 'var(--dark)'};">${overdue.length}</div></div>
+      <div class="stat"><div class="stat-label">Due within 14 days</div><div class="stat-value">${soon.length}</div></div>
       <div class="stat"><div class="stat-label">Short loads</div><div class="stat-value">${shortLoads.length}</div></div>
     </div>
 
-    <div class="card">
-      <div style="display:flex;gap:10px;align-items:end;margin-bottom:14px;">
-        <div style="flex:0 0 200px;">
-          <label>Sort by</label>
-          <select id="cn-sort">
-            <option value="eta">ETA</option>
-            <option value="consignment">Consignment</option>
-            <option value="model">Model</option>
-            <option value="status">Status</option>
-          </select>
-        </div>
+    <div style="display:flex;gap:10px;align-items:end;margin-bottom:14px;">
+      <div style="flex:0 0 220px;">
+        <label>Sort by</label>
+        <select id="cn-sort">
+          <option value="urgency">Urgency</option>
+          <option value="eta">ETA</option>
+          <option value="consignment">Consignment</option>
+          <option value="model">Model</option>
+          <option value="status">Status</option>
+        </select>
       </div>
+      <div style="font-size:12px;color:var(--text-soft);padding-bottom:11px;">
+        These are packaging lines. The dashboard counts models, so its number is smaller.
+      </div>
+    </div>
+
+    <div class="card">
       <div style="overflow-x:auto;">
         <table>
           <thead><tr>
@@ -1059,19 +1225,22 @@ function renderReceiving() {
     const models = block.models.map(g => {
       const parts = g.parts.filter(p => !p.arrived || p.needsCount);
       const partRows = parts.map(p => {
-        const rel = relDays(p.eta);
         const outstanding = Math.max(0, p.qtyExpected - p.qtyReceived);
+        // ModelParts calls part A "Part A", so printing both the letter and
+        // the name put "Part A" twice on every single row. Only show the name
+        // when somebody has actually given the part a real one.
+        const named = p.partName && p.partName !== 'Part ' + p.partLetter;
         return `
-          <tr${p.needsCount ? ' style="background:#FFFBF5;"' : ''}>
-            <td><b>Part ${esc(p.partLetter)}</b><div style="color:var(--text-soft);font-size:11.5px;">${esc(p.partName)}</div></td>
+          <tr${p.overdue ? ' style="background:#FFF6F5;"' : (p.needsCount ? ' style="background:#FFFBF5;"' : '')}>
+            <td><b>Part ${esc(p.partLetter)}</b>${named ? `<div style="color:var(--text-soft);font-size:11.5px;">${esc(p.partName)}</div>` : ''}</td>
             <td>${importChip(p.importStatus)}${p.needsCount ? ' <span class="chip chip-warn">Short load</span>' : ''}</td>
             <td>${esc(fmtDay(p.etd))}</td>
-            <td>${esc(fmtDay(p.eta))}${rel ? ` <span class="chip ${rel.cls}">${esc(rel.text)}</span>` : ''}</td>
+            <td>${esc(fmtDay(p.eta))}${etaChip(p)}</td>
             <td style="text-align:right;">${p.qtyExpected || '—'}</td>
             <td style="text-align:right;"><b>${p.qtyReceived}</b></td>
             <td style="text-align:right;${outstanding > 0 ? 'color:var(--warning);font-weight:600;' : ''}">${outstanding || '—'}</td>
             <td style="white-space:nowrap;">
-              <input type="number" min="1" max="${p.qtyExpected || ''}" class="rcv-qty" placeholder="counted" style="width:92px;display:inline-block;">
+              <input type="number" min="1" max="${p.qtyExpected || ''}" class="rcv-qty" placeholder="count" style="width:80px;display:inline-block;">
               <button class="btn btn-sm rcv-btn" data-rowid="${esc(p.rowId || '')}" ${p.rowId ? '' : 'disabled'}>Receive</button>
             </td>
           </tr>`;
@@ -1083,14 +1252,16 @@ function renderReceiving() {
             <div class="model-title">${modelLabel(g)}</div>
             <div class="model-meta">${esc(g.supplier)} · ${esc(g.product || '—')} · FR ${g.frQty || 0} · BB ${g.bbQty || 0} · total ${g.totalQty || '—'}</div>
           </div>
-          <table>
-            <thead><tr>
-              <th>Part</th><th>Status</th><th>ETD</th><th>ETA</th>
-              <th style="text-align:right;">Expected</th><th style="text-align:right;">Received</th>
-              <th style="text-align:right;">Outstanding</th><th style="width:190px;"></th>
-            </tr></thead>
-            <tbody>${partRows}</tbody>
-          </table>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead><tr>
+                <th>Part</th><th>Status</th><th>ETD</th><th>ETA</th>
+                <th style="text-align:right;">Expected</th><th style="text-align:right;">Received</th>
+                <th style="text-align:right;">Outstanding</th><th style="width:190px;"></th>
+              </tr></thead>
+              <tbody>${partRows}</tbody>
+            </table>
+          </div>
           <div class="rcv-status note hidden" style="margin-top:12px;"></div>
         </div>`;
     }).join('');
@@ -1125,12 +1296,18 @@ function renderAssembly() {
   const blocked = active.filter(g => g.buildableUnits <= 0).length;
 
   const partBar = p => {
-    const units = Math.floor(p.qtyReceived / (p.qtyPerUnit || 1));
+    const per = p.qtyPerUnit || 1;
+    const units = Math.floor(p.qtyReceived / per);
+    // With one part per unit the count and the unit count are the same number,
+    // so saying "537" and then "537 units" underneath told nobody anything.
+    // The second line earns its place only when a unit takes more than one.
     return `
       <div style="border:1px solid var(--border);border-radius:10px;padding:12px;">
         <div style="font-size:11.5px;color:var(--text-soft);font-weight:700;">Part ${esc(p.partLetter)}</div>
         <div style="font-size:22px;font-weight:800;color:var(--dark);margin-top:4px;line-height:1;">${p.qtyReceived}</div>
-        <div style="font-size:11.5px;color:var(--text-soft);margin-top:5px;">${units} unit${units === 1 ? '' : 's'}</div>
+        <div style="font-size:11.5px;color:var(--text-soft);margin-top:5px;">
+          ${per > 1 ? `${per} per unit · makes ${units}` : 'on the floor'}
+        </div>
       </div>`;
   };
 
@@ -1251,6 +1428,7 @@ function renderDelivery() {
   const pendingTable = pending.length ? `
     <div class="card">
       <h3 class="card-h">Awaiting confirmation</h3>
+      <div style="overflow-x:auto;">
       <table>
         <thead><tr><th>Consignment · model</th><th>Customer</th><th style="text-align:right;">Sent</th><th>When</th><th style="width:220px;"></th></tr></thead>
         <tbody>
@@ -1267,6 +1445,7 @@ function renderDelivery() {
             </tr>`).join('')}
         </tbody>
       </table>
+      </div>
       <div id="cfm-status" class="note hidden" style="margin-top:12px;"></div>
     </div>` : '';
 
@@ -1323,10 +1502,12 @@ function renderReports() {
         <input id="rp-search" type="text" placeholder="Search consignment, part or event" style="max-width:320px;">
         <button class="btn" id="rp-filter">Search</button>
       </div>
+      <div style="overflow-x:auto;">
       <table>
         <thead><tr><th>When</th><th>Consignment · model</th><th>Part</th><th>Event</th><th>Qty</th><th>By</th></tr></thead>
         <tbody id="rp-body">${reportRows(APP.events || [])}</tbody>
       </table>
+      </div>
     </div>`;
 }
 
@@ -1569,12 +1750,10 @@ function wirePageHandlers(pageId) {
   if (pageId === 'consignments') {
     const s = document.getElementById('cn-sort');
     if (s) {
-      s.value = window.__consignSort || 'eta';
-      s.onchange = () => {
-        window.__consignSort = s.value;
-        document.getElementById('content').innerHTML = RENDERERS.consignments();
-        wirePageHandlers('consignments');
-      };
+      s.value = window.__consignSort || 'urgency';
+      // reRender puts the active filter back. Re-rendering directly used to
+      // bring all 17 rows back while the search box still said "tony".
+      s.onchange = () => { window.__consignSort = s.value; reRender(); };
     }
   }
 
