@@ -77,6 +77,8 @@ display:flex;flex-direction:column;padding:20px 14px;gap:22px;
 position:sticky;top:0;height:100vh;overflow-y:auto;
 }
 .brand{display:flex;align-items:center;gap:10px;padding:0 6px;}
+.brand-home{text-decoration:none;border-radius:9px;padding:4px 6px;margin:-4px 0;transition:background .15s ease;}
+.brand-home:hover{background:rgba(255,255,255,0.07);}
 .brand-mark{
 width:32px;height:32px;flex-shrink:0;border-radius:9px;background:var(--primary);
 display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:15px;
@@ -113,6 +115,7 @@ border:1px solid var(--border);background:var(--surface);color:var(--text);
 padding:8px 15px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;
 display:inline-flex;align-items:center;gap:7px;transition:0.15s ease;white-space:nowrap;
 }
+a.btn{text-decoration:none;}
 .btn:hover{background:#FFF7ED;border-color:var(--accent);}
 .btn-primary{background:var(--primary);border-color:var(--primary);color:#fff;}
 .btn-primary:hover{background:var(--primary-dark);border-color:var(--primary-dark);}
@@ -161,6 +164,13 @@ padding:16px 18px;margin-bottom:12px;
 
 label{display:block;font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;
 color:var(--text-soft);margin-bottom:6px;}
+/* No up/down spinners on any quantity box. They are a fiddly target on a
+   warehouse tablet and a stray scroll over a focused field silently changes
+   the number, which on this site means a wrong count. Type the number. */
+input[type="number"]{-moz-appearance:textfield;appearance:textfield;}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+
 input,select,textarea{
 width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;
 background:var(--surface);color:var(--text);font-size:14px;font-family:inherit;
@@ -263,6 +273,13 @@ font-size:11.5px;color:var(--text-soft);
 }
 
 .arrive-late{border-color:#FBCFCF;background:#FFF8F7;}
+
+/* FR and BB filled in together, one button for both. */
+.dlv-form{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;}
+.dlv-cust-field{flex:0 0 130px;}
+.dlv-actions{display:flex;flex-direction:column;gap:7px;padding-top:23px;}
+.dlv-hint{font-size:11.5px;color:var(--text-soft);margin-top:6px;}
+.dlv-actions .dlv-hint{margin-top:0;}
 
 .stage-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;}
 .stage{
@@ -395,10 +412,10 @@ background:var(--surface);border:1px solid var(--accent);border-radius:12px;padd
 <div id="app" class="app-shell hidden">
 
   <aside class="sidebar">
-    <div class="brand">
+    <a class="brand brand-home" href="#/dashboard" title="Go to the dashboard">
       <div class="brand-mark">A</div>
       <div class="brand-word">AssembiX</div>
-    </div>
+    </a>
 
     <nav class="nav" id="nav"></nav>
 
@@ -441,7 +458,9 @@ const PAGES = [
   { id: 'delivery',     label: 'Delivery',       group: 'Output',    filter: true  },
   { id: 'needsreview',  label: 'Needs review',   group: 'Output',    filter: true  },
   { id: 'reports',      label: 'Reports',        group: 'Output',    filter: false },
-  { id: 'models',       label: 'Models & parts', group: 'Setup',     filter: false }
+  { id: 'models',       label: 'Models & parts', group: 'Setup',     filter: false },
+  // Reached from "Show all" on the dashboard, so it stays out of the sidebar.
+  { id: 'activity',     label: 'Your activity',  group: null,        filter: true, hidden: true }
 ];
 
 /* The storage key still says assembix_ on purpose. Renaming it would sign
@@ -586,6 +605,7 @@ function renderNav() {
   nav.innerHTML = "";
   let lastGroup = null;
   PAGES.forEach(p => {
+    if (p.hidden) return;
     if (p.group !== lastGroup) {
       nav.insertAdjacentHTML('beforeend', `<div class="nav-label">${p.group}</div>`);
       lastGroup = p.group;
@@ -996,7 +1016,7 @@ function renderDashboard() {
   const arriveTiles = arriving.length ? arriving.map(g => {
     const late = g.overdueParts > 0;
     const rel = relDays(g.nextEta);
-    const waiting = g.parts.filter(p => !p.arrived);
+    const waiting = g.parts.filter(p => !p.fullyIn);
     // The model leads, not the consignment code — ACE-49-50 carries two
     // different products and the repeated code read as a duplicate tile.
     return `
@@ -1007,7 +1027,13 @@ function renderDashboard() {
         </div>
         <div class="a-meta"><code>${esc(g.consignmentGroup)}</code> · ${esc(g.supplier)} · ${g.totalQty || '—'} expected</div>
         <div class="a-parts">
-          ${g.parts.map(p => `<span class="chip ${p.arrived ? 'chip-ok' : (p.overdue ? 'chip-bad' : (p.needsCount ? 'chip-warn' : 'chip-idle'))}">${esc(p.partLetter)}${p.arrived ? ' in' : (p.needsCount ? ' count' : (p.overdue ? ' late' : ''))}</span>`).join('')}
+          ${g.parts.map(p => {
+            const cls = p.fullyIn ? 'chip-ok' : (p.overdue ? 'chip-bad' : (p.arrived || p.needsCount ? 'chip-warn' : 'chip-idle'));
+            const tag = p.fullyIn ? ' in'
+              : (p.arrived ? ' ' + p.qtyReceived + '/' + p.qtyExpected
+              : (p.needsCount ? ' count' : (p.overdue ? ' late' : '')));
+            return `<span class="chip ${cls}">${esc(p.partLetter)}${tag}</span>`;
+          }).join('')}
         </div>
         <div class="a-meta">
           ${g.nextEta
@@ -1062,7 +1088,8 @@ function renderDashboard() {
   }).join('');
 
   /* --- Recent activity, this person only --- */
-  const mine = (APP.events || []).filter(e => String(e.User || '').toLowerCase() === String(user.email).toLowerCase()).slice(0, 12);
+  const allMine = (APP.events || []).filter(e => String(e.User || '').toLowerCase() === String(user.email).toLowerCase());
+  const mine = allMine.slice(0, 5);
   const activity = mine.length ? mine.map(e => `
     <div class="act-item">
       <div class="act-when">${esc(e.Timestamp || '—')}</div>
@@ -1124,8 +1151,44 @@ function renderDashboard() {
 
     <div class="card">
       <h3 class="card-h">Your recent activity</h3>
-      <p class="card-sub">What you have recorded, newest first.</p>
+      <p class="card-sub">Your last ${mine.length} entr${mine.length === 1 ? 'y' : 'ies'}, newest first.</p>
       ${activity}
+      ${allMine.length > mine.length
+        ? `<a class="btn btn-sm" style="margin-top:14px;" href="#/activity">Show all ${allMine.length}</a>`
+        : ''}
+    </div>`;
+}
+
+/* Everything this person has recorded. Reached from the dashboard's
+   "Show all", and filterable like any other list page. */
+function renderActivity() {
+  const mine = (APP.events || []).filter(e =>
+    String(e.User || '').toLowerCase() === String(user.email).toLowerCase());
+
+  if (!mine.length) {
+    return `<div class="empty">You haven't recorded anything yet.
+      <div style="margin-top:12px;"><a class="btn btn-sm" href="#/dashboard">Back to the dashboard</a></div></div>`;
+  }
+
+  return `
+    <div class="card">
+      <h3 class="card-h">Everything you have recorded</h3>
+      <p class="card-sub">${mine.length} entr${mine.length === 1 ? 'y' : 'ies'}, newest first.
+        Reports shows the whole team's history.</p>
+      <div style="overflow-x:auto;">
+      <table>
+        <thead><tr><th>When</th><th>Consignment · model</th><th>Part</th><th>Event</th><th style="text-align:right;">Qty</th></tr></thead>
+        <tbody>
+          ${mine.map(e => `<tr>
+            <td style="white-space:nowrap;">${esc(e.Timestamp || '—')}</td>
+            <td>${esc(e.ConsignmentGroup || 'whole file')}</td>
+            <td>${esc(e.PartLetter || '—')}</td>
+            <td><b>${esc(e.EventType)}</b></td>
+            <td style="text-align:right;">${e.Qty === '' || e.Qty == null ? '—' : esc(e.Qty)}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+      </div>
     </div>`;
 }
 
@@ -1218,12 +1281,15 @@ function renderConsignments() {
    ========================= */
 
 function renderReceiving() {
-  const groups = (APP.consignments || []).filter(g => g.parts.some(p => !p.arrived || p.needsCount));
+  // A part stays here until the whole count is in. Receiving 10 of 250 used
+  // to make the part "arrived" and drop it off this screen with 240 still
+  // owed — fullyIn is the test now.
+  const groups = (APP.consignments || []).filter(g => g.parts.some(p => !p.fullyIn || p.needsCount));
   if (!groups.length) return `<div class="empty">Everything has arrived. Head to Assembly to build.</div>`;
 
   const blocks = byConsignment(groups).map(block => {
     const models = block.models.map(g => {
-      const parts = g.parts.filter(p => !p.arrived || p.needsCount);
+      const parts = g.parts.filter(p => !p.fullyIn || p.needsCount);
       const partRows = parts.map(p => {
         const outstanding = Math.max(0, p.qtyExpected - p.qtyReceived);
         // ModelParts calls part A "Part A", so printing both the letter and
@@ -1395,6 +1461,10 @@ function renderDelivery() {
       <div class="consign-head"><h2>${esc(block.consignment)}</h2></div>
       ${block.models.map(g => {
         const available = g.totalBuilt - g.totalOut;
+        const frGot = (g.deliveredTo && g.deliveredTo.FR) || { confirmed: 0 };
+        const bbGot = (g.deliveredTo && g.deliveredTo.BB) || { confirmed: 0 };
+        const frLeft = Math.max(0, (g.frQty || 0) - (frGot.confirmed || 0));
+        const bbLeft = Math.max(0, (g.bbQty || 0) - (bbGot.confirmed || 0));
         return `
         <div class="model-block">
           <div class="model-head">
@@ -1403,16 +1473,23 @@ function renderDelivery() {
               <div class="model-meta">${available} built · FR ${g.frQty || 0} · BB ${g.bbQty || 0}</div>
             </div>
           </div>
-          <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
-            <div style="flex:0 0 130px;">
-              <label>Customer</label>
-              <select class="dlv-cust"><option value="FR">FR</option><option value="BB">BB</option></select>
+          <div class="dlv-form">
+            <div class="dlv-cust-field">
+              <label>To FR</label>
+              <input type="number" class="dlv-fr" min="0" max="${available}" placeholder="0"
+                     aria-label="Units out to FR">
+              <div class="dlv-hint">${frLeft ? frLeft + ' still owed' : 'nothing owed'}</div>
             </div>
-            <div style="flex:0 0 130px;">
-              <label>Units out</label>
-              <input type="number" class="dlv-qty" min="1" max="${available}" value="${available}">
+            <div class="dlv-cust-field">
+              <label>To BB</label>
+              <input type="number" class="dlv-bb" min="0" max="${available}" placeholder="0"
+                     aria-label="Units out to BB">
+              <div class="dlv-hint">${bbLeft ? bbLeft + ' still owed' : 'nothing owed'}</div>
             </div>
-            <button class="btn btn-primary dlv-btn" data-groupkey="${esc(g.groupKey)}" data-max="${available}">Mark out</button>
+            <div class="dlv-actions">
+              <button class="btn btn-primary dlv-btn" data-groupkey="${esc(g.groupKey)}" data-max="${available}">Mark out</button>
+              <div class="dlv-hint dlv-left" data-available="${available}">${available} on the floor</div>
+            </div>
           </div>
           <div class="dlv-status note hidden" style="margin-top:12px;"></div>
         </div>`;
@@ -1596,6 +1673,7 @@ const RENDERERS = {
   assembly: renderAssembly,
   delivery: renderDelivery,
   needsreview: renderNeedsReview,
+  activity: renderActivity,
   reports: renderReports,
   models: renderModels
 };
@@ -1861,21 +1939,47 @@ function wirePageHandlers(pageId) {
   }
 
   if (pageId === 'delivery') {
+    // Live "left on the floor" as the two boxes are filled in.
+    document.querySelectorAll('.dlv-form').forEach(form => {
+      const leftEl = form.querySelector('.dlv-left');
+      const max = Number(leftEl.dataset.available);
+      const update = () => {
+        const fr = Number(form.querySelector('.dlv-fr').value) || 0;
+        const bb = Number(form.querySelector('.dlv-bb').value) || 0;
+        const left = max - fr - bb;
+        leftEl.innerText = left < 0
+          ? (fr + bb) + ' is more than the ' + max + ' on the floor'
+          : left + ' of ' + max + ' left on the floor';
+        leftEl.style.color = left < 0 ? 'var(--danger)' : '';
+      };
+      form.querySelectorAll('input').forEach(i => i.oninput = update);
+    });
+
     document.querySelectorAll('.dlv-btn').forEach(btn => {
       btn.onclick = async () => {
         const block = btn.closest('.model-block');
         const statusEl = block.querySelector('.dlv-status');
-        const qty = Number(block.querySelector('.dlv-qty').value);
-        const customerCode = block.querySelector('.dlv-cust').value;
+        const fr = Number(block.querySelector('.dlv-fr').value) || 0;
+        const bb = Number(block.querySelector('.dlv-bb').value) || 0;
         const max = Number(btn.dataset.max);
 
         statusEl.classList.remove('hidden');
-        if (!qty || qty <= 0) { statusEl.innerText = 'Enter how many units are going out.'; return; }
-        if (qty > max) { statusEl.innerText = 'Only ' + max + ' built unit(s) are waiting to go out.'; return; }
+        if (fr <= 0 && bb <= 0) { statusEl.innerText = 'Enter how many units are going to FR, to BB, or to both.'; return; }
+        if (fr < 0 || bb < 0) { statusEl.innerText = 'A quantity cannot be negative.'; return; }
+        if (fr + bb > max) {
+          statusEl.innerText = 'That adds up to ' + (fr + bb) + ', and only ' + max + ' built unit(s) are on the floor.';
+          return;
+        }
+
+        // Both go in one call, so the server checks the pair against stock
+        // before writing either one.
+        const lines = [];
+        if (fr > 0) lines.push({ customerCode: 'FR', qty: fr });
+        if (bb > 0) lines.push({ customerCode: 'BB', qty: bb });
 
         btn.disabled = true;
         btn.innerText = 'Sending…';
-        const res = await apiCall('markOut', { groupKey: btn.dataset.groupkey, customerCode, qty });
+        const res = await apiCall('markOut', { groupKey: btn.dataset.groupkey, lines });
         if (res.ok) {
           await reload();
         } else {
