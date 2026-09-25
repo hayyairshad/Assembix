@@ -1682,6 +1682,16 @@ const RENDERERS = {
    SYNC (shared by Dashboard and Models & parts)
    ========================= */
 
+/* Put a sync result back on screen after the page has been redrawn. */
+function showParkedSyncMessage() {
+  if (!window.__syncMsg) return;
+  const el = document.getElementById('dash-sync-status') || document.getElementById('dbx-status');
+  if (!el) { window.__syncMsg = null; return; }
+  el.classList.remove('hidden');
+  el.innerText = window.__syncMsg;
+  window.__syncMsg = null;
+}
+
 function wireSyncButtons(syncId, checkId, statusId) {
   const syncBtn = document.getElementById(syncId);
   const checkBtn = document.getElementById(checkId);
@@ -1695,11 +1705,18 @@ function wireSyncButtons(syncId, checkId, statusId) {
       el.innerText = 'Checking…';
       const res = await apiCall('testDropbox');
       if (!res.ok) {
-        el.innerText = "Couldn't reach the file. " + (res.error || '');
+        // The server's message already says where the file actually is.
+        el.innerText = res.error || "Couldn't reach the file.";
       } else {
         const when = res.modified ? new Date(res.modified).toLocaleString() : 'unknown';
         const last = res.lastSync ? new Date(res.lastSync).toLocaleString() : 'never';
-        el.innerText = 'Connected to "' + res.name + '", changed ' + when + '. Last sync: ' + last + '.';
+        const kb = res.size ? ' (' + Math.round(res.size / 1024) + ' KB)' : '';
+        el.innerHTML =
+          'Reading <b>' + esc(res.path) + '</b>' + esc(kb) + '.<br>' +
+          'That file was last changed <b>' + esc(when) + '</b>. You last synced ' + esc(last) + '.' +
+          (res.fileUnchanged
+            ? '<br><b>It has not changed since your last sync</b> — anything new is not in this file yet.'
+            : '');
       }
       checkBtn.disabled = false;
     };
@@ -1724,10 +1741,23 @@ function wireSyncButtons(syncId, checkId, statusId) {
       if (res.needsReview > 0) msg += ' ' + res.needsReview + ' need review.';
       if (res.skipped > 0) msg += ' ' + res.skipped + ' blank row(s) ignored.';
       if (res.staleCount > 0) msg += ' ' + res.staleCount + ' line(s) are no longer in the file — check them by hand.';
-      el.innerText = msg;
+      // Say it plainly when the numbers came from a file that never changed.
+      if (res.fileUnchanged) {
+        msg += '\n\nThis file has not changed since your last sync, so nothing here is new.' +
+               ' If you were expecting a change, it has not reached ' + (res.path || 'this path') + ' yet.';
+      }
+
+      /* Hold the message across the reload.
+
+         reload() redraws the page, which threw away the status box and the
+         result with it — the outcome of a sync flashed up and vanished
+         before anyone could read it. The message is parked here and put back
+         once the new page is on screen. */
+      window.__syncMsg = msg;
       syncBtn.disabled = false;
       syncBtn.innerText = original;
       await reload();
+      showParkedSyncMessage();
     };
   }
 }
