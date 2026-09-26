@@ -145,6 +145,11 @@ code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;}
 .loading-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;color:var(--text-soft);font-size:13.5px;}
 @keyframes spin{to{transform:rotate(360deg);}}
 #login-status .spinner{margin-bottom:8px;}
+#login-restore{display:none;}
+html.restoring #login-restore{display:block;}
+html.restoring #login-form{display:none;}
+#restore-actions{margin-top:14px;display:flex;gap:8px;justify-content:center;}
+#restore-actions:empty{display:none;}
 
 /* ===== SEARCH, SORT ===== */
 .search-wrap{position:relative;display:inline-flex;align-items:center;}
@@ -353,6 +358,140 @@ border-radius:9px;margin-bottom:6px;font-size:13px;text-decoration:none;color:va
 .prio-pick button.on-urgent{background:#DC2626;color:#fff;}
 .status-line{margin-top:10px;}
 
+
+/* ===== SORT TOOLBAR (card pages) ===== */
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px;
+padding:8px 10px 8px 14px;background:var(--surface);border:1px solid var(--border);border-radius:11px;}
+.tb-count{font-size:13px;font-weight:700;color:var(--dark);}
+.tb-count span{font-weight:500;color:var(--text-soft);}
+.tb-sort{display:flex;align-items:center;gap:8px;}
+.tb-sort label{margin:0;text-transform:none;letter-spacing:0;font-size:12.5px;font-weight:600;}
+.select-wrap{position:relative;}
+.select-wrap::after{content:"";position:absolute;right:10px;top:50%;width:6px;height:6px;border-right:1.6px solid var(--text-soft);
+border-bottom:1.6px solid var(--text-soft);transform:translateY(-70%) rotate(45deg);pointer-events:none;}
+.select-wrap select{appearance:none;-webkit-appearance:none;padding:6px 28px 6px 11px;font-size:13px;font-weight:600;width:auto;
+border-radius:8px;background:#FFFBF7;cursor:pointer;}
+.dir-btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);background:var(--surface);border-radius:8px;
+padding:6px 11px;font-size:12.5px;font-weight:600;color:var(--text);cursor:pointer;font-family:inherit;white-space:nowrap;}
+.dir-btn:hover{border-color:var(--accent);background:#FFF7ED;}
+.cons-tag{display:inline-block;font-family:"IBM Plex Sans",sans-serif;font-size:11px;font-weight:600;color:#7C2D12;background:#FFEAD5;
+border-radius:6px;padding:2px 7px;margin-left:6px;vertical-align:1px;}
+
+/* ===== DATA TABLES with sortable headings ===== */
+.table-card{padding:0;overflow:hidden;}
+.table-card .tbl-wrap{overflow-x:auto;}
+.data-table thead th{position:sticky;top:0;background:#FFF9F4;z-index:1;padding:0;border-bottom:1px solid var(--border);}
+.data-table th.r .th-btn{justify-content:flex-end;}
+.th-btn{display:flex;align-items:center;gap:4px;width:100%;border:none;background:none;cursor:pointer;padding:10px 9px;
+font:inherit;font-size:10.5px;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-soft);font-weight:700;white-space:nowrap;text-align:left;}
+.th-btn:hover{color:var(--dark);background:#FFF1E6;}
+.th-ind{width:11px;height:14px;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;background:#F6E7DB;
+flex-shrink:0;position:relative;}
+.th-ind::before,.th-ind::after{content:"";position:absolute;left:2.5px;border-left:3px solid transparent;border-right:3px solid transparent;}
+.th-ind::before{top:2.5px;border-bottom:3.5px solid #C9AE9C;}
+.th-ind::after{bottom:2.5px;border-top:3.5px solid #C9AE9C;}
+th.asc .th-ind,th.desc .th-ind{background:var(--primary);}
+th.asc .th-ind::before{border-bottom-color:#fff;}
+th.asc .th-ind::after{border-top-color:rgba(255,255,255,0.35);}
+th.desc .th-ind::after{border-top-color:#fff;}
+th.desc .th-ind::before{border-bottom-color:rgba(255,255,255,0.35);}
+th.asc .th-btn,th.desc .th-btn{color:var(--dark);}
+.data-table td{padding:10px 9px;font-size:12.5px;vertical-align:middle;}
+.data-table td.model-cell{min-width:118px;max-width:150px;}
+.data-table td.nw{white-space:nowrap;}
+.data-table code{white-space:nowrap;font-size:11.5px;}
+.data-table .eta-chip{margin-top:4px;}
+.data-table .eta-chip .chip{margin:0;}
+.data-table tbody tr:hover td{background:#FFFAF5;}
+.data-table .sub{font-size:11px;color:var(--text-soft);margin-top:2px;}
+.data-table .sub-bad{color:var(--danger);font-weight:600;max-width:260px;white-space:normal;}
+tr.prio-row-urgent td{background:#FFF4F4;}
+tr.prio-row-urgent td:first-child{box-shadow:inset 4px 0 0 #DC2626;}
+tr.prio-row-high td{background:#FFF9F2;}
+tr.prio-row-high td:first-child{box-shadow:inset 4px 0 0 #F97316;}
+tr.row-cancel td{color:var(--text-faint);}
+tr.row-cancel td code{text-decoration:line-through;}
+.prio-sel{width:auto;padding:5px 26px 5px 9px;font-size:12px;font-weight:700;border-radius:7px;appearance:none;-webkit-appearance:none;cursor:pointer;
+background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,transparent 50%);
+background-position:calc(100% - 13px) 50%,calc(100% - 9px) 50%;background-size:4px 4px;background-repeat:no-repeat;}
+.prio-sel-normal{background-color:#F5EBE3;color:var(--text-soft);border-color:#EADBCF;}
+.prio-sel-high{background-color:#FFEDD5;color:#C2410C;border-color:#FDBA74;}
+.prio-sel-urgent{background-color:#DC2626;color:#fff;border-color:#DC2626;}
+
+
+/* The first column stays put while a wide table scrolls sideways, so the
+   packaging code of each row is always in view. */
+.data-table th:first-child,.data-table td:first-child{position:sticky;left:0;z-index:2;}
+.data-table thead th:first-child{z-index:3;background:#FFF9F4;}
+.data-table tbody td:first-child{background:#fff;box-shadow:1px 0 0 var(--border-soft);}
+.data-table tbody tr:hover td:first-child{background:#FFFAF5;}
+.data-table tbody tr.row-late td:first-child{background:#FFF8F7;}
+.data-table tbody tr.prio-row-high td:first-child{background:#FFF9F2;box-shadow:inset 4px 0 0 #F97316,1px 0 0 var(--border-soft);}
+.data-table tbody tr.prio-row-urgent td:first-child{background:#FFF4F4;box-shadow:inset 4px 0 0 #DC2626,1px 0 0 var(--border-soft);}
+
+/* ===== DASHBOARD ROW 1: status board ===== */
+.phases{display:grid;grid-template-columns:1fr 1.2fr 1fr 0.85fr;gap:12px;align-items:stretch;}
+@media (max-width:1180px){.phases{grid-template-columns:1fr 1fr;}}
+@media (max-width:640px){.phases{grid-template-columns:1fr;}}
+.phase{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 12px 8px;display:flex;flex-direction:column;}
+.ph-head{display:flex;align-items:center;gap:8px;padding:2px 4px 10px;border-bottom:1px dashed var(--border);margin-bottom:6px;}
+.ph-step{width:20px;height:20px;border-radius:6px;background:#FFF1E6;color:var(--primary-dark);font-size:11px;font-weight:800;
+display:inline-flex;align-items:center;justify-content:center;font-family:"Plus Jakarta Sans",sans-serif;}
+.ph-name{font-family:"Plus Jakarta Sans",sans-serif;font-weight:700;font-size:13px;color:var(--dark);}
+.ph-total{margin-left:auto;font-size:11.5px;color:var(--text-soft);}
+.ph-row{display:grid;grid-template-columns:10px 1fr auto 34px;align-items:center;gap:9px;padding:8px 8px;border-radius:9px;
+text-decoration:none;color:var(--text);transition:background .12s ease;}
+a.ph-row:hover{background:var(--c-bg);}
+.ph-dot{width:10px;height:10px;border-radius:50%;background:var(--c-dot);box-shadow:0 0 0 3px var(--c-bg);}
+.ph-label{font-size:13px;font-weight:600;}
+.ph-lines{font-size:11px;color:var(--text-soft);}
+.ph-count{font-family:"Plus Jakarta Sans",sans-serif;font-weight:800;font-size:15px;text-align:center;color:var(--c-fg);
+background:var(--c-bg);border-radius:7px;padding:3px 0;}
+.ph-row.is-zero{opacity:.45;}
+.ph-row.is-zero .ph-count{background:#F6EEE8;color:var(--text-faint);}
+.phase-hero{text-decoration:none;color:var(--c-fg);background:linear-gradient(160deg,var(--c-bg) 0%,#FFFFFF 85%);border-color:var(--c-dot);}
+.phase-hero .ph-head{border-bottom-color:rgba(5,150,105,0.25);}
+.phase-hero .ph-step{background:var(--c-dot);color:#fff;}
+.phase-hero .ph-hero-v{font-family:"Plus Jakarta Sans",sans-serif;font-weight:800;font-size:44px;line-height:1;margin:14px 4px 6px;}
+.phase-hero .ph-hero-l{font-size:13px;font-weight:700;margin:0 4px;}
+.phase-hero .ph-hero-f{font-size:11.5px;margin:6px 4px 8px;opacity:.8;}
+a.phase-hero:hover{box-shadow:0 6px 16px rgba(5,150,105,0.14);}
+.phase-hero.is-zero{opacity:.55;}
+
+/* ===== DASHBOARD ROW 2: process strip ===== */
+.flow{display:grid;grid-template-columns:repeat(7,1fr);gap:14px;}
+@media (max-width:1280px){.flow{grid-template-columns:repeat(4,1fr);}}
+@media (max-width:640px){.flow{grid-template-columns:repeat(2,1fr);}}
+.flow-step{position:relative;display:flex;flex-direction:column;padding:14px 14px 13px;border-radius:14px;text-decoration:none;color:inherit;
+background:var(--surface);border:1px solid var(--border);box-shadow:0 1px 2px rgba(124,45,18,0.04);
+transition:transform .12s ease,box-shadow .12s ease;}
+a.flow-step:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(67,20,7,0.09);border-color:var(--c);}
+.flow-step::before{content:"";position:absolute;left:14px;right:14px;top:0;height:3px;border-radius:0 0 3px 3px;background:var(--c);}
+@media (min-width:1281px){
+  .flow-step:not(:last-child)::after{content:"";position:absolute;right:-12px;top:50%;width:10px;height:10px;margin-top:-5px;
+  border-top:2px solid #E5C9B5;border-right:2px solid #E5C9B5;transform:rotate(45deg);}
+}
+.fs-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.fs-icon{width:34px;height:34px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;
+background:color-mix(in srgb,var(--c) 14%,#fff);color:var(--cf);}
+.fs-icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;}
+.fs-num{font-size:10.5px;font-weight:800;color:var(--text-faint);font-family:"Plus Jakarta Sans",sans-serif;}
+.fs-value{font-family:"Plus Jakarta Sans",sans-serif;font-weight:800;font-size:30px;line-height:1;color:var(--cf);}
+.fs-label{font-size:13px;font-weight:700;color:var(--dark);margin-top:6px;}
+.fs-foot{font-size:11px;color:var(--text-soft);margin-top:3px;line-height:1.4;}
+.flow-step.is-zero .fs-value{color:var(--text-faint);}
+.flow-step.is-zero .fs-icon{background:#F6EEE8;color:var(--text-faint);}
+.flow-step.is-zero::before{background:#EAD9CC;}
+
+.done-section{margin-top:18px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 16px;}
+.done-section summary{cursor:pointer;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+.done-section .ds-title{font-family:"Plus Jakarta Sans",sans-serif;font-weight:700;font-size:14px;color:var(--dark);}
+.done-section .ds-sub{font-size:12px;color:var(--text-soft);}
+
+/* ===== Sidebar icons ===== */
+.nav-item .ni{display:inline-flex;align-items:center;gap:10px;}
+.nav-item .ni svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;opacity:.85;}
+
 @media (prefers-reduced-motion: reduce){*{animation-duration:0.01ms !important;transition-duration:0.01ms !important;}}
 
 @media (max-width:820px){
@@ -376,15 +515,29 @@ border-radius:9px;margin-bottom:6px;font-size:13px;text-decoration:none;color:va
 <div class="progress hidden" id="progress"><i></i></div>
 
 <!-- ============ LOGIN ============ -->
+<script>
+  /* Decided before the page paints: with a saved session, open on a loading
+     screen. The sign-in card used to flash up for the few seconds the data
+     took to load, which looked exactly like being asked to log in again. */
+  try { if (localStorage.getItem('assembix_session')) document.documentElement.classList.add('restoring'); } catch (e) {}
+</script>
 <div id="scr-login" class="login-screen">
   <div class="login-card">
     <div class="brand">
       <div class="brand-mark">A</div>
       <div class="brand-word" style="color:var(--dark)">AssembiX</div>
     </div>
-    <h2>Sign in</h2>
-    <p>Use your authorised Google account to continue.</p>
-    <div id="g_id_signin"></div>
+    <div id="login-restore">
+      <div class="spinner"></div>
+      <h2 style="font-size:17px;">Opening AssembiX…</h2>
+      <p id="restore-msg" style="margin-bottom:0;">Loading your consignments.</p>
+      <div id="restore-actions"></div>
+    </div>
+    <div id="login-form">
+      <h2>Sign in</h2>
+      <p>Use your authorised Google account to continue.</p>
+      <div id="g_id_signin"></div>
+    </div>
     <div id="login-status"></div>
   </div>
 </div>
@@ -583,15 +736,31 @@ function handleCredentialResponse(response) {
   completeLogin();
 }
 
+function showSignInForm(message) {
+  document.documentElement.classList.remove('restoring');
+  document.getElementById('login-status').innerText = message || '';
+  try { if (typeof google !== 'undefined' && google.accounts && !user) google.accounts.id.prompt(); } catch (e) {}
+}
+
 async function completeLogin() {
+  const restoring = !!session && !pendingIdToken;
   const statusEl = document.getElementById('login-status');
-  statusEl.innerHTML = `<div class="spinner"></div>Signing you in…`;
+  if (restoring) {
+    document.documentElement.classList.add('restoring');
+    document.getElementById('restore-msg').innerText = 'Loading your consignments.';
+    document.getElementById('restore-actions').innerHTML = '';
+    statusEl.innerText = '';
+  } else {
+    statusEl.innerHTML = `<div class="spinner"></div>Signing you in…`;
+  }
+
   const res = await apiCall('getAppData');
 
   if (res.ok) {
     APP = res;
     user = res.user;
     statusEl.innerText = '';
+    document.documentElement.classList.remove('restoring');
     document.getElementById('scr-login').classList.add('hidden');
     document.getElementById('app').classList.remove('hidden');
     document.getElementById('who-name').innerText = user.name || user.email;
@@ -603,11 +772,17 @@ async function completeLogin() {
 
   if (res.network) {
     // Keep the session: the server was unreachable, not the sign-in wrong.
-    statusEl.innerHTML = esc(res.error) +
-      '<div style="margin-top:12px;"><button class="btn btn-sm" onclick="completeLogin()">Try again</button></div>';
+    if (restoring) {
+      document.getElementById('restore-msg').innerText = res.error;
+      document.getElementById('restore-actions').innerHTML =
+        '<button class="btn btn-sm btn-primary" onclick="completeLogin()">Try again</button>';
+    } else {
+      statusEl.innerHTML = esc(res.error) +
+        '<div style="margin-top:12px;"><button class="btn btn-sm" onclick="completeLogin()">Try again</button></div>';
+    }
     return;
   }
-  statusEl.innerText = res.error || 'Sign-in failed.';
+  showSignInForm(res.error || 'Sign-in failed.');
 }
 
 function handleSessionExpiry(message) {
@@ -617,8 +792,7 @@ function handleSessionExpiry(message) {
   APP = null;
   document.getElementById('app').classList.add('hidden');
   document.getElementById('scr-login').classList.remove('hidden');
-  document.getElementById('login-status').innerText = message || 'Please sign in again.';
-  try { if (typeof google !== 'undefined' && google.accounts) google.accounts.id.prompt(); } catch (e) {}
+  showSignInForm(message || 'Please sign in again.');
 }
 
 function roleLabel(level) {
@@ -639,9 +813,11 @@ function doLogout() {
 }
 
 // A saved session signs you straight in — no Google popup, no waiting for it.
-document.addEventListener('DOMContentLoaded', () => { if (session) completeLogin(); });
+if (session) completeLogin(); else document.documentElement.classList.remove('restoring');
 
 /* ---------- Shell ---------- */
+
+const NAV_ICONS = {"dashboard": "<rect x=\"3\" y=\"3\" width=\"7\" height=\"9\" rx=\"1.5\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"5\" rx=\"1.5\"/><rect x=\"14\" y=\"12\" width=\"7\" height=\"9\" rx=\"1.5\"/><rect x=\"3\" y=\"16\" width=\"7\" height=\"5\" rx=\"1.5\"/>", "consignments": "<path d=\"M3 7h11v9H3z\"/><path d=\"M14 10h4l3 3v3h-7\"/><circle cx=\"7\" cy=\"17.5\" r=\"1.8\"/><circle cx=\"17.5\" cy=\"17.5\" r=\"1.8\"/>", "receiving": "<path d=\"M21 8l-9-5-9 5 9 5 9-5z\"/><path d=\"M3 8v8l9 5 9-5V8\"/>", "assembly": "<path d=\"M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z\"/>", "delivery": "<path d=\"M5 12h14\"/><path d=\"M13 6l6 6-6 6\"/>", "acceptance": "<path d=\"M9 4h6v3H9z\"/><path d=\"M8 5H6v16h12V5h-2\"/><path d=\"M9 14l2 2 4-4\"/>", "needsreview": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 8v5\"/><path d=\"M12 16.5v.5\"/>", "reports": "<path d=\"M4 20V10\"/><path d=\"M10 20V4\"/><path d=\"M16 20v-7\"/><path d=\"M22 20H2\"/>"};
 
 function renderNav() {
   const nav = document.getElementById('nav');
@@ -651,7 +827,7 @@ function renderNav() {
     if (p.group !== lastGroup) { html += `<div class="nav-label">${esc(p.group)}</div>`; lastGroup = p.group; }
     const n = p.count && APP ? p.count() : 0;
     html += `<a class="nav-item${p.id === currentPage ? ' active' : ''}" href="#/${p.id}">
-      <span>${esc(p.label)}</span>${n ? `<span class="nav-count">${n}</span>` : ''}</a>`;
+      <span class="ni"><svg viewBox="0 0 24 24">${NAV_ICONS[p.id] || ''}</svg>${esc(p.label)}</span>${n ? `<span class="nav-count">${n}</span>` : ''}</a>`;
   });
   nav.innerHTML = html;
 }
@@ -826,36 +1002,62 @@ function applyPageFilter(q) {
   }
 }
 
-/* ---------- Sort ---------- */
+/* ---------- Sort ----------
+
+   Card pages get one small sort control above the cards: a "Sort by" menu
+   and a direction button that says in words which way it runs.
+
+   The old row of pill buttons looked like it sorted but mostly didn't: the
+   cards stayed bunched under their consignment headings, so sorting by Model
+   or ETA barely moved anything. Now "Consignment" is the only order that
+   groups; every other order lays the models out as one list, each card
+   carrying its consignment name, so the order you pick is the order you see. */
 
 const SORT_KEYS = [
-  { k: 'urgency', label: 'Urgency' },
-  { k: 'eta', label: 'ETA' },
-  { k: 'consignment', label: 'Consignment' },
-  { k: 'model', label: 'Model' },
-  { k: 'status', label: 'Status' },
-  { k: 'priority', label: 'Priority' }
+  { k: 'consignment', label: 'Consignment', up: 'A → Z',              down: 'Z → A' },
+  { k: 'urgency',     label: 'Most urgent', up: 'Most urgent first',  down: 'Least urgent first' },
+  { k: 'eta',         label: 'ETA',         up: 'Soonest first',      down: 'Latest first' },
+  { k: 'status',      label: 'Status',      up: 'Least advanced first', down: 'Furthest along first' },
+  { k: 'priority',    label: 'Priority',    up: 'Urgent first',       down: 'Normal first' },
+  { k: 'model',       label: 'Model',       up: 'A → Z',              down: 'Z → A' },
+  { k: 'supplier',    label: 'Supplier',    up: 'A → Z',              down: 'Z → A' }
 ];
 
+// Receiving opens most-urgent-first (late and ready lines on top); the
+// other card pages open grouped by consignment.
+const DEFAULT_SORT = { receiving: 'urgency', tile: 'urgency' };
 function sortState() {
-  return SORT[currentPage] || { key: 'urgency', dir: 1 };
+  return SORT[currentPage] || { key: DEFAULT_SORT[currentPage] || 'consignment', dir: 1 };
 }
 
-function sortBar() {
+function sortBar(n) {
   const s = sortState();
-  return `<div class="sortbar"><span class="lbl">Sort</span>${SORT_KEYS.map(x => `
-    <button class="sortbtn${s.key === x.k ? ' on' : ''}" data-sort="${x.k}">${esc(x.label)}${
-      s.key === x.k ? `<span class="ar">${s.dir === 1 ? '▲' : '▼'}</span>` : ''}</button>`).join('')}</div>`;
+  const def = SORT_KEYS.find(x => x.k === s.key) || SORT_KEYS[0];
+  return `
+    <div class="toolbar">
+      <div class="tb-count">${n != null ? n + ' model' + (n === 1 ? '' : 's') : ''}${
+        s.key === 'consignment' ? ' <span>· grouped by consignment</span>' : ''}</div>
+      <div class="tb-sort">
+        <label for="sort-key">Sort by</label>
+        <div class="select-wrap">
+          <select id="sort-key">${SORT_KEYS.map(x =>
+            `<option value="${x.k}"${x.k === s.key ? ' selected' : ''}>${esc(x.label)}</option>`).join('')}</select>
+        </div>
+        <button class="dir-btn" id="sort-dir" title="Reverse the order" aria-label="Reverse the order">
+          <svg viewBox="0 0 24 24" class="icon" style="width:14px;height:14px;">${s.dir === 1
+            ? '<path d="M12 19V5"/><path d="M5 12l7-7 7 7"/>'
+            : '<path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/>'}</svg>
+          ${esc(s.dir === 1 ? def.up : def.down)}
+        </button>
+      </div>
+    </div>`;
 }
 
 function wireSortBar() {
-  document.querySelectorAll('.sortbtn').forEach(b => {
-    b.onclick = () => {
-      const s = sortState();
-      SORT[currentPage] = { key: b.dataset.sort, dir: s.key === b.dataset.sort ? -s.dir : 1 };
-      reRender();
-    };
-  });
+  const sel = document.getElementById('sort-key');
+  const dir = document.getElementById('sort-dir');
+  if (sel) sel.onchange = () => { SORT[currentPage] = { key: sel.value, dir: 1 }; reRender(); };
+  if (dir) dir.onclick = () => { const st = sortState(); SORT[currentPage] = { key: st.key, dir: -st.dir }; reRender(); };
 }
 
 const PRIO_RANK = { Urgent: 2, High: 1, Normal: 0 };
@@ -872,19 +1074,24 @@ function urgencyScore(g) {
 
 function sortGroups(groups) {
   const { key, dir } = sortState();
-  const cmp = (a, b) => String(a).localeCompare(String(b), undefined, { numeric: true });
-  const out = groups.slice().sort((a, b) => {
+  const cmp = (x, y) => String(x).localeCompare(String(y), undefined, { numeric: true, sensitivity: 'base' });
+  const stable = (x, y) => cmp(x.consignmentGroup, y.consignmentGroup) || cmp(x.factoryModel, y.factoryModel);
+  return groups.slice().sort((x, y) => {
+    // Missing dates always go last, whichever way the list runs.
+    if (key === 'eta') {
+      const ex = x.nextEta || x.eta, ey = y.nextEta || y.eta;
+      if (!ex !== !ey) return ex ? -1 : 1;
+      return (cmp(ex || '', ey || '') * dir) || stable(x, y);
+    }
     let r = 0;
-    if (key === 'urgency') r = urgencyScore(b) - urgencyScore(a);
-    else if (key === 'eta') r = cmp(a.nextEta || a.eta || '9999', b.nextEta || b.eta || '9999');
-    else if (key === 'consignment') r = cmp(a.consignmentGroup, b.consignmentGroup);
-    else if (key === 'model') r = cmp(a.signatureModel || a.factoryModel, b.signatureModel || b.factoryModel);
-    else if (key === 'status') r = (a.importStageRank || 0) - (b.importStageRank || 0);
-    else if (key === 'priority') r = (PRIO_RANK[b.priority] || 0) - (PRIO_RANK[a.priority] || 0);
-    if (r === 0) r = cmp(a.consignmentGroup, b.consignmentGroup) || cmp(a.factoryModel, b.factoryModel);
-    return r * dir;
+    if (key === 'urgency') r = urgencyScore(y) - urgencyScore(x);
+    else if (key === 'consignment') r = cmp(x.consignmentGroup, y.consignmentGroup);
+    else if (key === 'model') r = cmp(plainModel(x), plainModel(y));
+    else if (key === 'supplier') r = cmp(x.supplier, y.supplier);
+    else if (key === 'status') r = (x.importStageRank || 0) - (y.importStageRank || 0);
+    else if (key === 'priority') r = (PRIO_RANK[y.priority] || 0) - (PRIO_RANK[x.priority] || 0);
+    return (r * dir) || stable(x, y);
   });
-  return out;
 }
 
 /* ---------- Small helpers ---------- */
@@ -998,7 +1205,8 @@ function modelBlock(g, right, body) {
     <div class="model-block fx prio-${esc(String(g.priority || 'Normal').toLowerCase())}" data-groupkey="${esc(g.groupKey)}">
       <div class="model-head fh">
         <div>
-          <div class="model-title">${prioTag(g)}${modelLabel(g)}</div>
+          <div class="model-title">${prioTag(g)}${modelLabel(g)}${CARD_FLAT
+            ? ` <span class="cons-tag">${esc(g.consignmentGroup)}</span>` : ''}</div>
           <div class="model-meta">${esc(g.supplier || '—')} · ${esc(g.product || '—')}${ids ? ' · ID ' + esc(ids) : ''}${
             g.totalQty ? ' · ' + g.totalQty + ' units (FR ' + (g.frQty || 0) + ' · BB ' + (g.bbQty || 0) + ')' : ''}</div>
         </div>
@@ -1064,9 +1272,19 @@ function summaryCard(g, lineFilter) {
     (warn.length ? `<div class="note note-bad status-line">${esc(warn.join(' '))}</div>` : ''));
 }
 
+// Grouped under consignment headings when sorting by consignment; one flat
+// list in the chosen order otherwise, each card naming its consignment.
+let CARD_FLAT = false;
 function cardsFor(groups, bodyFor) {
   const sorted = sortGroups(groups);
-  return byConsignment(sorted).map(b => consignBlock(b.consignment, b.models, bodyFor)).join('');
+  if (sortState().key === 'consignment') {
+    CARD_FLAT = false;
+    return byConsignment(sorted).map(b => consignBlock(b.consignment, b.models, bodyFor)).join('');
+  }
+  CARD_FLAT = true;
+  const html = `<div class="flat-list">${sorted.map(bodyFor).join('')}</div>`;
+  CARD_FLAT = false;
+  return html;
 }
 
 /* ---------- Counts for the sidebar ---------- */
@@ -1088,7 +1306,15 @@ function countAcceptance() { return (APP.deliveries || []).filter(d => d.Status 
 
 const PAGE_HEAD = {
   dashboard: () => ({ title: 'Dashboard', sub: '' }),
-  consignments: () => ({ title: 'Consignments', sub: 'Every model in China Master, line by line.' }),
+  consignments: () => {
+    const lines = []; groupsAll().forEach(g => allLinesOf(g).forEach(l => lines.push(l)));
+    const coming = lines.filter(l => !l.cancelled && !l.factoryReceived && !l.receivedOnSheet).length;
+    const late = lines.filter(l => l.overdue).length;
+    const short = lines.filter(l => l.shortLoad && !l.factoryReceived).length;
+    return { title: 'Consignments', sub: lines.length + ' lines in China Master · ' + coming + ' still to arrive' +
+      (late ? ' · ' + late + ' late' : '') + (short ? ' · ' + short + ' short load' + (short === 1 ? '' : 's') : '') +
+      ' · click any heading to sort' };
+  },
   receiving: () => ({ title: 'Receiving', sub: 'Factory receive a line when it is physically on the floor. Nothing reaches Assembly without it.' }),
   assembly: () => ({ title: 'Assembly', sub: 'Only models you can build right now.' }),
   delivery: () => ({ title: 'Delivery', sub: 'Assembled units ready to go out to FR and BB.' }),
@@ -1138,30 +1364,149 @@ function renderTile(q) {
   const t = tileDef(q.k);
   if (!t) return `<div class="empty">That view no longer exists. <a href="#/dashboard">Back to the dashboard</a></div>`;
   if (!t.groups.length) return `<div class="empty">Nothing here right now. <a href="#/dashboard">Back to the dashboard</a></div>`;
-  return sortBar() + cardsFor(t.groups, g => summaryCard(g, t.lineFilter));
+  return sortBar(t.groups.length) + cardsFor(t.groups, g => summaryCard(g, t.lineFilter));
 }
 
 /* ---------- Consignments ---------- */
 
-function prioPicker(g) {
-  if (!user || user.level > 1) return '';
-  const cur = g.priority || 'Normal';
-  return `<div class="prio-pick" role="group" aria-label="Priority">${['Normal', 'High', 'Urgent'].map(p =>
-    `<button class="prio-btn${cur === p ? ' on-' + p.toLowerCase() : ''}" data-groupkey="${esc(g.groupKey)}" data-prio="${p}">${p}</button>`
-  ).join('')}</div>`;
+/* ---------- Tables with sortable headings ----------
+   Every column heading is a small button. First click sorts that column
+   A→Z / low→high, the second reverses it, the third goes back to the page's
+   own order. Empty cells always sink to the bottom. Each cell can carry a
+   data-v with the value to sort on, so a status sorts by where it is in the
+   journey rather than alphabetically, and a date by the date. */
+
+const TSORT = {};
+
+function th(label, type, cls) {
+  return `<th class="sortable ${cls || ''}" data-type="${type || 'text'}" aria-sort="none">
+    <button type="button" class="th-btn">${label}<span class="th-ind" aria-hidden="true"></span></button></th>`;
+}
+
+function wireTableSort(table) {
+  if (!table || !table.tHead || !table.tBodies[0]) return;
+  const key = currentPage + ':' + (table.id || 'table');
+  const heads = [...table.tHead.rows[0].cells];
+  const tbody = table.tBodies[0];
+  const original = [...tbody.rows];
+
+  const apply = () => {
+    const st = TSORT[key];
+    heads.forEach((h, i) => {
+      h.classList.remove('asc', 'desc');
+      if (h.classList.contains('sortable')) h.setAttribute('aria-sort', 'none');
+      if (st && st.col === i) {
+        h.classList.add(st.dir === 1 ? 'asc' : 'desc');
+        h.setAttribute('aria-sort', st.dir === 1 ? 'ascending' : 'descending');
+      }
+    });
+    const rows = original.slice();
+    if (st) {
+      const type = heads[st.col].dataset.type;
+      const val = r => {
+        const c = r.cells[st.col];
+        if (!c) return '';
+        return c.dataset.v !== undefined ? c.dataset.v : c.textContent.trim();
+      };
+      rows.sort((x, y) => {
+        const a = val(x), b = val(y);
+        if ((a === '') !== (b === '')) return a === '' ? 1 : -1;
+        const r = type === 'num' ? (Number(a) - Number(b))
+          : a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+        return r * st.dir;
+      });
+    }
+    rows.forEach(r => tbody.appendChild(r));
+  };
+
+  heads.forEach((h, i) => {
+    const btn = h.querySelector('.th-btn');
+    if (!btn) return;
+    btn.onclick = () => {
+      const st = TSORT[key];
+      if (!st || st.col !== i) TSORT[key] = { col: i, dir: 1 };
+      else if (st.dir === 1) TSORT[key] = { col: i, dir: -1 };
+      else delete TSORT[key];
+      apply();
+    };
+  });
+  apply();
+}
+
+/* ---------- Consignments ----------
+   One table, one row per line in China Master — the layout it had before —
+   with a sort button on every heading. The page's own order, before any
+   heading is clicked, is most urgent first: late lines, then by priority,
+   then what is still coming by ETA, then what has landed. */
+
+const STATUS_ORDER = {};
+STATUS_TILES.forEach((st, i) => { STATUS_ORDER[st] = i + 1; });
+STATUS_ORDER['Cancel'] = 99;
+
+function prioControl(g) {
+  const p = g.priority || 'Normal';
+  if (!user || user.level > 1) {
+    return p === 'Normal' ? '<span class="hint" style="margin:0;">Normal</span>' : prioTag(g);
+  }
+  return `<select class="prio-sel prio-sel-${esc(p.toLowerCase())}" data-groupkey="${esc(g.groupKey)}" aria-label="Priority for ${esc(plainModel(g))}">
+    ${['Normal', 'High', 'Urgent'].map(x => `<option${x === p ? ' selected' : ''}>${x}</option>`).join('')}</select>`;
+}
+
+function consignmentRows() {
+  const rows = [];
+  groupsAll().forEach(g => allLinesOf(g).forEach(l => rows.push({ g, l })));
+  const bucket = ({ l }) => l.cancelled ? 4 : l.overdue ? 0 : (l.factoryReceived || l.receivedOnSheet) ? 3 : 1;
+  rows.sort((x, y) =>
+    bucket(x) - bucket(y) ||
+    (x.l.overdue && y.l.overdue ? y.l.daysLate - x.l.daysLate : 0) ||
+    (PRIO_RANK[y.g.priority] || 0) - (PRIO_RANK[x.g.priority] || 0) ||
+    String(x.l.eta || '9999').localeCompare(String(y.l.eta || '9999')) ||
+    String(x.l.packaging).localeCompare(String(y.l.packaging)));
+  return rows;
 }
 
 function renderConsignments() {
-  const groups = groupsAll();
-  if (!groups.length) return `<div class="empty">No consignments yet. Sync China Master from the <a href="#/dashboard">Dashboard</a>.</div>`;
-  return sortBar() + cardsFor(groups, g => {
-    const lines = allLinesOf(g);
-    const right = `${prioPicker(g)}${pipeChip(g.pipeline)}`;
-    return modelBlock(g, right,
-      (g.parts.length ? partTiles(g) : '') + linesTable(lines) +
-      (g.quantityNote ? `<div class="note note-bad status-line">${esc(g.quantityNote)}</div>` : '') +
-      `<div class="card-status note hidden status-line"></div>`);
-  });
+  const rows = consignmentRows();
+  if (!rows.length) return `<div class="empty">No consignments yet. Sync China Master from the <a href="#/dashboard">Dashboard</a>.</div>`;
+
+  const body = rows.map(({ g, l }) => {
+    const sig = l.signatureModel || g.signatureModel || g.factoryModel;
+    const partial = l.factoryReceived && !l.done;
+    const cls = ['fx', 'prio-row-' + String(g.priority || 'Normal').toLowerCase()];
+    if (l.overdue) cls.push('row-late');
+    if (l.cancelled) cls.push('row-cancel');
+    return `
+      <tr class="${cls.join(' ')}">
+        <td data-v="${esc(l.packaging)}"><code>${esc(l.packaging)}</code>
+          ${l.uniqueId ? `<div class="sub">${esc(l.uniqueId)}</div>` : ''}
+          ${l.sheetNote ? `<div class="sub sub-bad">${esc(l.sheetNote)}</div>` : ''}</td>
+        <td>${esc(g.supplier || '—')}</td>
+        <td>${esc(g.product || '—')}</td>
+        <td data-v="${esc(sig)}" class="model-cell">${prioTag(g)}<b>${esc(sig)}</b><div class="sub">${esc(g.factoryModel || '')}</div></td>
+        <td class="r" data-v="${l.fr || ''}">${l.fr || '—'}</td>
+        <td class="r" data-v="${l.bb || ''}">${l.bb || '—'}</td>
+        <td class="r" data-v="${l.total || ''}"><b>${l.total || '—'}</b></td>
+        <td data-v="${STATUS_ORDER[l.status] || 50}" class="nw">${statusChip(l.status, partial ? ` · ${l.qtyReceived}/${l.total}` : '')}</td>
+        <td data-v="${esc(l.etd || '')}" class="nw">${esc(fmtDay(l.etd))}</td>
+        <td data-v="${esc(l.eta || '')}" class="nw">${esc(fmtDay(l.eta))}${etaChip(l) ? `<div class="eta-chip">${etaChip(l)}</div>` : ''}</td>
+        <td>${esc(g.mgr || '—')}</td>
+        <td data-v="${PRIO_RANK[g.priority] || 0}">${prioControl(g)}</td>
+      </tr>`;
+  }).join('');
+
+  return `
+    <div class="card table-card">
+      <div class="tbl-wrap">
+        <table class="data-table" id="cons-table">
+          <thead><tr>
+            ${th('Packaging')}${th('Supplier')}${th('Product')}${th('Model')}
+            ${th('FR', 'num', 'r')}${th('BB', 'num', 'r')}${th('Total', 'num', 'r')}
+            ${th('Status', 'num')}${th('ETD')}${th('ETA')}${th('MGR')}${th('Priority', 'num')}
+          </tr></thead>
+          <tbody>${body}</tbody>
+        </table>
+      </div>
+    </div>`;
 }
 
 /* ---------- Receiving ----------
@@ -1216,24 +1561,23 @@ function receivingCard(g) {
 function renderReceiving() {
   const live = groupsAll().filter(g => !g.fullyCancelled);
   const hasOpen = g => g.parts.some(p => p.lines.some(l => !l.done));
-  const ready = live.filter(g => hasOpen(g) && g.parts.some(p => p.lines.some(l => !l.done && (l.receivedOnSheet || l.shortLoad || l.factoryReceived))));
-  const onWay = live.filter(g => hasOpen(g) && ready.indexOf(g) === -1);
+  const open = live.filter(hasOpen);
   const finished = live.filter(g => !hasOpen(g));
 
-  let html = `<div class="note" style="margin-bottom:18px;">The count you type <b>replaces</b> the one on the line — it is how many are
-    physically on the floor, not how many more turned up. To correct a count, type the right number again.</div>` + sortBar();
+  /* One list, sorted as a whole. It used to be split into "ready" and "on the
+     way" and each half sorted on its own, so choosing ETA put a line due in
+     late August below one due in September. The default order, Most urgent,
+     already brings late and ready-to-receive lines to the top. */
+  let html = `<div class="note" style="margin-bottom:14px;">The count you type <b>replaces</b> the one on the line — it is how many are
+    physically on the floor, not how many more turned up. To correct a count, type the right number again.</div>`;
+  html += open.length
+    ? sortBar(open.length) + cardsFor(open, receivingCard)
+    : `<div class="empty" style="margin-bottom:24px;">Nothing is waiting to be received.</div>`;
 
-  html += `<div class="dash-head"><h2>Ready to receive</h2><span class="sub">in the country or already counted in part</span></div>`;
-  html += ready.length ? cardsFor(ready, receivingCard) : `<div class="empty" style="margin-bottom:24px;">Nothing is waiting for factory receipt.</div>`;
-
-  if (onWay.length) {
-    html += `<div class="dash-head" style="margin-top:8px;"><h2>Still on the way</h2><span class="sub">receive early if something turns up before China Master says so</span></div>`;
-    html += cardsFor(onWay, receivingCard);
-  }
   if (finished.length) {
-    html += `<details style="margin-top:8px;"><summary class="dash-head" style="cursor:pointer;display:block;"><h2 style="display:inline;">Fully factory received</h2>
-      <span class="sub"> — ${finished.length} model${finished.length === 1 ? '' : 's'}, open to correct a count</span></summary>
-      <div style="margin-top:12px;">${cardsFor(finished, receivingCard)}</div></details>`;
+    html += `<details class="done-section"><summary><span class="ds-title">Fully factory received</span>
+      <span class="ds-sub">${finished.length} model${finished.length === 1 ? '' : 's'} · open to correct a count</span></summary>
+      <div style="margin-top:14px;">${cardsFor(finished, receivingCard)}</div></details>`;
   }
   return html;
 }
@@ -1247,7 +1591,7 @@ function renderAssembly() {
     return `<div class="empty">Nothing can be built right now.${waiting ? ' ' + waiting + ' model' + (waiting === 1 ? ' is' : 's are') +
       ' waiting on parts — see <a href="#/tile?k=flow:arriving">Arriving</a>.' : ''}</div>`;
   }
-  return sortBar() + cardsFor(groups, g => {
+  return sortBar(groups.length) + cardsFor(groups, g => {
     const right = `<div class="big-num"><div class="k">Can build</div><div class="v" style="color:#15803D;">${g.buildableUnits}</div></div>`;
     return modelBlock(g, right, partTiles(g) + `
       <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
@@ -1267,7 +1611,7 @@ function renderAssembly() {
 function renderDelivery() {
   const groups = groupsAll().filter(g => g.readyToSend > 0);
   if (!groups.length) return `<div class="empty">No assembled units waiting to go out.</div>`;
-  return sortBar() + cardsFor(groups, g => {
+  return sortBar(groups.length) + cardsFor(groups, g => {
     const available = g.readyToSend;
     const fr = (g.deliveredTo && g.deliveredTo.FR) || { confirmed: 0, pending: 0 };
     const bb = (g.deliveredTo && g.deliveredTo.BB) || { confirmed: 0, pending: 0 };
@@ -1303,7 +1647,7 @@ function renderAcceptance() {
   const keys = [];
   pending.forEach(d => { if (keys.indexOf(d.GroupKey) === -1) keys.push(d.GroupKey); });
   const groups = groupsAll().filter(g => keys.indexOf(g.groupKey) !== -1);
-  return sortBar() + cardsFor(groups, g => {
+  return sortBar(groups.length) + cardsFor(groups, g => {
     const mine = pending.filter(d => d.GroupKey === g.groupKey);
     const total = mine.reduce((s, d) => s + (Number(d.QtyOut) || 0), 0);
     const right = `<div class="big-num"><div class="k">Awaiting</div><div class="v" style="color:#5130B0;">${total}</div></div>`;
@@ -1363,8 +1707,8 @@ function renderReports() {
         <input id="rp-search" type="text" placeholder="Search consignment, part, event or person" style="max-width:340px;">
         <button class="btn" id="rp-filter">Search</button>
       </div>
-      <div class="tbl-wrap"><table>
-        <thead><tr><th>When</th><th>Consignment · model</th><th>Part</th><th>Event</th><th class="r">Qty</th><th>By</th></tr></thead>
+      <div class="tbl-wrap"><table class="data-table" id="rp-table">
+        <thead><tr>${th('When')}${th('Consignment · model')}${th('Part')}${th('Event')}${th('Qty', 'num', 'r')}${th('By')}</tr></thead>
         <tbody id="rp-body">${reportRows(APP.events || [])}</tbody>
       </table></div>
     </div>`;
@@ -1386,9 +1730,9 @@ function renderActivity() {
   const mine = myEvents();
   if (!mine.length) return `<div class="empty">You haven't recorded anything yet.</div>`;
   return `
-    <div class="card">
-      <div class="tbl-wrap"><table>
-        <thead><tr><th>When</th><th>Consignment · model</th><th>Part</th><th>Event</th><th class="r">Qty</th></tr></thead>
+    <div class="card table-card">
+      <div class="tbl-wrap"><table class="data-table" id="act-table">
+        <thead><tr>${th('When')}${th('Consignment · model')}${th('Part')}${th('Event')}${th('Qty', 'num', 'r')}</tr></thead>
         <tbody>${mine.map(e => `<tr class="fx"><td style="white-space:nowrap;">${esc(e.Timestamp || '—')}</td><td>${esc(e.ConsignmentGroup || 'whole file')}</td>
           <td>${esc(e.PartLetter || '—')}</td><td><b>${esc(e.EventType)}</b></td><td class="r">${e.Qty === '' || e.Qty == null ? '—' : esc(e.Qty)}</td></tr>`).join('')}</tbody>
       </table></div>
@@ -1399,32 +1743,87 @@ function renderActivity() {
    DASHBOARD
    ====================================================================== */
 
+/* Row 1 — China Master status, as a board of four stages. Each status is a
+   row inside its stage: dot, name, lines, models. It reads like the
+   journey itself, left to right, and looks nothing like the flow row below. */
+
+const PHASES = [
+  { name: 'Ordering',      statuses: ['Formal order', 'Production await', 'Production', 'Cancel'] },
+  { name: 'Shipping',      statuses: ['Loaded', 'Short load', 'Foreign banking', 'Local banking', 'Clearance', 'On road'] },
+  { name: 'Arrived',       statuses: ['Recently received', 'Already received'] },
+  { name: 'At the factory', statuses: ['Factory received'] }
+];
+
 function statusTiles() {
   const groups = groupsAll();
-  return `<div class="stiles">${STATUS_TILES.map(s => {
-    const models = groups.filter(g => linesWithStatus(g, s).length);
-    const lines = models.reduce((n, g) => n + linesWithStatus(g, s).length, 0);
-    const st = STATUS_STYLE[s];
-    const inner = `<div class="sv">${models.length}</div><div class="sl">${esc(s)}</div>
-      <div class="sf">${lines ? lines + ' line' + (lines === 1 ? '' : 's') : 'none'}</div>`;
-    const cls = 'stile' + (models.length ? '' : ' zero') + (s === 'Factory received' ? ' factory' : '');
-    return models.length
-      ? `<a class="${cls}" style="${styleVars(st)}" href="#/tile?k=${encodeURIComponent('status:' + s)}">${inner}</a>`
-      : `<div class="${cls}" style="${styleVars(st)}">${inner}</div>`;
+  const stat = st => {
+    const models = groups.filter(g => linesWithStatus(g, st).length);
+    return { models: models.length, lines: models.reduce((n, g) => n + linesWithStatus(g, st).length, 0) };
+  };
+  const link = st => '#/tile?k=' + encodeURIComponent('status:' + st);
+
+  return `<div class="phases">${PHASES.map((ph, pi) => {
+    const inPhase = groups.filter(g => ph.statuses.some(st => linesWithStatus(g, st).length)).length;
+
+    if (ph.statuses.length === 1) {
+      const st = ph.statuses[0], v = stat(st), c = STATUS_STYLE[st];
+      const inner = `
+        <div class="ph-head"><span class="ph-step">${pi + 1}</span><span class="ph-name">${esc(ph.name)}</span></div>
+        <div class="ph-hero-v">${v.models}</div>
+        <div class="ph-hero-l">model${v.models === 1 ? '' : 's'} factory received</div>
+        <div class="ph-hero-f">${v.lines} line${v.lines === 1 ? '' : 's'} counted on the website</div>`;
+      return v.models
+        ? `<a class="phase phase-hero" style="${styleVars(c)}" href="${link(st)}">${inner}</a>`
+        : `<div class="phase phase-hero is-zero" style="${styleVars(c)}">${inner}</div>`;
+    }
+
+    return `
+      <div class="phase">
+        <div class="ph-head"><span class="ph-step">${pi + 1}</span><span class="ph-name">${esc(ph.name)}</span>
+          <span class="ph-total">${inPhase} model${inPhase === 1 ? '' : 's'}</span></div>
+        ${ph.statuses.map(st => {
+          const v = stat(st), c = STATUS_STYLE[st];
+          const inner = `<span class="ph-dot"></span><span class="ph-label">${esc(st)}</span>
+            <span class="ph-lines">${v.lines ? v.lines + ' line' + (v.lines === 1 ? '' : 's') : ''}</span>
+            <span class="ph-count">${v.models}</span>`;
+          return v.models
+            ? `<a class="ph-row" style="${styleVars(c)}" href="${link(st)}">${inner}</a>`
+            : `<div class="ph-row is-zero" style="${styleVars(c)}">${inner}</div>`;
+        }).join('')}
+      </div>`;
   }).join('')}</div>`;
 }
 
+/* Row 2 — factory to customer, as a numbered process strip: an icon, a big
+   number and an arrow on to the next step. */
+
+const FLOW_ICONS = {
+  arriving:   '<path d="M3 7h11v9H3z"/><path d="M14 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17.5" cy="17.5" r="1.8"/>',
+  received:   '<path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M9 14.5l2 2 4-4"/>',
+  canbuild:   '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/>',
+  assembled:  '<path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/><path d="M3 17l9 5 9-5"/>',
+  pending:    '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  acceptance: '<path d="M9 4h6v3H9z"/><path d="M8 5H6v16h12V5h-2"/><path d="M9 14l2 2 4-4"/>',
+  delivered:  '<circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/>'
+};
+
 function flowTiles() {
   const groups = groupsAll();
-  return `<div class="ftiles">${FLOW_TILES.map(f => {
+  return `<div class="flow">${FLOW_TILES.map((f, i) => {
     const hit = groups.filter(f.pred);
-    const v = hit.reduce((s, g) => s + f.value(g), 0);
-    const inner = `<div class="fl">${esc(f.label)}</div><div class="fv">${v}</div>
-      <div class="ff">${f.unit === 'units' ? 'units' : 'models'} ${esc(f.foot)}</div>`;
-    const style = `--c-dot:${f.color};--c-fg:${f.fg};`;
+    const v = hit.reduce((sum, g) => sum + f.value(g), 0);
+    const inner = `
+      <div class="fs-top">
+        <span class="fs-icon"><svg viewBox="0 0 24 24">${FLOW_ICONS[f.k] || ''}</svg></span>
+        <span class="fs-num">${i + 1}</span>
+      </div>
+      <div class="fs-value">${v}</div>
+      <div class="fs-label">${esc(f.label)}</div>
+      <div class="fs-foot">${f.unit === 'units' ? 'units' : 'models'} ${esc(f.foot)}</div>`;
+    const style = `--c:${f.color};--cf:${f.fg};`;
     return hit.length
-      ? `<a class="ftile" style="${style}" href="#/tile?k=${encodeURIComponent('flow:' + f.k)}">${inner}</a>`
-      : `<div class="ftile zero" style="${style}">${inner}</div>`;
+      ? `<a class="flow-step" style="${style}" href="#/tile?k=${encodeURIComponent('flow:' + f.k)}">${inner}</a>`
+      : `<div class="flow-step is-zero" style="${style}">${inner}</div>`;
   }).join('')}</div>`;
 }
 
@@ -1476,7 +1875,7 @@ function atAGlance() {
   if (!groups.length) return '';
   return `
     <div class="dash-section">
-      <div class="dash-head"><h2>Every model at a glance</h2><span class="sub">${groups.length} models · most urgent first</span></div>
+      <div class="dash-head"><h2>Model tracker</h2><span class="sub">${groups.length} models from China Master · most urgent first · click one to open it</span></div>
       <div class="glance">${groups.map(g => `
         <a class="gtile prio-${esc(g.priority.toLowerCase())}${g.overdueParts ? ' late' : ''}" href="#/consignments?q=${encodeURIComponent(g.consignmentGroup)}">
           <div class="g-top">
@@ -1828,12 +2227,12 @@ function renderDashboard() {
     ${master}
 
     <div class="dash-section">
-      <div class="dash-head"><h2>Where everything is</h2><span class="sub">models at each status in China Master, and on the factory floor</span></div>
+      <div class="dash-head"><h2>China Master status</h2><span class="sub">where every model is on its journey · click a status to see its models</span></div>
       ${statusTiles()}
     </div>
 
     <div class="dash-section">
-      <div class="dash-head"><h2>From the factory to the customer</h2><span class="sub">click any tile to see the models behind it</span></div>
+      <div class="dash-head"><h2>Factory to customer</h2><span class="sub">what happens once parts land · click a step to see its models</span></div>
       ${flowTiles()}
     </div>
 
@@ -2006,6 +2405,7 @@ function onEnter(input, btn) {
 
 function wirePageHandlers(pageId) {
   wireSortBar();
+  document.querySelectorAll('#content table.data-table').forEach(wireTableSort);
 
   if (pageId === 'dashboard') {
     wireSyncButtons();
@@ -2022,9 +2422,21 @@ function wirePageHandlers(pageId) {
   }
 
   if (pageId === 'consignments') {
-    document.querySelectorAll('.prio-btn').forEach(btn => {
-      btn.onclick = () => save(btn, '…', 'setPriority',
-        { groupKey: btn.dataset.groupkey, priority: btn.dataset.prio }, 'Priority set to ' + btn.dataset.prio + '.');
+    document.querySelectorAll('.prio-sel').forEach(sel => {
+      sel.onchange = async () => {
+        const was = sel.className;
+        sel.disabled = true;
+        const res = await apiCall('setPriority', { groupKey: sel.dataset.groupkey, priority: sel.value });
+        if (res.ok) {
+          if (!takeApp(res)) await reload();
+          reRender();
+          toast('Priority set to ' + sel.value + '.');
+        } else if (!res.authFailed) {
+          sel.disabled = false;
+          sel.className = was;
+          toast(res.error || 'Could not change the priority.');
+        }
+      };
     });
   }
 
@@ -2118,6 +2530,7 @@ function wirePageHandlers(pageId) {
     b.onclick = async () => {
       const res = await apiCall('getReports', { search: i.value });
       document.getElementById('rp-body').innerHTML = res.ok ? reportRows(res.events) : `<tr><td colspan="6">${esc(res.error)}</td></tr>`;
+      wireTableSort(document.getElementById('rp-table'));
     };
   }
 }
