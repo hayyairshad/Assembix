@@ -5,22 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AssembiX</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
-<script src="https://accounts.google.com/gsi/client" async defer onload="initGoogleSignIn()"
-onerror="handleGsiLoadError()"></script>
 <style>
 :root{
 --primary:#F97316;
 --primary-dark:#C2410C;
---secondary:#A8877D;
 --accent:#FDBA74;
 --dark:#7C2D12;
---dark-2:#9A3412;
---bg-page:#FFF4EC;
+--bg-page:#FFF6EF;
 --surface:#FFFFFF;
 --border:#F3DCC9;
+--border-soft:#F8EAE0;
 --text:#431407;
 --text-soft:#8B6F5E;
---text-faint:#D9BBA5;
+--text-faint:#C9AE9C;
 --success:#15803D;
 --success-bg:#DCFCE7;
 --warning:#B45309;
@@ -29,370 +26,354 @@ onerror="handleGsiLoadError()"></script>
 --danger-bg:#FEE2E2;
 --info:#1D4ED8;
 --info-bg:#DBEAFE;
---fr:#C2410C;
---bb:#0F766E;
+/* Chart series: validated for colour-blind separation. */
+--fr:#E8743B;
+--bb:#2A9D8F;
+--prod:#5B6CD9;
 }
 *{box-sizing:border-box;}
-body{
-margin:0;
-background:var(--bg-page);
-font-family:"IBM Plex Sans",system-ui,sans-serif;
-color:var(--text);
-min-height:100vh;
-}
-h1,h2,h3,.brand-word,.btn,.nav-item,.content-h,.stat-value{font-family:"Plus Jakarta Sans",sans-serif;}
+body{margin:0;background:var(--bg-page);font-family:"IBM Plex Sans",system-ui,sans-serif;color:var(--text);min-height:100vh;}
+h1,h2,h3,.brand-word,.btn,.nav-item,.content-h{font-family:"Plus Jakarta Sans",sans-serif;}
 .icon{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
 .hidden{display:none !important;}
+a{color:inherit;}
+
+/* Quantity boxes: no spinner arrows. A stray scroll over a focused box
+   silently changed the number, which here means a wrong count. */
+input[type="number"]{-moz-appearance:textfield;appearance:textfield;}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
 
 /* ===== LOGIN ===== */
-.login-screen{
-min-height:100vh;
-display:flex;align-items:center;justify-content:center;
-padding:24px;
-background-image:
-linear-gradient(rgba(67,20,7,0.72), rgba(67,20,7,0.86)),
-url('login-bg.jpg');
-background-size:cover;
-background-position:center;
-}
-.login-card{
-background:var(--surface);
-border-radius:18px;
-padding:36px 32px;
-width:100%;max-width:400px;
-box-shadow:0 24px 60px rgba(67,20,7,0.35);
-text-align:center;
-}
+.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
+background:radial-gradient(1200px 600px at 20% 10%,#9A3412 0%,transparent 60%),
+radial-gradient(900px 500px at 90% 90%,#C2410C 0%,transparent 55%),#431407;}
+.login-card{background:var(--surface);border-radius:18px;padding:36px 32px;width:100%;max-width:400px;
+box-shadow:0 24px 60px rgba(67,20,7,0.35);text-align:center;}
 .login-card .brand{justify-content:center;margin-bottom:22px;}
 .login-card h2{font-weight:800;font-size:20px;margin:0 0 6px;color:var(--dark);}
 .login-card p{margin:0 0 24px;color:var(--text-soft);font-size:13.5px;line-height:1.6;}
 #g_id_signin{display:flex;justify-content:center;}
-#login-status{margin-top:16px;font-size:12.5px;color:var(--text-soft);min-height:18px;}
+#login-status{margin-top:16px;font-size:12.5px;color:var(--text-soft);min-height:18px;line-height:1.5;}
 
-/* ===== APP SHELL ===== */
+/* ===== SHELL ===== */
 .app-shell{display:flex;align-items:stretch;min-height:100vh;}
-.sidebar{
-width:214px;flex-shrink:0;background:var(--dark);
-display:flex;flex-direction:column;padding:20px 14px;gap:22px;
-position:sticky;top:0;height:100vh;overflow-y:auto;
-}
+.sidebar{width:214px;flex-shrink:0;background:var(--dark);display:flex;flex-direction:column;padding:20px 14px;gap:22px;
+position:sticky;top:0;height:100vh;overflow-y:auto;}
 .brand{display:flex;align-items:center;gap:10px;padding:0 6px;}
 .brand-home{text-decoration:none;border-radius:9px;padding:4px 6px;margin:-4px 0;transition:background .15s ease;}
 .brand-home:hover{background:rgba(255,255,255,0.07);}
-.brand-mark{
-width:32px;height:32px;flex-shrink:0;border-radius:9px;background:var(--primary);
-display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:15px;
-font-family:"Plus Jakarta Sans",sans-serif;
-}
+.brand-mark{width:32px;height:32px;flex-shrink:0;border-radius:9px;background:var(--primary);display:flex;align-items:center;justify-content:center;
+color:#fff;font-weight:800;font-size:15px;font-family:"Plus Jakarta Sans",sans-serif;}
 .brand-word{font-weight:800;font-size:17px;letter-spacing:0.02em;color:#FFF7ED;}
 .nav{display:flex;flex-direction:column;gap:2px;}
-.nav-label{
-font-size:10.5px;text-transform:uppercase;letter-spacing:0.09em;
-color:#B98A6E;padding:12px 10px 5px;font-weight:700;
-}
-.nav-item{
-display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;
-color:#EAD5C8;font-size:13.5px;font-weight:500;cursor:pointer;
-text-decoration:none;transition:0.15s ease;border:none;background:none;width:100%;text-align:left;
-}
+.nav-label{font-size:10.5px;text-transform:uppercase;letter-spacing:0.09em;color:#B98A6E;padding:12px 10px 5px;font-weight:700;}
+.nav-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;border-radius:9px;color:#EAD5C8;font-size:13.5px;
+font-weight:500;cursor:pointer;text-decoration:none;transition:0.15s ease;border:none;background:none;width:100%;text-align:left;}
 .nav-item:hover{background:rgba(255,255,255,0.07);color:#fff;}
 .nav-item.active{background:var(--primary);color:#fff;font-weight:600;}
+.nav-count{font-size:11px;font-weight:700;background:rgba(255,255,255,0.14);border-radius:999px;padding:1px 7px;}
+.nav-item.active .nav-count{background:rgba(255,255,255,0.28);}
 .sidebar-foot{margin-top:auto;display:flex;flex-direction:column;gap:8px;}
 .who{padding:0 10px;font-size:12px;color:#C8A18A;line-height:1.4;}
 .who b{display:block;color:#FFF7ED;font-size:13px;font-weight:600;}
 
 .main{flex:1;min-width:0;display:flex;flex-direction:column;}
-.topbar{
-background:var(--surface);border-bottom:1px solid var(--border);
-padding:16px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
-}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;
+justify-content:space-between;gap:16px;flex-wrap:wrap;position:sticky;top:0;z-index:20;}
 .content-h{font-weight:700;font-size:19px;color:var(--dark);margin:0;}
-.content{padding:28px;flex:1;}
+.content-sub{font-size:12.5px;color:var(--text-soft);margin-top:2px;}
+.content{padding:26px 28px 40px;flex:1;}
+
+/* A thin bar while anything is loading, instead of blanking the page. */
+.progress{position:fixed;top:0;left:0;right:0;height:3px;z-index:100;overflow:hidden;pointer-events:none;}
+.progress i{position:absolute;top:0;bottom:0;width:30%;background:var(--primary);border-radius:2px;animation:slide 1.1s ease-in-out infinite;}
+@keyframes slide{0%{left:-30%}100%{left:100%}}
 
 /* ===== COMPONENTS ===== */
-.btn{
-border:1px solid var(--border);background:var(--surface);color:var(--text);
-padding:8px 15px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;
-display:inline-flex;align-items:center;gap:7px;transition:0.15s ease;white-space:nowrap;
-}
-a.btn{text-decoration:none;}
+.btn{border:1px solid var(--border);background:var(--surface);color:var(--text);padding:8px 15px;border-radius:8px;cursor:pointer;
+font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:7px;transition:0.15s ease;white-space:nowrap;text-decoration:none;}
 .btn:hover{background:#FFF7ED;border-color:var(--accent);}
 .btn-primary{background:var(--primary);border-color:var(--primary);color:#fff;}
 .btn-primary:hover{background:var(--primary-dark);border-color:var(--primary-dark);}
 .btn-sm{padding:6px 11px;font-size:12px;}
 .btn:disabled{opacity:0.55;cursor:not-allowed;}
-.btn:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--primary);outline-offset:2px;}
+.btn:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--primary);outline-offset:2px;}
 
-.card{
-background:var(--surface);border:1px solid var(--border);border-radius:13px;
-padding:20px;box-shadow:0 1px 3px rgba(124,45,18,0.04);
-}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;box-shadow:0 1px 3px rgba(124,45,18,0.04);}
 .card + .card{margin-top:18px;}
 .card-h{font-weight:700;font-size:15px;color:var(--dark);margin:0 0 4px;font-family:"Plus Jakarta Sans",sans-serif;}
 .card-sub{font-size:12.5px;color:var(--text-soft);margin:0 0 16px;line-height:1.5;}
 
-/* Receiving nests: consignment -> model -> parts */
-.consign-block{margin-bottom:22px;}
-.consign-head{
-display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;
-padding:0 2px 10px;border-bottom:2px solid var(--border);margin-bottom:14px;
-}
-.consign-head h2{margin:0;font-size:17px;font-weight:800;color:var(--dark);}
-.consign-head .meta{font-size:12.5px;color:var(--text-soft);}
-.model-block{
-border:1px solid var(--border);border-radius:11px;background:var(--surface);
-padding:16px 18px;margin-bottom:12px;
-}
-.model-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:10px;}
-.model-title{font-family:"Plus Jakarta Sans",sans-serif;font-weight:700;font-size:14.5px;color:var(--dark);}
-.model-meta{font-size:12px;color:var(--text-soft);}
-
-.grid{display:grid;gap:16px;}
-.grid-4{grid-template-columns:repeat(auto-fill,minmax(190px,1fr));}
-.grid-3{grid-template-columns:repeat(auto-fill,minmax(240px,1fr));}
-.grid-2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr));}
-/* Five headline tiles stay on one line, then break cleanly rather than
-   leaving a single orphan on a row of its own. */
-.grid-5{grid-template-columns:repeat(5,1fr);}
-@media (max-width:1240px){.grid-5{grid-template-columns:repeat(3,1fr);}}
-@media (max-width:760px){.grid-5{grid-template-columns:repeat(2,1fr);}}
-@media (max-width:460px){.grid-5{grid-template-columns:1fr;}}
-
-.stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
-.stat-label{font-size:11.5px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-soft);font-weight:600;}
-.stat-value{font-size:26px;font-weight:800;color:var(--dark);margin-top:5px;line-height:1;}
-
-label{display:block;font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;
-color:var(--text-soft);margin-bottom:6px;}
-/* No up/down spinners on any quantity box. They are a fiddly target on a
-   warehouse tablet and a stray scroll over a focused field silently changes
-   the number, which on this site means a wrong count. Type the number. */
-input[type="number"]{-moz-appearance:textfield;appearance:textfield;}
-input[type="number"]::-webkit-outer-spin-button,
-input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
-
-input,select,textarea{
-width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;
-background:var(--surface);color:var(--text);font-size:14px;font-family:inherit;
-}
+label{display:block;font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-soft);margin-bottom:6px;}
+input,select,textarea{width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);
+font-size:14px;font-family:inherit;}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(249,115,22,0.13);}
-.field{margin-bottom:16px;}
-.form-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px;}
 
-.chip{
-display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;
-font-size:11.5px;font-weight:600;border:1px solid transparent;
-}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:999px;font-size:11.5px;font-weight:600;
+border:1px solid transparent;white-space:nowrap;line-height:1.35;}
 .chip-ok{background:var(--success-bg);color:var(--success);}
 .chip-warn{background:var(--warning-bg);color:var(--warning);}
 .chip-bad{background:var(--danger-bg);color:var(--danger);}
 .chip-info{background:var(--info-bg);color:var(--info);}
 .chip-idle{background:#F5EBE3;color:var(--text-soft);}
+/* Status chips take their colours from STATUS_STYLE, with a dot so identity
+   never rests on colour alone — the words are always there. */
+.st{background:var(--c-bg);color:var(--c-fg);}
+.st::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c-dot);flex-shrink:0;}
+
+.prio{display:inline-flex;align-items:center;font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;border-radius:6px;
+padding:2px 7px;vertical-align:2px;margin-right:6px;}
+.prio-u{background:#DC2626;color:#fff;}
+.prio-h{background:#FFEDD5;color:#C2410C;border:1px solid #FDBA74;}
 
 table{width:100%;border-collapse:collapse;}
-th{
-text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);
-font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-soft);font-weight:700;
-}
-td{padding:12px;border-bottom:1px solid #F8EDE4;font-size:13.5px;}
+th{text-align:left;padding:9px 11px;border-bottom:1px solid var(--border);font-size:10.5px;text-transform:uppercase;letter-spacing:0.06em;
+color:var(--text-soft);font-weight:700;white-space:nowrap;}
+td{padding:10px 11px;border-bottom:1px solid var(--border-soft);font-size:13px;vertical-align:middle;}
 tbody tr:last-child td{border-bottom:none;}
+th.r,td.r{text-align:right;}
+.tbl-wrap{overflow-x:auto;}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;}
 
-.empty{
-border:1px dashed var(--border);border-radius:12px;padding:44px 20px;text-align:center;
-color:var(--text-soft);font-size:13.5px;background:#FFFBF7;
-}
-.note{
-background:#FFF7ED;border:1px solid var(--border);border-radius:10px;
-padding:12px 15px;font-size:12.5px;color:var(--text-soft);line-height:1.55;
-}
+.empty{border:1px dashed var(--border);border-radius:12px;padding:40px 20px;text-align:center;color:var(--text-soft);font-size:13.5px;background:#FFFBF7;}
+.note{background:#FFF7ED;border:1px solid var(--border);border-radius:10px;padding:11px 14px;font-size:12.5px;color:var(--text-soft);line-height:1.55;}
 .note b{color:var(--text);}
+.note-bad{background:var(--danger-bg);border-color:#FBCFCF;color:#8F2020;}
 
-.spinner{
-width:34px;height:34px;border:3px solid var(--border);border-top-color:var(--primary);
-border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 14px;
-}
+.spinner{width:34px;height:34px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 14px;}
 .loading-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;color:var(--text-soft);font-size:13.5px;}
 @keyframes spin{to{transform:rotate(360deg);}}
 #login-status .spinner{margin-bottom:8px;}
 
+/* ===== SEARCH, SORT ===== */
+.search-wrap{position:relative;display:inline-flex;align-items:center;}
+.search-wrap input{padding:7px 30px 7px 32px;font-size:13px;border-radius:8px;width:240px;}
+.search-wrap .s-icon{position:absolute;left:10px;width:15px;height:15px;stroke:var(--text-soft);fill:none;stroke-width:2;stroke-linecap:round;pointer-events:none;}
+.search-wrap .s-clear{position:absolute;right:6px;border:none;background:none;cursor:pointer;color:var(--text-soft);font-size:16px;line-height:1;padding:2px 5px;border-radius:5px;}
+.search-count{font-size:11.5px;color:var(--text-soft);white-space:nowrap;}
+
+.sortbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:18px;}
+.sortbar .lbl{font-size:11.5px;color:var(--text-soft);font-weight:600;margin-right:4px;}
+.sortbtn{border:1px solid var(--border);background:var(--surface);color:var(--text-soft);border-radius:999px;padding:5px 12px;font-size:12px;
+font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-family:inherit;}
+.sortbtn:hover{border-color:var(--accent);color:var(--text);}
+.sortbtn.on{background:var(--dark);border-color:var(--dark);color:#fff;}
+.sortbtn .ar{font-size:10px;}
+
+/* ===== CONSIGNMENT CARDS — the same shape on every page ===== */
+.consign-block{margin-bottom:24px;}
+.consign-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:0 2px 9px;border-bottom:2px solid var(--border);margin-bottom:12px;}
+.consign-head h2{margin:0;font-size:17px;font-weight:800;color:var(--dark);}
+.consign-head .meta{font-size:12px;color:var(--text-soft);}
+.model-block{border:1px solid var(--border);border-radius:13px;background:var(--surface);padding:15px 17px;margin-bottom:12px;
+border-left:4px solid var(--border);box-shadow:0 1px 2px rgba(124,45,18,0.03);}
+.model-block.prio-high{border-left-color:#F97316;background:linear-gradient(90deg,#FFF7ED 0,#FFFFFF 180px);}
+.model-block.prio-urgent{border-left-color:#DC2626;border-color:#FBCFCF;background:linear-gradient(90deg,#FFF1F1 0,#FFFFFF 220px);}
+.model-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:12px;}
+.model-title{font-family:"Plus Jakarta Sans",sans-serif;font-weight:700;font-size:14.5px;color:var(--dark);}
+.model-title .fac{color:var(--text-soft);font-weight:500;}
+.model-meta{font-size:12px;color:var(--text-soft);margin-top:3px;}
+.model-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:flex-end;}
+.big-num{text-align:right;}
+.big-num .k{font-size:11px;color:var(--text-soft);font-weight:700;}
+.big-num .v{font-size:26px;font-weight:800;line-height:1;font-family:"Plus Jakarta Sans",sans-serif;}
+
+.part-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;margin-bottom:12px;}
+.part-tile{border:1px solid var(--border);border-radius:11px;padding:11px 12px;background:#FFFCFA;}
+.part-tile .pt-top{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:7px;flex-wrap:wrap;}
+.part-tile .pt-top b{font-size:12.5px;white-space:nowrap;}
+.part-tile .pt-num{font-size:21px;font-weight:800;color:var(--dark);font-family:"Plus Jakarta Sans",sans-serif;line-height:1;}
+.part-tile .pt-num span{font-size:12px;color:var(--text-soft);font-weight:600;margin-left:3px;}
+.part-tile .pt-bar{height:6px;background:#F6E7DB;border-radius:4px;margin:8px 0 6px;overflow:hidden;}
+.part-tile .pt-bar i{display:block;height:100%;background:#10B981;border-radius:4px;}
+.part-tile .pt-foot{font-size:11px;color:var(--text-soft);}
+.part-tile.pt-in{background:#F0FBF5;border-color:#BBEBD0;}
+.part-tile.pt-late{background:#FFF6F5;border-color:#FBCFCF;}
+.part-tile.pt-late .pt-bar i{background:#EF4444;}
+
+table.lines td{font-size:12.5px;}
+tr.row-late td{background:#FFF8F7;}
+tr.row-short td{background:#FFFBF0;}
+tr.row-done td{color:var(--text-soft);}
+
 /* ===== DASHBOARD ===== */
-.dash-section{margin-bottom:26px;}
-.dash-head{
-display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px;
-}
-.dash-head h2{
-margin:0;font-size:15px;font-weight:700;color:var(--dark);font-family:"Plus Jakarta Sans",sans-serif;
-}
+.dash-section{margin-bottom:28px;}
+.dash-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px;}
+.dash-head h2{margin:0;font-size:15.5px;font-weight:700;color:var(--dark);font-family:"Plus Jakarta Sans",sans-serif;}
 .dash-head .sub{font-size:12.5px;color:var(--text-soft);}
 
-.tile{
-background:var(--surface);border:1px solid var(--border);border-radius:12px;
-padding:18px;display:flex;flex-direction:column;gap:6px;
-border-left:4px solid var(--border);
-}
-a.tile,a.stage,a.arrive-tile{text-decoration:none;color:inherit;transition:border-color .15s ease,box-shadow .15s ease;}
-a.tile:hover,a.stage:hover,a.arrive-tile:hover{border-color:var(--accent);box-shadow:0 2px 8px rgba(124,45,18,0.08);}
-a.tile:hover .t-label,a.arrive-tile:hover .a-model{color:var(--primary-dark);}
-.tile .t-label{font-size:12.5px;color:var(--text-soft);font-weight:600;}
-.tile .t-value{font-size:30px;font-weight:800;line-height:1;color:var(--dark);font-family:"Plus Jakarta Sans",sans-serif;}
-.tile .t-foot{font-size:11.5px;color:var(--text-soft);}
-.tile-accent{border-left-color:var(--primary);}
-.tile-good{border-left-color:var(--success);}
-.tile-good .t-value{color:var(--success);}
-.tile-warn{border-left-color:var(--warning);}
-.tile-warn .t-value{color:var(--warning);}
-.tile-fr{border-left-color:var(--fr);}
-.tile-bb{border-left-color:var(--bb);}
-/* Late is the one state worth shouting about, so it is the only tile that
-   changes its whole background rather than just an edge. */
-.tile-late{border-left-color:var(--danger);background:var(--danger-bg);border-color:#FBCFCF;}
-.tile-late .t-value{color:var(--danger);}
-.tile-late .t-label,.tile-late .t-foot{color:#8F2020;}
+.stiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:10px;}
+.stile{display:flex;flex-direction:column;gap:5px;padding:13px 13px 12px;border-radius:12px;background:var(--c-bg);border:1px solid transparent;
+text-decoration:none;color:var(--c-fg);transition:transform .12s ease,box-shadow .12s ease,border-color .12s ease;min-height:92px;}
+a.stile:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(67,20,7,0.08);border-color:var(--c-dot);}
+.stile .sv{font-size:25px;font-weight:800;line-height:1;font-family:"Plus Jakarta Sans",sans-serif;}
+.stile .sl{font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;}
+.stile .sl::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--c-dot);}
+.stile .sf{font-size:11px;opacity:.8;margin-top:auto;}
+.stile.zero{opacity:.5;}
+.stile.factory{box-shadow:inset 0 0 0 2px var(--c-dot);}
 
-/* The two standing customers. */
-.cust{
-display:block;text-decoration:none;color:inherit;background:var(--surface);
-border:1px solid var(--border);border-radius:13px;padding:18px 20px;
-border-top:4px solid var(--border);transition:border-color .15s ease,box-shadow .15s ease;
-}
-.cust:hover{box-shadow:0 2px 10px rgba(124,45,18,0.09);}
+.ftiles{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;}
+@media (max-width:1280px){.ftiles{grid-template-columns:repeat(4,1fr);}}
+@media (max-width:640px){.ftiles{grid-template-columns:repeat(2,1fr);}}
+.ftile{display:flex;flex-direction:column;gap:6px;padding:15px;border-radius:13px;background:var(--surface);border:1px solid var(--border);
+border-top:4px solid var(--c-dot);text-decoration:none;color:inherit;transition:transform .12s ease,box-shadow .12s ease;}
+a.ftile:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(67,20,7,0.08);}
+.ftile .fl{font-size:12.5px;font-weight:700;color:var(--text-soft);}
+.ftile .fv{font-size:28px;font-weight:800;line-height:1;color:var(--c-fg);font-family:"Plus Jakarta Sans",sans-serif;}
+.ftile .ff{font-size:11px;color:var(--text-soft);}
+.ftile.zero .fv{color:var(--text-faint);}
+.flow-arrow{display:none;}
+
+.cust-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media (max-width:760px){.cust-grid{grid-template-columns:1fr;}}
+.cust{display:block;text-decoration:none;color:inherit;background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:16px 18px;
+border-top:4px solid var(--border);}
 .cust-fr{border-top-color:var(--fr);}
 .cust-bb{border-top-color:var(--bb);}
-.cust .c-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:14px;}
-.cust .c-code{font-family:"Plus Jakarta Sans",sans-serif;font-weight:800;font-size:19px;color:var(--dark);}
-.cust-fr .c-code{color:var(--fr);}
-.cust-bb .c-code{color:var(--bb);}
+.cust .c-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:10px;}
+.cust .c-code{font-family:"Plus Jakarta Sans",sans-serif;font-weight:800;font-size:18px;}
+.cust-fr .c-code{color:#B4521F;}
+.cust-bb .c-code{color:#1D7268;}
 .cust .c-tag{font-size:11.5px;color:var(--text-soft);}
-.cust .c-main{display:flex;gap:34px;flex-wrap:wrap;}
-.cust .c-num{font-family:"Plus Jakarta Sans",sans-serif;font-weight:800;font-size:31px;line-height:1;color:var(--dark);}
-.cust .c-num-soft{color:var(--success);}
-.cust .c-lab{font-size:11.5px;color:var(--text-soft);margin-top:6px;max-width:190px;line-height:1.45;}
-.cust .c-foot{
-margin-top:15px;padding-top:12px;border-top:1px solid var(--border);
-font-size:11.5px;color:var(--text-soft);
-}
+.cust .c-main{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.cust .c-num{font-family:"Plus Jakarta Sans",sans-serif;font-weight:800;font-size:24px;line-height:1;color:var(--dark);}
+.cust .c-lab{font-size:11px;color:var(--text-soft);margin-top:5px;line-height:1.4;}
 
-.arrive-late{border-color:#FBCFCF;background:#FFF8F7;}
+.glance{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;}
+.gtile{display:flex;flex-direction:column;gap:8px;padding:13px 14px;border-radius:12px;background:var(--surface);border:1px solid var(--border);
+border-left:4px solid var(--border);text-decoration:none;color:inherit;transition:box-shadow .12s ease;}
+a.gtile:hover{box-shadow:0 4px 12px rgba(67,20,7,0.08);}
+.gtile.prio-urgent{border-left-color:#DC2626;background:#FFF8F8;}
+.gtile.prio-high{border-left-color:#F97316;}
+.gtile.late{border-color:#FBCFCF;}
+.gtile .g-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+.gtile .g-model{font-weight:700;font-size:13.5px;font-family:"Plus Jakarta Sans",sans-serif;color:var(--dark);}
+.gtile .g-meta{font-size:11.5px;color:var(--text-soft);}
+.gtile .g-parts{display:flex;gap:5px;flex-wrap:wrap;}
+.gtile .g-stats{display:flex;gap:14px;font-size:11.5px;color:var(--text-soft);margin-top:auto;}
+.gtile .g-stats b{color:var(--text);font-size:13px;}
 
-/* FR and BB filled in together, one button for both. */
-.dlv-form{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;}
-.dlv-cust-field{flex:0 0 130px;}
-.dlv-actions{display:flex;flex-direction:column;gap:7px;padding-top:23px;}
-.dlv-hint{font-size:11.5px;color:var(--text-soft);margin-top:6px;}
-.dlv-actions .dlv-hint{margin-top:0;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;}
+@media (max-width:980px){.two-col{grid-template-columns:1fr;}}
+.two-col .card + .card{margin-top:0;}
 
-.stage-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;}
-.stage{
-background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:14px;
-text-align:left;position:relative;
-}
-.stage .s-count{font-size:24px;font-weight:800;color:var(--dark);line-height:1;font-family:"Plus Jakarta Sans",sans-serif;}
-.stage .s-name{font-size:12px;color:var(--text-soft);margin-top:5px;font-weight:600;}
-.stage-empty .s-count{color:var(--text-faint);}
-.stage-done{background:var(--success-bg);border-color:#BBF7D0;}
-.stage-done .s-count{color:var(--success);}
-.stage-done .s-name{color:var(--success);}
+.mini-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border-soft);text-decoration:none;color:inherit;}
+.mini-row:last-child{border-bottom:none;}
+a.mini-row:hover .mr-title{color:var(--primary-dark);}
+.mini-row .mr-date{flex:0 0 52px;text-align:center;border-radius:9px;background:#FFF1E6;padding:5px 0;}
+.mini-row .mr-date b{display:block;font-size:16px;line-height:1;color:var(--dark);font-family:"Plus Jakarta Sans",sans-serif;}
+.mini-row .mr-date span{font-size:10px;color:var(--text-soft);text-transform:uppercase;font-weight:700;letter-spacing:.05em;}
+.mini-row .mr-body{flex:1;min-width:0;}
+.mini-row .mr-title{font-size:13px;font-weight:600;}
+.mini-row .mr-sub{font-size:11.5px;color:var(--text-soft);margin-top:2px;}
+.mini-row .mr-end{text-align:right;font-size:12px;color:var(--text-soft);white-space:nowrap;}
+.mini-row .mr-end b{display:block;color:var(--text);font-size:13.5px;}
 
-.arrive-tile{
-background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:15px 16px;
-display:flex;flex-direction:column;gap:7px;
-}
-.arrive-tile .a-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;}
-.arrive-tile code{font-size:12.5px;font-weight:700;color:var(--dark);}
-.arrive-tile .a-model{font-size:13px;font-weight:600;color:var(--text);}
+.arrive-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;}
+.arrive-tile{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 15px;display:flex;flex-direction:column;
+gap:7px;text-decoration:none;color:inherit;border-left:4px solid var(--c-dot,var(--border));}
+a.arrive-tile:hover{box-shadow:0 4px 12px rgba(67,20,7,0.08);}
+.arrive-tile.late{background:#FFF8F7;border-color:#FBCFCF;border-left-color:#EF4444;}
+.arrive-tile .a-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+.arrive-tile .a-model{font-size:13.5px;font-weight:700;font-family:"Plus Jakarta Sans",sans-serif;color:var(--dark);}
 .arrive-tile .a-meta{font-size:11.5px;color:var(--text-soft);}
 .arrive-tile .a-parts{display:flex;gap:5px;flex-wrap:wrap;}
 
-/* Bars: FR vs BB, and demand vs built vs delivered */
-.bar-row{margin-bottom:15px;}
-.bar-row:last-child{margin-bottom:0;}
-.bar-label{font-size:12.5px;font-weight:600;color:var(--text);margin-bottom:7px;display:flex;justify-content:space-between;gap:10px;}
-.bar-label span:last-child{color:var(--text-soft);font-weight:500;font-size:11.5px;}
-.bar-track{background:#FBF1E9;border-radius:5px;height:15px;margin-bottom:5px;}
-.bar-fill{height:100%;border-radius:5px;display:flex;align-items:center;justify-content:flex-end;
-padding-right:6px;color:#fff;font-size:10.5px;font-weight:700;position:relative;}
-/* Sits just past the end of its own bar, not at the end of the track. */
-.bar-out{position:absolute;left:100%;top:0;height:15px;line-height:15px;margin-left:6px;
-font-size:10.5px;font-weight:700;color:var(--text-soft);white-space:nowrap;}
-
-/* One track per model: the whole order is the track, built fills it, and
-   confirmed sits inside the built portion. */
-.prog-track{background:#FBF1E9;border-radius:5px;height:17px;position:relative;overflow:hidden;}
-.prog-landed{position:absolute;inset:0 auto 0 0;background:var(--accent);border-radius:5px;}
-.prog-built{position:absolute;inset:0 auto 0 0;background:var(--primary);border-radius:5px;}
-.prog-conf{position:absolute;inset:0 auto 0 0;background:var(--success);border-radius:5px;}
-.legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;font-size:12px;color:var(--text-soft);}
+/* Charts */
+.chart-wrap{position:relative;}
+.chart-wrap svg{display:block;width:100%;height:auto;overflow:visible;}
+.chart-wrap .grid line{stroke:#F1E3D8;stroke-width:1;}
+.chart-wrap .axis text{fill:var(--text-soft);font-size:10.5px;font-family:"IBM Plex Sans",sans-serif;}
+.tip{position:absolute;pointer-events:none;background:#2B1206;color:#fff;font-size:12px;padding:7px 10px;border-radius:8px;white-space:nowrap;
+transform:translate(-50%,-110%);box-shadow:0 6px 18px rgba(0,0,0,0.18);z-index:5;line-height:1.45;}
+.tip b{font-weight:700;}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px;font-size:12px;color:var(--text-soft);align-items:center;}
 .legend i{width:11px;height:11px;border-radius:3px;display:inline-block;margin-right:6px;vertical-align:-1px;}
+.dbar{margin-bottom:14px;}
+.dbar:last-child{margin-bottom:0;}
+.dbar .db-label{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;font-weight:600;margin-bottom:6px;}
+.dbar .db-label span:last-child{font-weight:500;color:var(--text-soft);font-size:11.5px;}
+.dbar .db-line{display:grid;grid-template-columns:24px 1fr 86px;align-items:center;gap:8px;margin-bottom:4px;font-size:11.5px;}
+.dbar .db-line .who{font-weight:700;padding:0;color:var(--text-soft);font-size:11px;}
+.dbar .db-track{height:12px;background:#F7ECE3;border-radius:4px;position:relative;overflow:hidden;cursor:default;}
+.dbar .db-sent{position:absolute;inset:0 auto 0 0;border-radius:4px;opacity:.35;}
+.dbar .db-done{position:absolute;inset:0 auto 0 0;border-radius:4px;}
+.dbar .db-val{text-align:right;color:var(--text);font-variant-numeric:tabular-nums;}
 
-/* Search */
-.search-wrap{position:relative;display:inline-flex;align-items:center;}
-.search-wrap input{
-padding:7px 30px 7px 32px;font-size:13px;border-radius:8px;width:230px;
-}
-.search-wrap .s-icon{position:absolute;left:10px;width:15px;height:15px;stroke:var(--text-soft);
-fill:none;stroke-width:2;stroke-linecap:round;pointer-events:none;}
-.search-wrap .s-clear{
-position:absolute;right:6px;border:none;background:none;cursor:pointer;color:var(--text-soft);
-font-size:16px;line-height:1;padding:2px 5px;border-radius:5px;
-}
-.search-wrap .s-clear:hover{background:#FBF1E9;color:var(--text);}
-.search-count{font-size:11.5px;color:var(--text-soft);margin-left:10px;white-space:nowrap;}
+/* Needs attention + activity */
+.att{display:flex;gap:11px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--border-soft);text-decoration:none;color:inherit;}
+.att:last-child{border-bottom:none;}
+a.att:hover .att-title{color:var(--primary-dark);}
+.att-ico{flex:0 0 28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;}
+.sev-high .att-ico{background:var(--danger-bg);color:var(--danger);}
+.sev-mid .att-ico{background:var(--warning-bg);color:var(--warning);}
+.sev-low .att-ico{background:var(--info-bg);color:var(--info);}
+.att-title{font-size:13px;font-weight:600;line-height:1.35;}
+.att-sub{font-size:11.5px;color:var(--text-soft);margin-top:3px;line-height:1.45;}
+.act-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border-soft);font-size:13px;}
+.act-item:last-child{border-bottom:none;}
+.act-when{color:var(--text-soft);font-size:11.5px;white-space:nowrap;flex:0 0 108px;}
+.act-where{color:var(--text-soft);font-size:11.5px;}
 
-.master-search{
-background:var(--surface);border:1px solid var(--border);border-radius:12px;
-padding:16px 18px;margin-bottom:22px;
-}
+.sync-bar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--accent);
+border-radius:12px;padding:12px 16px;margin-bottom:18px;}
+.sync-bar .s-text{font-size:13px;color:var(--text-soft);}
+.sync-bar .s-text b{color:var(--text);font-weight:600;}
+
+.master-search{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:24px;}
 .master-search .ms-input{position:relative;display:flex;align-items:center;}
 .master-search .ms-input input{padding:11px 14px 11px 38px;font-size:14.5px;}
-.master-search .ms-input svg{position:absolute;left:13px;width:17px;height:17px;
-stroke:var(--text-soft);fill:none;stroke-width:2;stroke-linecap:round;pointer-events:none;}
-.ms-results{margin-top:16px;}
-.ms-group{margin-bottom:18px;}
+.master-search .ms-input svg{position:absolute;left:13px;width:17px;height:17px;stroke:var(--text-soft);fill:none;stroke-width:2;stroke-linecap:round;pointer-events:none;}
+.ms-results{margin-top:14px;}
+.ms-results:empty{display:none;}
+.ms-group{margin-bottom:16px;}
 .ms-group:last-child{margin-bottom:0;}
-.ms-group h4{
-margin:0 0 9px;font-size:12.5px;font-weight:700;color:var(--dark);
-font-family:"Plus Jakarta Sans",sans-serif;
-}
-.ms-hit{
-display:flex;justify-content:space-between;gap:12px;align-items:baseline;flex-wrap:wrap;
-padding:9px 11px;border:1px solid var(--border);border-radius:9px;margin-bottom:6px;
-font-size:13px;text-decoration:none;color:var(--text);background:#FFFBF7;
-}
+.ms-group h4{margin:0 0 8px;font-size:12.5px;font-weight:700;color:var(--dark);font-family:"Plus Jakarta Sans",sans-serif;}
+.ms-hit{display:flex;justify-content:space-between;gap:12px;align-items:baseline;flex-wrap:wrap;padding:9px 11px;border:1px solid var(--border);
+border-radius:9px;margin-bottom:6px;font-size:13px;text-decoration:none;color:var(--text);background:#FFFBF7;}
 .ms-hit:hover{border-color:var(--accent);background:#FFF7ED;}
 .ms-hit .h-meta{font-size:11.5px;color:var(--text-soft);}
 .ms-more{font-size:11.5px;color:var(--text-soft);padding:3px 2px;}
 
-.act-item{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid #F8EDE4;font-size:13px;}
-.act-item:last-child{border-bottom:none;}
-.act-when{color:var(--text-soft);font-size:11.5px;white-space:nowrap;flex:0 0 110px;}
-.act-what b{font-weight:600;}
-.act-where{color:var(--text-soft);font-size:11.5px;}
+/* Forms inside cards */
+.row-form{display:flex;gap:8px;align-items:center;justify-content:flex-end;}
+.row-form input{width:84px;padding:7px 9px;font-size:13px;}
+.dlv-form{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;}
+.dlv-cust-field{flex:0 0 130px;}
+.dlv-actions{display:flex;flex-direction:column;gap:7px;padding-top:23px;}
+.hint{font-size:11.5px;color:var(--text-soft);margin-top:6px;}
+.dlv-actions .hint{margin-top:0;}
+.prio-pick{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.prio-pick button{border:none;background:var(--surface);font-size:11.5px;font-weight:700;padding:5px 10px;cursor:pointer;color:var(--text-soft);font-family:inherit;}
+.prio-pick button + button{border-left:1px solid var(--border);}
+.prio-pick button.on-normal{background:#F5EBE3;color:var(--text);}
+.prio-pick button.on-high{background:#FFEDD5;color:#C2410C;}
+.prio-pick button.on-urgent{background:#DC2626;color:#fff;}
+.status-line{margin-top:10px;}
 
-.sync-bar{
-display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
-background:var(--surface);border:1px solid var(--accent);border-radius:12px;padding:14px 18px;margin-bottom:22px;
-}
-.sync-bar .s-text{font-size:13px;color:var(--text-soft);}
-.sync-bar .s-text b{color:var(--text);font-weight:600;}
-
-@media (prefers-reduced-motion: reduce){
-*{animation-duration:0.01ms !important;transition-duration:0.01ms !important;}
-}
+@media (prefers-reduced-motion: reduce){*{animation-duration:0.01ms !important;transition-duration:0.01ms !important;}}
 
 @media (max-width:820px){
 .app-shell{flex-direction:column;}
-.sidebar{width:100%;height:auto;position:static;flex-direction:column;}
+.sidebar{width:100%;height:auto;position:static;}
 .nav{flex-direction:row;flex-wrap:wrap;}
 .nav-item{width:auto;}
 .nav-label{display:none;}
-.sidebar-foot{margin-top:14px;}
-.content{padding:18px;}
-.topbar{padding:14px 18px;}
-.act-when{flex:0 0 90px;}
+.sidebar-foot{margin-top:14px;flex-direction:row;align-items:center;justify-content:space-between;}
+.content{padding:16px;}
+.topbar{padding:12px 16px;position:static;}
+.search-wrap input{width:100%;}
+.search-wrap{width:100%;}
+.act-when{flex:0 0 88px;}
+.cust .c-main{grid-template-columns:1fr 1fr 1fr;}
 }
 </style>
 </head>
 <body>
+
+<div class="progress hidden" id="progress"><i></i></div>
 
 <!-- ============ LOGIN ============ -->
 <div id="scr-login" class="login-screen">
@@ -410,18 +391,15 @@ background:var(--surface);border:1px solid var(--accent);border-radius:12px;padd
 
 <!-- ============ APP ============ -->
 <div id="app" class="app-shell hidden">
-
   <aside class="sidebar">
     <a class="brand brand-home" href="#/dashboard" title="Go to the dashboard">
       <div class="brand-mark">A</div>
       <div class="brand-word">AssembiX</div>
     </a>
-
     <nav class="nav" id="nav"></nav>
-
     <div class="sidebar-foot">
       <div class="who"><b id="who-name">—</b><span id="who-role">—</span></div>
-      <button class="nav-item" onclick="doLogout()">
+      <button class="nav-item" onclick="doLogout()" style="justify-content:flex-start;">
         <svg class="icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><path d="M21 12H9"/></svg>
         Sign out
       </button>
@@ -430,7 +408,10 @@ background:var(--surface);border:1px solid var(--accent);border-radius:12px;padd
 
   <div class="main">
     <div class="topbar">
-      <div><h1 class="content-h" id="page-title">Dashboard</h1></div>
+      <div>
+        <h1 class="content-h" id="page-title">Dashboard</h1>
+        <div class="content-sub" id="page-sub"></div>
+      </div>
       <div id="page-actions"></div>
     </div>
     <div class="content" id="content"></div>
@@ -438,148 +419,206 @@ background:var(--surface);border:1px solid var(--accent);border-radius:12px;padd
 </div>
 
 <script>
-/* Fill APPS_SCRIPT_URL after deploying the AssembiX Apps Script project. */
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDAt4paCuEsZ0HZG4eWyWAMX_AVevyEBNVdUPyM6t6EJoMi8r1fpEc-R3epfe5XmMv/exec";
 const GOOGLE_CLIENT_ID = "766825494798-2vq54u2u9kmfegir98uig2ubr9gr6hj4.apps.googleusercontent.com";
 
-/* `filter` decides whether the topbar filter box appears.
-
-   It is off on two pages on purpose. The Dashboard has the master search,
-   which searches everything rather than just what is on screen — two boxes
-   ten pixels apart fought each other, and typing in the topbar one silently
-   emptied the master results. Reports has its own Search button that queries
-   the server, which finds events the page has not loaded; a box that only
-   hides visible rows sitting next to it was worse than no box. */
+/* `filter` puts the filter box in the top bar. The Dashboard has its own
+   master search and Reports searches the server, so neither gets one — two
+   search boxes on one screen fought each other. `hidden` pages are reached
+   from links, not the sidebar. */
 const PAGES = [
-  { id: 'dashboard',    label: 'Dashboard',      group: 'Overview',  filter: false },
-  { id: 'consignments', label: 'Consignments',   group: 'Incoming',  filter: true  },
-  { id: 'receiving',    label: 'Receiving',      group: 'Warehouse', filter: true  },
-  { id: 'assembly',     label: 'Assembly',       group: 'Warehouse', filter: true  },
-  { id: 'delivery',     label: 'Delivery',       group: 'Output',    filter: true  },
-  { id: 'needsreview',  label: 'Needs review',   group: 'Output',    filter: true  },
-  { id: 'reports',      label: 'Reports',        group: 'Output',    filter: false },
-  { id: 'models',       label: 'Models & parts', group: 'Setup',     filter: false },
-  // Reached from "Show all" on the dashboard, so it stays out of the sidebar.
-  { id: 'activity',     label: 'Your activity',  group: null,        filter: true, hidden: true }
+  { id: 'dashboard',    label: 'Dashboard',    group: 'Overview',  filter: false },
+  { id: 'consignments', label: 'Consignments', group: 'Incoming',  filter: true, sort: true },
+  { id: 'receiving',    label: 'Receiving',    group: 'Warehouse', filter: true, sort: true, count: () => countReceiving() },
+  { id: 'assembly',     label: 'Assembly',     group: 'Warehouse', filter: true, sort: true, count: () => countAssembly() },
+  { id: 'delivery',     label: 'Delivery',     group: 'Output',    filter: true, sort: true, count: () => countDelivery() },
+  { id: 'acceptance',   label: 'Acceptance',   group: 'Output',    filter: true, sort: true, count: () => countAcceptance() },
+  { id: 'needsreview',  label: 'Needs review', group: 'Output',    filter: true, count: () => (APP.needsReview || []).length },
+  { id: 'reports',      label: 'Reports',      group: 'Output',    filter: false },
+  { id: 'activity',     label: 'Your activity', hidden: true,      filter: true },
+  { id: 'tile',         label: 'Details',       hidden: true,      filter: true, sort: true }
 ];
 
-/* The storage key still says assembix_ on purpose. Renaming it would sign
-   everybody out once for no gain — it is internal and never shown. */
-let idToken = localStorage.getItem('assembix_idToken') || null;
+/* ---------- Colours ----------
+   Each status has a soft background, a deep text colour and a dot. The
+   journey runs cool to warm to green: grey and violet before production,
+   blues while it travels, yellow at the border, greens once it is here, and
+   a strong emerald for Factory received — the one the website owns. */
+const STATUS_STYLE = {
+  'Cancel':            { bg: '#F1F1F3', fg: '#5F6170', dot: '#A1A1AA' },
+  'Formal order':      { bg: '#EEF2F7', fg: '#3F4E63', dot: '#94A3B8' },
+  'Production await':  { bg: '#F4EFFC', fg: '#62419E', dot: '#B79CF2' },
+  'Production':        { bg: '#EDE8FE', fg: '#5130B0', dot: '#8B5CF6' },
+  'Short load':        { bg: '#FFF1DB', fg: '#8F5200', dot: '#F59E0B' },
+  'Loaded':            { bg: '#E5EEFF', fg: '#1D4AAF', dot: '#3B82F6' },
+  'Foreign banking':   { bg: '#E7E9FF', fg: '#373CA8', dot: '#6366F1' },
+  'Local banking':     { bg: '#E0F2FE', fg: '#0A5A84', dot: '#0EA5E9' },
+  'Clearance':         { bg: '#FDF4D3', fg: '#7A5B00', dot: '#EAB308' },
+  'On road':           { bg: '#DCF5F5', fg: '#0B666C', dot: '#14B8A6' },
+  'Recently received': { bg: '#EAF7DD', fg: '#3C6612', dot: '#84CC16' },
+  'Already received':  { bg: '#DEF5E7', fg: '#166236', dot: '#22C55E' },
+  'Factory received':  { bg: '#D3F2E6', fg: '#075A41', dot: '#059669' }
+};
+const SHEET_STATUSES = ['Cancel', 'Formal order', 'Production await', 'Production', 'Short load', 'Loaded',
+  'Foreign banking', 'Local banking', 'Clearance', 'On road', 'Recently received', 'Already received'];
+const STATUS_TILES = SHEET_STATUSES.concat(['Factory received']);
+
+const PIPE_STYLE = {
+  'Cancelled':            { bg: '#F1F1F3', fg: '#5F6170', dot: '#A1A1AA' },
+  'Arriving':             { bg: '#E5EEFF', fg: '#1D4AAF', dot: '#3B82F6' },
+  'Waiting on parts':     { bg: '#FFF1DB', fg: '#8F5200', dot: '#F59E0B' },
+  'Can build':            { bg: '#DEF5E7', fg: '#166236', dot: '#22C55E' },
+  'Delivery pending':     { bg: '#FFEAD5', fg: '#9A3412', dot: '#F97316' },
+  'Awaiting acceptance':  { bg: '#EDE8FE', fg: '#5130B0', dot: '#8B5CF6' },
+  'Delivered':            { bg: '#D3F2E6', fg: '#075A41', dot: '#059669' },
+  'Delivery discrepancy': { bg: '#FEE2E2', fg: '#991B1B', dot: '#EF4444' }
+};
+
+/* The seven steps of what happens after China Master. */
+const FLOW_TILES = [
+  { k: 'arriving',  label: 'Arriving',         unit: 'models', color: '#3B82F6', fg: '#1D4AAF',
+    foot: 'still waiting on parts',        pred: g => !g.allArrived && !g.fullyCancelled, value: () => 1 },
+  { k: 'received',  label: 'Received',         unit: 'models', color: '#059669', fg: '#075A41',
+    foot: 'every part factory received',   pred: g => g.allArrived, value: () => 1 },
+  { k: 'canbuild',  label: 'Can build now',    unit: 'units',  color: '#22C55E', fg: '#166236',
+    foot: 'from parts on the floor',       pred: g => g.buildableUnits > 0, value: g => g.buildableUnits },
+  { k: 'assembled', label: 'Assembled',        unit: 'units',  color: '#F97316', fg: '#C2410C',
+    foot: 'built so far',                  pred: g => g.totalBuilt > 0, value: g => g.totalBuilt },
+  { k: 'pending',   label: 'Delivery pending', unit: 'units',  color: '#F59E0B', fg: '#8F5200',
+    foot: 'built, not yet sent',           pred: g => g.readyToSend > 0, value: g => g.readyToSend },
+  { k: 'acceptance',label: 'Acceptance',       unit: 'units',  color: '#8B5CF6', fg: '#5130B0',
+    foot: 'sent, waiting for the customer', pred: g => g.pendingAcceptance > 0, value: g => g.pendingAcceptance },
+  { k: 'delivered', label: 'Delivered',        unit: 'units',  color: '#14B8A6', fg: '#0B666C',
+    foot: 'accepted by FR and BB',         pred: g => g.totalConfirmed > 0, value: g => g.totalConfirmed }
+];
+
+/* ---------- State ---------- */
+
+// Old versions kept the Google token here; it expires after an hour, which
+// is what sent people back to the login screen on refresh.
+try { localStorage.removeItem('assembix_idToken'); } catch (e) {}
+let session = null;
+try { session = localStorage.getItem('assembix_session'); } catch (e) {}
+let pendingIdToken = null;
 let user = null;
-let currentPage = 'dashboard';
-
-/* FIX 6 — one backend call holds everything every page needs.
-   The old page fired listConsignments, getConsignmentRows, listDeliveries and
-   getDashboard back to back, each 3-6s, stacking into 20-30s. Now: a single
-   getAppData round-trip, and every page renders from this object. */
 let APP = null;
+let currentPage = 'dashboard';
+let currentQuery = {};
+const SORT = {};
+let inFlight = 0;
 
-let sessionExpired = false;
-
-function handleSessionExpiry() {
-  if (sessionExpired) return;
-  sessionExpired = true;
-  idToken = null;
-  localStorage.removeItem('assembix_idToken');
-  user = null;
-  APP = null;
-
-  const app = document.getElementById('app');
-  const login = document.getElementById('scr-login');
-  if (app) app.classList.add('hidden');
-  if (login) {
-    login.classList.remove('hidden');
-    const statusEl = document.getElementById('login-status');
-    if (statusEl) statusEl.innerText = 'Your session expired. Please sign in again.';
-  }
+function setSession(tok) {
+  session = tok || null;
   try {
-    if (typeof google !== 'undefined' && google.accounts) {
-      google.accounts.id.disableAutoSelect();
-      google.accounts.id.prompt();
-    }
-  } catch (e) { /* the sign-in button is still on screen regardless */ }
+    if (session) localStorage.setItem('assembix_session', session);
+    else localStorage.removeItem('assembix_session');
+  } catch (e) {}
 }
 
-const AUTH_ERRORS = ['Missing idToken', 'Email not allowlisted or invalid token', 'User is not active'];
+function busy(on) {
+  inFlight = Math.max(0, inFlight + (on ? 1 : -1));
+  const bar = document.getElementById('progress');
+  if (bar) bar.classList.toggle('hidden', inFlight === 0);
+}
+
+/* ---------- Talking to the server ---------- */
 
 async function apiCall(action, payload = {}) {
-  if (!idToken) { handleSessionExpiry(); return { ok: false, error: 'Session expired', authFailed: true }; }
+  const body = Object.assign({ action }, payload);
+  if (session) body.session = session;
+  else if (pendingIdToken) body.idToken = pendingIdToken;
+  else return { ok: false, authFailed: true, error: 'Not signed in.' };
+
+  busy(true);
   try {
     const res = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action, idToken, ...payload })
+      body: JSON.stringify(body)
     });
     const data = await res.json();
-    if (!data.ok && AUTH_ERRORS.indexOf(String(data.error)) !== -1) {
-      handleSessionExpiry();
-      return { ok: false, error: 'Session expired', authFailed: true };
-    }
+    if (data && data.session) { setSession(data.session); pendingIdToken = null; }
+    // Only a real "you are not signed in" logs you out. A slow connection or
+    // a server hiccup used to wipe the session and loop back to login.
+    if (data && data.authFailed) handleSessionExpiry(data.error);
     return data;
   } catch (e) {
-    return { ok: false, error: 'Could not reach the server. Check your connection and try again.' };
+    return { ok: false, network: true, error: 'Could not reach the server. Check your connection and try again.' };
+  } finally {
+    busy(false);
   }
 }
 
-async function loadApp() {
+/* Every save hands back fresh data in the same response, so the page redraws
+   at once from it instead of making a second slow round trip. */
+function takeApp(res) {
+  if (res && res.app) { APP = res.app; return true; }
+  return false;
+}
+
+async function reload() {
   const res = await apiCall('getAppData');
-  if (res.ok) APP = res;
+  if (res.ok) { APP = res; route(); }
+  else if (!res.authFailed) toast(res.error || 'Could not refresh.');
   return res;
 }
 
-/* =========================
-   AUTH
-   ========================= */
+/* ---------- Sign-in ---------- */
 
 function initGoogleSignIn() {
   if (typeof google === 'undefined') { handleGsiLoadError(); return; }
   google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleCredentialResponse });
   google.accounts.id.renderButton(document.getElementById('g_id_signin'), { theme: 'outline', size: 'large', width: 260 });
-  if (idToken) completeLogin();
-  else google.accounts.id.prompt();
+  if (!session && !user) google.accounts.id.prompt();
 }
 
 function handleGsiLoadError() {
+  if (session) return; // not needed while the saved session is good
   document.getElementById('login-status').innerText = "Could not load Google Sign-In. The page must be served over https:// with a working connection.";
 }
 
 function handleCredentialResponse(response) {
-  sessionExpired = false;
-  idToken = response.credential;
-  localStorage.setItem('assembix_idToken', idToken);
+  pendingIdToken = response.credential;
+  setSession(null);
   completeLogin();
 }
 
 async function completeLogin() {
   const statusEl = document.getElementById('login-status');
   statusEl.innerHTML = `<div class="spinner"></div>Signing you in…`;
-  try {
-    const result = await loadApp();
-    if (!result.ok) {
-      statusEl.innerText = result.error || "Authorization failed";
-      idToken = null;
-      localStorage.removeItem('assembix_idToken');
-      if (google && google.accounts) google.accounts.id.prompt();
-      return;
-    }
+  const res = await apiCall('getAppData');
 
-    user = result.user;
-    statusEl.innerText = "";
+  if (res.ok) {
+    APP = res;
+    user = res.user;
+    statusEl.innerText = '';
     document.getElementById('scr-login').classList.add('hidden');
     document.getElementById('app').classList.remove('hidden');
-    document.getElementById('who-name').innerText = user.name;
+    document.getElementById('who-name').innerText = user.name || user.email;
     document.getElementById('who-role').innerText = roleLabel(user.level);
-
-    renderNav();
-    window.addEventListener('hashchange', route);
+    if (!window.__routed) { window.addEventListener('hashchange', route); window.__routed = true; }
     route();
-  } catch (e) {
-    statusEl.innerText = "Could not reach the server. Try signing in again.";
-    idToken = null;
-    localStorage.removeItem('assembix_idToken');
-    if (google && google.accounts) google.accounts.id.prompt();
+    return;
   }
+
+  if (res.network) {
+    // Keep the session: the server was unreachable, not the sign-in wrong.
+    statusEl.innerHTML = esc(res.error) +
+      '<div style="margin-top:12px;"><button class="btn btn-sm" onclick="completeLogin()">Try again</button></div>';
+    return;
+  }
+  statusEl.innerText = res.error || 'Sign-in failed.';
+}
+
+function handleSessionExpiry(message) {
+  setSession(null);
+  pendingIdToken = null;
+  user = null;
+  APP = null;
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('scr-login').classList.remove('hidden');
+  document.getElementById('login-status').innerText = message || 'Please sign in again.';
+  try { if (typeof google !== 'undefined' && google.accounts) google.accounts.id.prompt(); } catch (e) {}
 }
 
 function roleLabel(level) {
@@ -589,49 +628,68 @@ function roleLabel(level) {
 }
 
 function doLogout() {
-  idToken = null;
-  localStorage.removeItem('assembix_idToken');
-  user = null;
-  google.accounts.id.disableAutoSelect();
-  location.reload();
+  const tok = session;
+  if (tok) {
+    fetch(APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'logout', session: tok }) }).catch(() => {});
+  }
+  setSession(null);
+  try { google.accounts.id.disableAutoSelect(); } catch (e) {}
+  setTimeout(() => location.reload(), 150);
 }
 
-/* =========================
-   SHELL
-   ========================= */
+// A saved session signs you straight in — no Google popup, no waiting for it.
+document.addEventListener('DOMContentLoaded', () => { if (session) completeLogin(); });
+
+/* ---------- Shell ---------- */
 
 function renderNav() {
   const nav = document.getElementById('nav');
-  nav.innerHTML = "";
-  let lastGroup = null;
+  let html = '', lastGroup = null;
   PAGES.forEach(p => {
     if (p.hidden) return;
-    if (p.group !== lastGroup) {
-      nav.insertAdjacentHTML('beforeend', `<div class="nav-label">${p.group}</div>`);
-      lastGroup = p.group;
-    }
-    nav.insertAdjacentHTML('beforeend', `<a class="nav-item${p.id === currentPage ? ' active' : ''}" href="#/${p.id}">${p.label}</a>`);
+    if (p.group !== lastGroup) { html += `<div class="nav-label">${esc(p.group)}</div>`; lastGroup = p.group; }
+    const n = p.count && APP ? p.count() : 0;
+    html += `<a class="nav-item${p.id === currentPage ? ' active' : ''}" href="#/${p.id}">
+      <span>${esc(p.label)}</span>${n ? `<span class="nav-count">${n}</span>` : ''}</a>`;
   });
+  nav.innerHTML = html;
 }
 
-// Every page renders synchronously from APP — no per-page fetches.
-// A hash may carry a filter: #/receiving?q=Short%20load
-function route() {
-  if (!user || !idToken || !APP) return;
+function parseHash() {
   const raw = window.location.hash.replace(/^#\/?/, '') || 'dashboard';
   const qIdx = raw.indexOf('?');
   const id = (qIdx === -1 ? raw : raw.slice(0, qIdx)) || 'dashboard';
-  let preset = '';
+  const query = {};
   if (qIdx !== -1) {
-    const m = /(?:^|&)q=([^&]*)/.exec(raw.slice(qIdx + 1));
-    if (m) { try { preset = decodeURIComponent(m[1].replace(/\+/g, ' ')); } catch (e) { preset = m[1]; } }
+    raw.slice(qIdx + 1).split('&').forEach(kv => {
+      const i = kv.indexOf('=');
+      if (i === -1) return;
+      try { query[kv.slice(0, i)] = decodeURIComponent(kv.slice(i + 1).replace(/\+/g, ' ')); }
+      catch (e) { query[kv.slice(0, i)] = kv.slice(i + 1); }
+    });
   }
+  return { id, query };
+}
 
+function route() {
+  if (!user || !APP) return;
+  const { id, query } = parseHash();
   const page = PAGES.find(p => p.id === id);
   if (!page) { window.location.hash = '#/dashboard'; return; }
 
+  const samePage = page.id === currentPage && JSON.stringify(query) === JSON.stringify(currentQuery);
+  const keepScroll = samePage ? window.scrollY : 0;
+  const typed = document.getElementById('page-search');
+  const keepFilter = samePage && typed ? typed.value : (query.q || '');
+
   currentPage = page.id;
-  document.getElementById('page-title').innerText = page.label;
+  currentQuery = query;
+
+  const head = PAGE_HEAD[page.id] ? PAGE_HEAD[page.id](query) : { title: page.label, sub: '' };
+  document.getElementById('page-title').innerText = head.title;
+  document.getElementById('page-sub').innerText = head.sub || '';
+
   document.getElementById('page-actions').innerHTML = `
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
       ${page.filter ? `
@@ -648,57 +706,75 @@ function route() {
     b.disabled = true; b.innerText = 'Refreshing…';
     await reload();
   };
-  renderNav();
 
-  document.getElementById('content').innerHTML = RENDERERS[page.id]();
+  renderNav();
+  document.getElementById('content').innerHTML = RENDERERS[page.id](query);
   wirePageHandlers(page.id);
   wirePageSearch();
 
   const input = document.getElementById('page-search');
-  if (preset && input) {
-    input.value = preset;
+  if (input && keepFilter) {
+    input.value = keepFilter;
     document.getElementById('page-search-clear').classList.remove('hidden');
-    applyPageFilter(preset.toLowerCase());
+    applyPageFilter(keepFilter.toLowerCase());
   }
+  if (keepScroll) window.scrollTo(0, keepScroll);
 }
 
-/* Redraw the current page without going back to the server, then put the
-   filter back over it. Anything that rebuilds the content — changing the
-   sort, say — must come through here. Re-rendering on its own used to bring
-   every hidden row back while the box still held the search text and the
-   counter still claimed a filter was on. */
+/* Redraw this page from APP without going to the server, keeping the filter
+   and scroll where they were. Used after sorting, and after every save. */
 function reRender() {
-  document.getElementById('content').innerHTML = RENDERERS[currentPage]();
-  wirePageHandlers(currentPage);
   const input = document.getElementById('page-search');
   const q = input ? input.value.trim().toLowerCase() : '';
+  const y = window.scrollY;
+  renderNav();
+  document.getElementById('content').innerHTML = RENDERERS[currentPage](currentQuery);
+  wirePageHandlers(currentPage);
   if (q) applyPageFilter(q);
+  window.scrollTo(0, y);
 }
 
-/* =========================
-   PER-PAGE FILTER
+function toast(msg) {
+  let el = document.getElementById('toast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'toast';
+    el.style.cssText = 'position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#2B1206;color:#fff;padding:11px 16px;border-radius:10px;font-size:13px;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,.2);max-width:90vw;';
+    document.body.appendChild(el);
+  }
+  el.innerText = msg;
+  el.style.display = 'block';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.style.display = 'none'; }, 4200);
+}
 
-   Hides anything on the current page that doesn't contain the typed text:
-   table rows first, then the cards and tiles, then any consignment heading
-   left with nothing under it. Purely visual — it never refetches.
-   ========================= */
+/* ---------- Filter ----------
+
+   Works on the card shape every page shares: consignment → model → line.
+   Anything carrying class `fx` can be matched; its own heading is the `.fh`
+   directly inside it.
+
+   The old filter matched blocks and rows separately. Typing "tony" matched
+   the Tony model card but none of its part rows — so the card showed with
+   every row inside it hidden. Now a match at any level shows that thing
+   whole, and a match further down shows just the path to it. */
 
 function wirePageSearch() {
   const input = document.getElementById('page-search');
   const clear = document.getElementById('page-search-clear');
   if (!input) return;
-
   const run = () => {
     const q = input.value.trim().toLowerCase();
     clear.classList.toggle('hidden', !q);
     applyPageFilter(q);
-    // Drop the filter out of the URL so a refresh doesn't bring it back.
-    if (!q && window.location.hash.indexOf('?') !== -1) {
-      const clean = window.location.hash.split('?')[0];
-      history.replaceState(null, '', clean);
+    if (!q && window.location.hash.indexOf('q=') !== -1) {
+      const { id, query } = parseHash();
+      delete query.q;
+      const rest = Object.keys(query).map(k => k + '=' + encodeURIComponent(query[k])).join('&');
+      history.replaceState(null, '', '#/' + id + (rest ? '?' + rest : ''));
+      currentQuery = query;
     }
   };
-
   input.oninput = run;
   input.onkeydown = e => { if (e.key === 'Escape') { input.value = ''; run(); } };
   clear.onclick = () => { input.value = ''; run(); input.focus(); };
@@ -709,53 +785,32 @@ function applyPageFilter(q) {
   const countEl = document.getElementById('page-search-count');
   if (!content) return;
 
-  // Summary tiles at the top of a page describe the whole page, so they are
-  // never filtered — only the rows and blocks that list individual things.
-  const blockSel = '.model-block, .arrive-tile';
-  const all = [
-    ...content.querySelectorAll('tbody tr'),
-    ...content.querySelectorAll(blockSel)
-  ];
+  const all = [...content.querySelectorAll('.fx')];
+  const kidsOf = node => all.filter(k => k.parentElement.closest('.fx') === node);
+  const tops = all.filter(n => !n.parentElement.closest('.fx'));
+  const own = node => {
+    const head = [...node.children].find(c => c.classList.contains('fh'));
+    return (head || node).textContent.toLowerCase();
+  };
 
-  if (!q) {
-    all.forEach(el => el.classList.remove('hidden'));
-    content.querySelectorAll('.consign-block, .card, .dash-section').forEach(el => el.classList.remove('hidden'));
-    const msg = content.querySelector('#page-search-empty');
-    if (msg) msg.remove();
-    if (countEl) countEl.innerText = '';
-    return;
-  }
-
-  const hits = [];
-  all.forEach(el => {
-    const hit = el.textContent.toLowerCase().indexOf(q) !== -1;
-    el.classList.toggle('hidden', !hit);
-    if (hit) hits.push(el);
-  });
-
-  /* Count only the innermost matches. A model block on Receiving contains the
-     part rows, so both matched and two visible rows were reported as "4
-     matches". Anything that contains another match is a container, not a
-     result. */
-  const shown = hits.filter(el => !hits.some(other => other !== el && el.contains(other))).length;
-
-  // A consignment heading with every model hidden under it is just noise.
-  content.querySelectorAll('.consign-block').forEach(block => {
-    const kids = block.querySelectorAll('.model-block');
-    const anyVisible = [...kids].some(k => !k.classList.contains('hidden'));
-    block.classList.toggle('hidden', kids.length > 0 && !anyVisible);
-  });
-
-  // Same for a card or dashboard section whose rows have all gone.
-  content.querySelectorAll('.card, .dash-section').forEach(card => {
-    const kids = card.querySelectorAll('tbody tr, ' + blockSel);
-    if (!kids.length) return;
-    const anyVisible = [...kids].some(k => !k.classList.contains('hidden'));
-    card.classList.toggle('hidden', !anyVisible);
-  });
+  const visit = (node, forced) => {
+    const kids = kidsOf(node);
+    const self = forced || !q || own(node).indexOf(q) !== -1;
+    let anyKid = false;
+    kids.forEach(k => { if (visit(k, self)) anyKid = true; });
+    const visible = kids.length ? (self || anyKid) : self;
+    node.classList.toggle('hidden', !visible);
+    return visible;
+  };
+  tops.forEach(t => visit(t, false));
 
   let msg = content.querySelector('#page-search-empty');
-  if (!shown) {
+  const models = [...content.querySelectorAll('.model-block.fx')];
+  const shown = models.length
+    ? models.filter(m => !m.classList.contains('hidden')).length
+    : all.filter(n => !kidsOf(n).length && !n.classList.contains('hidden')).length;
+
+  if (q && !shown) {
     if (!msg) {
       msg = document.createElement('div');
       msg.id = 'page-search-empty';
@@ -766,42 +821,95 @@ function applyPageFilter(q) {
   } else if (msg) {
     msg.remove();
   }
-
-  if (countEl) countEl.innerText = shown ? shown + ' match' + (shown === 1 ? '' : 'es') : '';
-}
-
-async function reload() {
-  document.getElementById('content').innerHTML = `<div class="loading-wrap"><div class="spinner"></div>Loading…</div>`;
-  const res = await loadApp();
-  if (!res.ok) {
-    document.getElementById('content').innerHTML = `<div class="empty">Could not load: ${esc(res.error)}</div>`;
-    return;
+  if (countEl) {
+    countEl.innerText = q ? (shown + (models.length ? ' model' : ' match') + (shown === 1 ? '' : (models.length ? 's' : 'es'))) : '';
   }
-  route();
 }
 
-function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+/* ---------- Sort ---------- */
 
-function chip(status) {
-  const map = {
-    'Fully Pending': 'chip-idle', 'Partial Pending': 'chip-warn', 'Assembly Pending': 'chip-info',
-    'Ready to Deliver': 'chip-info', 'Delivered': 'chip-ok', 'Delivery discrepancy': 'chip-bad'
-  };
-  let cls = map[status];
-  if (!cls) cls = String(status).indexOf('Towards') === 0 ? 'chip-warn' : 'chip-idle';
-  return `<span class="chip ${cls}">${esc(status)}</span>`;
+const SORT_KEYS = [
+  { k: 'urgency', label: 'Urgency' },
+  { k: 'eta', label: 'ETA' },
+  { k: 'consignment', label: 'Consignment' },
+  { k: 'model', label: 'Model' },
+  { k: 'status', label: 'Status' },
+  { k: 'priority', label: 'Priority' }
+];
+
+function sortState() {
+  return SORT[currentPage] || { key: 'urgency', dir: 1 };
 }
 
-function importChip(status) {
-  const map = {
-    'Production': 'chip-idle', 'Loaded': 'chip-info', 'F-Bank': 'chip-info',
-    'L-Bank': 'chip-info', 'Clearance': 'chip-warn', 'Received': 'chip-ok'
-  };
-  return `<span class="chip ${map[status] || 'chip-idle'}">${esc(status || '—')}</span>`;
+function sortBar() {
+  const s = sortState();
+  return `<div class="sortbar"><span class="lbl">Sort</span>${SORT_KEYS.map(x => `
+    <button class="sortbtn${s.key === x.k ? ' on' : ''}" data-sort="${x.k}">${esc(x.label)}${
+      s.key === x.k ? `<span class="ar">${s.dir === 1 ? '▲' : '▼'}</span>` : ''}</button>`).join('')}</div>`;
 }
 
-/* FIX 4 — dates arrive as plain yyyy-MM-dd strings and are parsed as local
-   calendar dates. Nothing goes through UTC, so nothing shifts a day at UTC+5. */
+function wireSortBar() {
+  document.querySelectorAll('.sortbtn').forEach(b => {
+    b.onclick = () => {
+      const s = sortState();
+      SORT[currentPage] = { key: b.dataset.sort, dir: s.key === b.dataset.sort ? -s.dir : 1 };
+      reRender();
+    };
+  });
+}
+
+const PRIO_RANK = { Urgent: 2, High: 1, Normal: 0 };
+
+function urgencyScore(g) {
+  return (PRIO_RANK[g.priority] || 0) * 10000 +
+    (g.overdueParts ? 5000 + g.worstDaysLate : 0) +
+    (g.awaitingFactory ? 1000 : 0) +
+    (g.needsCount ? 800 : 0) +
+    (g.buildableUnits ? 400 : 0) +
+    (g.readyToSend ? 200 : 0) +
+    (g.pendingAcceptance ? 100 : 0);
+}
+
+function sortGroups(groups) {
+  const { key, dir } = sortState();
+  const cmp = (a, b) => String(a).localeCompare(String(b), undefined, { numeric: true });
+  const out = groups.slice().sort((a, b) => {
+    let r = 0;
+    if (key === 'urgency') r = urgencyScore(b) - urgencyScore(a);
+    else if (key === 'eta') r = cmp(a.nextEta || a.eta || '9999', b.nextEta || b.eta || '9999');
+    else if (key === 'consignment') r = cmp(a.consignmentGroup, b.consignmentGroup);
+    else if (key === 'model') r = cmp(a.signatureModel || a.factoryModel, b.signatureModel || b.factoryModel);
+    else if (key === 'status') r = (a.importStageRank || 0) - (b.importStageRank || 0);
+    else if (key === 'priority') r = (PRIO_RANK[b.priority] || 0) - (PRIO_RANK[a.priority] || 0);
+    if (r === 0) r = cmp(a.consignmentGroup, b.consignmentGroup) || cmp(a.factoryModel, b.factoryModel);
+    return r * dir;
+  });
+  return out;
+}
+
+/* ---------- Small helpers ---------- */
+
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
+
+function styleVars(st) { return st ? `--c-bg:${st.bg};--c-fg:${st.fg};--c-dot:${st.dot};` : ''; }
+
+function statusChip(status, extra) {
+  if (!status) return '<span class="chip chip-idle">—</span>';
+  const st = STATUS_STYLE[status] || { bg: '#F5EBE3', fg: '#8B6F5E', dot: '#C9AE9C' };
+  return `<span class="chip st" style="${styleVars(st)}">${esc(status)}${extra || ''}</span>`;
+}
+
+function pipeChip(p) {
+  const st = PIPE_STYLE[p] || STATUS_STYLE[p] || { bg: '#F5EBE3', fg: '#8B6F5E', dot: '#C9AE9C' };
+  return `<span class="chip st" style="${styleVars(st)}">${esc(p)}</span>`;
+}
+
+function prioTag(g) {
+  if (g.priority === 'Urgent') return '<span class="prio prio-u">Urgent</span>';
+  if (g.priority === 'High') return '<span class="prio prio-h">High</span>';
+  return '';
+}
+
 function parseYmd(v) {
   if (!v) return null;
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(v));
@@ -813,24 +921,6 @@ function fmtDay(v) {
   const d = parseYmd(v);
   if (!d) return '—';
   return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
-}
-
-/* The ETA chip.
-
-   Two rules, both learned from looking at the live page. A line that has
-   already arrived gets no chip at all — "168 days ago" next to a received
-   container was the loudest thing in the column and meant nothing. A line
-   that is late gets a red one that says so in plain words, because overdue
-   used to render in the same calm blue as "in 9 days", which buried the
-   single most expensive state in the business. */
-function etaChip(r) {
-  if (!r.eta || r.arrived) return '';
-  const rel = relDays(r.eta);
-  if (!rel) return '';
-  if (r.overdue) {
-    return `<div><span class="chip chip-bad" style="margin-top:4px;">${Math.abs(rel.days)} days late</span></div>`;
-  }
-  return `<div><span class="chip ${rel.cls}" style="margin-top:4px;">${esc(rel.text)}</span></div>`;
 }
 
 function relDays(v) {
@@ -845,23 +935,28 @@ function relDays(v) {
   return { days, text: Math.abs(days) + ' days ago', cls: 'chip-info' };
 }
 
+// ETA chip for a line: nothing once it is here, red and plain-spoken if late.
+function etaChip(l) {
+  if (!l.eta || l.factoryReceived || l.receivedOnSheet || l.cancelled) return '';
+  if (l.overdue) return ` <span class="chip chip-bad">${l.daysLate} days late</span>`;
+  const rel = relDays(l.eta);
+  return rel ? ` <span class="chip ${rel.cls}">${esc(rel.text)}</span>` : '';
+}
+
 function modelLabel(g) {
   const sig = g.signatureModel || g.modelName || '';
   const fac = g.factoryModel || '';
-  if (sig && fac) return esc(sig) + ' <span style="color:var(--text-soft);font-weight:500;">(' + esc(fac) + ')</span>';
+  if (sig && fac && sig !== fac) return esc(sig) + ' <span class="fac">(' + esc(fac) + ')</span>';
   return esc(sig || fac || '—');
 }
 
-function plainModel(g) {
-  return g.signatureModel || g.factoryModel || g.modelName || '—';
-}
+function plainModel(g) { return g.signatureModel || g.factoryModel || g.modelName || '—'; }
 
-// FIX 7 — Receiving and Assembly nest: consignment heading, each model under
-// it, that model's parts and dates under the model. A container carrying more
-// than one product no longer collapses into one flat block.
+function groupsAll() { return APP.consignments || []; }
+
+// Consignment → its models, in the order the models arrive in.
 function byConsignment(groups) {
-  const order = [];
-  const map = {};
+  const order = [], map = {};
   groups.forEach(g => {
     const c = g.consignmentGroup;
     if (!map[c]) { map[c] = []; order.push(c); }
@@ -870,48 +965,856 @@ function byConsignment(groups) {
   return order.map(c => ({ consignment: c, models: map[c] }));
 }
 
-/* =========================
-   DASHBOARD
-   ========================= */
+function allLinesOf(g) {
+  const lines = [];
+  g.parts.forEach(p => p.lines.forEach(l => lines.push(l)));
+  (g.cancelledLines || []).forEach(l => lines.push(l));
+  return lines;
+}
 
-const STAGES = ['Production', 'Loaded', 'F-Bank', 'L-Bank', 'Clearance', 'Received'];
+/* ---------- The card ----------
+   Every page is built from these two: a consignment block holding one card
+   per model. What goes inside a model card depends on the page. */
 
-/* One bar. A zero draws an empty track rather than a two-pixel stub with a
-   "0" crammed into it, and the value only sits inside the fill when there is
-   room for it. */
-function barTrack(value, max, color) {
-  const pct = max > 0 && value > 0 ? Math.max(2, Math.round((value / max) * 100)) : 0;
-  const inside = pct >= 12;
+function consignBlock(consignment, models, bodyFor) {
+  const late = models.filter(g => g.overdueParts > 0).length;
+  const containers = [];
+  models.forEach(g => (g.containers || []).forEach(c => { if (containers.indexOf(c) === -1) containers.push(c); }));
   return `
-    <div class="bar-track">
-      <div class="bar-fill" style="width:${pct}%;background:${color};">${
-        inside ? value : (value > 0 ? `<span class="bar-out">${value}</span>` : '')}</div>
+    <section class="consign-block fx">
+      <div class="consign-head fh">
+        <h2>${esc(consignment)}</h2>
+        <span class="meta">${models.length} model${models.length === 1 ? '' : 's'}${
+          containers.length ? ' · ' + esc(containers.join(', ')) : ''}</span>
+        ${late ? `<span class="chip chip-bad">${late} late</span>` : ''}
+      </div>
+      ${models.map(bodyFor).join('')}
+    </section>`;
+}
+
+function modelBlock(g, right, body) {
+  const ids = (g.uniqueIds || []).join(', ');
+  return `
+    <div class="model-block fx prio-${esc(String(g.priority || 'Normal').toLowerCase())}" data-groupkey="${esc(g.groupKey)}">
+      <div class="model-head fh">
+        <div>
+          <div class="model-title">${prioTag(g)}${modelLabel(g)}</div>
+          <div class="model-meta">${esc(g.supplier || '—')} · ${esc(g.product || '—')}${ids ? ' · ID ' + esc(ids) : ''}${
+            g.totalQty ? ' · ' + g.totalQty + ' units (FR ' + (g.frQty || 0) + ' · BB ' + (g.bbQty || 0) + ')' : ''}</div>
+        </div>
+        <div class="model-right">${right || ''}</div>
+      </div>
+      ${body}
     </div>`;
 }
 
-function renderDashboard() {
-  const groups = APP.consignments || [];
-  const stats = (APP.dashboard && APP.dashboard.stats) || {};
-  const byStage = (APP.dashboard && APP.dashboard.byStage) || {};
+function partTiles(g) {
+  return `<div class="part-row">${g.parts.map(p => {
+    const pct = p.qtyExpected ? Math.round((p.qtyReceived / p.qtyExpected) * 100) : 0;
+    const cls = p.fullyIn ? 'pt-in' : (p.overdue ? 'pt-late' : '');
+    const foot = p.fullyIn ? 'all factory received'
+      : p.overdue ? p.daysLate + ' days late'
+      : p.awaitingFactory ? p.awaitingFactory + ' line' + (p.awaitingFactory === 1 ? '' : 's') + ' waiting for factory receipt'
+      : p.needsCount ? 'short load to count'
+      : p.nextEta ? 'due ' + fmtDay(p.nextEta)
+      : (p.qtyReceived ? 'part received' : 'not here yet');
+    return `
+      <div class="part-tile ${cls}">
+        <div class="pt-top"><b>Part ${esc(p.partLetter)}</b>${statusChip(p.importStatus)}</div>
+        <div class="pt-num">${p.qtyReceived}<span>/ ${p.qtyExpected}</span></div>
+        <div class="pt-bar"><i style="width:${pct}%;"></i></div>
+        <div class="pt-foot">${esc(foot)}</div>
+      </div>`;
+  }).join('')}</div>`;
+}
 
+function linesTable(lines) {
+  if (!lines.length) return '';
+  return `
+    <div class="tbl-wrap"><table class="lines">
+      <thead><tr><th>Part</th><th>Packaging</th><th>Status</th><th>ETD</th><th>ETA</th>
+        <th class="r">FR</th><th class="r">BB</th><th class="r">Total</th><th class="r">Received</th></tr></thead>
+      <tbody>${lines.map(l => `
+        <tr class="fx ${l.overdue ? 'row-late' : (l.shortLoad && !l.factoryReceived ? 'row-short' : '')}">
+          <td><b>${esc(l.partLetter || '—')}</b></td>
+          <td><code>${esc(l.packaging)}</code>${l.uniqueId ? `<div class="hint" style="margin-top:2px;">${esc(l.uniqueId)}</div>` : ''}</td>
+          <td>${statusChip(l.status)}</td>
+          <td>${esc(fmtDay(l.etd))}</td>
+          <td style="white-space:nowrap;">${esc(fmtDay(l.eta))}${etaChip(l)}</td>
+          <td class="r">${l.fr || '—'}</td>
+          <td class="r">${l.bb || '—'}</td>
+          <td class="r"><b>${l.total || '—'}</b></td>
+          <td class="r">${l.factoryReceived ? `<b style="color:#075A41;">${l.qtyReceived}</b>` : '—'}</td>
+        </tr>
+        ${l.sheetNote ? `<tr class="fx"><td></td><td colspan="8"><div class="note note-bad" style="padding:7px 11px;">${esc(l.sheetNote)}</div></td></tr>` : ''}`).join('')}
+      </tbody>
+    </table></div>`;
+}
+
+// The card shown by the dashboard's drill-downs and the Consignments page.
+function summaryCard(g, lineFilter) {
+  const lines = allLinesOf(g).filter(lineFilter || (() => true));
+  const right = `${pipeChip(g.pipeline)}${g.buildableUnits ? `
+    <div class="big-num"><div class="k">Can build</div><div class="v" style="color:#15803D;">${g.buildableUnits}</div></div>` : ''}`;
+  const warn = [];
+  if (g.quantityNote) warn.push(g.quantityNote);
+  return modelBlock(g, right,
+    (g.parts.length ? partTiles(g) : '') +
+    linesTable(lines) +
+    (warn.length ? `<div class="note note-bad status-line">${esc(warn.join(' '))}</div>` : ''));
+}
+
+function cardsFor(groups, bodyFor) {
+  const sorted = sortGroups(groups);
+  return byConsignment(sorted).map(b => consignBlock(b.consignment, b.models, bodyFor)).join('');
+}
+
+/* ---------- Counts for the sidebar ---------- */
+
+// Receiving's badge counts what someone can act on now: lines China Master
+// says are in the country but the factory has not received, and short loads.
+function countReceiving() {
+  let n = 0;
+  groupsAll().forEach(g => g.parts.forEach(p => p.lines.forEach(l => {
+    if (!l.factoryReceived && (l.receivedOnSheet || l.shortLoad)) n++;
+  })));
+  return n;
+}
+function countAssembly() { return groupsAll().filter(g => g.buildableUnits > 0).length; }
+function countDelivery() { return groupsAll().filter(g => g.readyToSend > 0).length; }
+function countAcceptance() { return (APP.deliveries || []).filter(d => d.Status === 'pending').length; }
+
+/* ---------- Page headings ---------- */
+
+const PAGE_HEAD = {
+  dashboard: () => ({ title: 'Dashboard', sub: '' }),
+  consignments: () => ({ title: 'Consignments', sub: 'Every model in China Master, line by line.' }),
+  receiving: () => ({ title: 'Receiving', sub: 'Factory receive a line when it is physically on the floor. Nothing reaches Assembly without it.' }),
+  assembly: () => ({ title: 'Assembly', sub: 'Only models you can build right now.' }),
+  delivery: () => ({ title: 'Delivery', sub: 'Assembled units ready to go out to FR and BB.' }),
+  acceptance: () => ({ title: 'Acceptance', sub: 'Units sent out, waiting for the customer to accept them.' }),
+  needsreview: () => ({ title: 'Needs review', sub: 'Lines in China Master whose packaging code could not be read.' }),
+  reports: () => ({ title: 'Reports', sub: 'Everything anyone has recorded.' }),
+  activity: () => ({ title: 'Your activity', sub: 'Everything you have recorded, newest first.' }),
+  tile: q => {
+    const t = tileDef(q.k);
+    return { title: t ? t.title : 'Details', sub: t ? t.sub : '' };
+  }
+};
+
+/* ---------- Drill-down from a dashboard tile ---------- */
+
+function linesWithStatus(g, s) { return allLinesOf(g).filter(l => l.status === s); }
+
+function tileDef(k) {
+  if (!k) return null;
+  const [kind, name] = [k.slice(0, k.indexOf(':')), k.slice(k.indexOf(':') + 1)];
+  if (kind === 'status') {
+    const groups = groupsAll().filter(g => linesWithStatus(g, name).length);
+    const lines = groups.reduce((s, g) => s + linesWithStatus(g, name).length, 0);
+    return {
+      title: name,
+      sub: groups.length + ' model' + (groups.length === 1 ? '' : 's') + ' · ' + lines + ' line' + (lines === 1 ? '' : 's') + ' at this status',
+      groups: groups,
+      lineFilter: l => l.status === name
+    };
+  }
+  if (kind === 'flow') {
+    const f = FLOW_TILES.find(x => x.k === name);
+    if (!f) return null;
+    const groups = groupsAll().filter(f.pred);
+    const total = groups.reduce((s, g) => s + f.value(g), 0);
+    return {
+      title: f.label,
+      sub: (f.unit === 'units' ? total + ' units across ' : '') + groups.length + ' model' + (groups.length === 1 ? '' : 's') + ' — ' + f.foot,
+      groups: groups,
+      lineFilter: null
+    };
+  }
+  return null;
+}
+
+function renderTile(q) {
+  const t = tileDef(q.k);
+  if (!t) return `<div class="empty">That view no longer exists. <a href="#/dashboard">Back to the dashboard</a></div>`;
+  if (!t.groups.length) return `<div class="empty">Nothing here right now. <a href="#/dashboard">Back to the dashboard</a></div>`;
+  return sortBar() + cardsFor(t.groups, g => summaryCard(g, t.lineFilter));
+}
+
+/* ---------- Consignments ---------- */
+
+function prioPicker(g) {
+  if (!user || user.level > 1) return '';
+  const cur = g.priority || 'Normal';
+  return `<div class="prio-pick" role="group" aria-label="Priority">${['Normal', 'High', 'Urgent'].map(p =>
+    `<button class="prio-btn${cur === p ? ' on-' + p.toLowerCase() : ''}" data-groupkey="${esc(g.groupKey)}" data-prio="${p}">${p}</button>`
+  ).join('')}</div>`;
+}
+
+function renderConsignments() {
+  const groups = groupsAll();
+  if (!groups.length) return `<div class="empty">No consignments yet. Sync China Master from the <a href="#/dashboard">Dashboard</a>.</div>`;
+  return sortBar() + cardsFor(groups, g => {
+    const lines = allLinesOf(g);
+    const right = `${prioPicker(g)}${pipeChip(g.pipeline)}`;
+    return modelBlock(g, right,
+      (g.parts.length ? partTiles(g) : '') + linesTable(lines) +
+      (g.quantityNote ? `<div class="note note-bad status-line">${esc(g.quantityNote)}</div>` : '') +
+      `<div class="card-status note hidden status-line"></div>`);
+  });
+}
+
+/* ---------- Receiving ----------
+   One row per line — a line is one shipment in China Master, and each one is
+   factory received on its own. A line stays here until its whole total is
+   counted; a short load's count is final, so one count finishes it. */
+
+function receivingRow(l, done) {
+  const cls = done ? 'row-done' : (l.overdue ? 'row-late' : (l.shortLoad ? 'row-short' : ''));
+  const partial = l.factoryReceived && !l.done;
+  return `
+    <tr class="fx ${cls}">
+      <td><b>${esc(l.partLetter)}</b></td>
+      <td><code>${esc(l.packaging)}</code>${l.uniqueId ? `<div class="hint" style="margin-top:2px;">${esc(l.uniqueId)}</div>` : ''}</td>
+      <td>${statusChip(l.status, partial ? ` · ${l.qtyReceived}/${l.total}` : '')}</td>
+      <td style="white-space:nowrap;">${esc(fmtDay(l.eta))}${etaChip(l)}</td>
+      <td class="r"><b>${l.total}</b></td>
+      <td class="r">${l.factoryReceived ? `<b style="color:#075A41;">${l.qtyReceived}</b>` : '—'}</td>
+      <td>
+        <div class="row-form">
+          <input type="number" min="1" max="${l.total || ''}" class="rcv-qty" inputmode="numeric"
+            placeholder="${l.factoryReceived ? l.qtyReceived : 'count'}" aria-label="Count for ${esc(l.packaging)}">
+          <button class="btn btn-sm ${!done && (l.receivedOnSheet || l.shortLoad || partial) ? 'btn-primary' : ''} rcv-btn" data-rowid="${esc(l.rowId)}"
+            data-pk="${esc(l.packaging)}">${done ? 'Correct' : (partial ? 'Update count' : 'Factory receive')}</button>
+        </div>
+      </td>
+    </tr>`;
+}
+
+function receivingTable(rows) {
+  return `<div class="tbl-wrap"><table class="lines">
+    <thead><tr><th>Part</th><th>Packaging</th><th>Status</th><th>ETA</th><th class="r">Total</th><th class="r">Counted</th><th style="width:240px;"></th></tr></thead>
+    <tbody>${rows}</tbody></table></div>`;
+}
+
+function receivingCard(g) {
+  const open = [], done = [];
+  g.parts.forEach(p => p.lines.forEach(l => (l.done ? done : open).push(l)));
+  const act = l => (l.receivedOnSheet || l.shortLoad || l.factoryReceived) ? 0 : 1;
+  open.sort((a, b) => act(a) - act(b) || String(a.eta || '9999').localeCompare(String(b.eta || '9999')));
+  const waiting = open.filter(l => !l.factoryReceived && (l.receivedOnSheet || l.shortLoad)).length;
+  const right = waiting
+    ? `<span class="chip st" style="${styleVars(STATUS_STYLE['Already received'])}">${waiting} ready to receive</span>`
+    : pipeChip(g.pipeline);
+  return modelBlock(g, right,
+    (open.length ? receivingTable(open.map(l => receivingRow(l, false)).join('')) : '') +
+    (done.length ? `<details style="margin-top:8px;"><summary class="hint" style="cursor:pointer;">${done.length} line${done.length === 1 ? '' : 's'} already factory received — correct a count</summary>
+      ${receivingTable(done.map(l => receivingRow(l, true)).join(''))}</details>` : '') +
+    `<div class="card-status note hidden status-line"></div>`);
+}
+
+function renderReceiving() {
+  const live = groupsAll().filter(g => !g.fullyCancelled);
+  const hasOpen = g => g.parts.some(p => p.lines.some(l => !l.done));
+  const ready = live.filter(g => hasOpen(g) && g.parts.some(p => p.lines.some(l => !l.done && (l.receivedOnSheet || l.shortLoad || l.factoryReceived))));
+  const onWay = live.filter(g => hasOpen(g) && ready.indexOf(g) === -1);
+  const finished = live.filter(g => !hasOpen(g));
+
+  let html = `<div class="note" style="margin-bottom:18px;">The count you type <b>replaces</b> the one on the line — it is how many are
+    physically on the floor, not how many more turned up. To correct a count, type the right number again.</div>` + sortBar();
+
+  html += `<div class="dash-head"><h2>Ready to receive</h2><span class="sub">in the country or already counted in part</span></div>`;
+  html += ready.length ? cardsFor(ready, receivingCard) : `<div class="empty" style="margin-bottom:24px;">Nothing is waiting for factory receipt.</div>`;
+
+  if (onWay.length) {
+    html += `<div class="dash-head" style="margin-top:8px;"><h2>Still on the way</h2><span class="sub">receive early if something turns up before China Master says so</span></div>`;
+    html += cardsFor(onWay, receivingCard);
+  }
+  if (finished.length) {
+    html += `<details style="margin-top:8px;"><summary class="dash-head" style="cursor:pointer;display:block;"><h2 style="display:inline;">Fully factory received</h2>
+      <span class="sub"> — ${finished.length} model${finished.length === 1 ? '' : 's'}, open to correct a count</span></summary>
+      <div style="margin-top:12px;">${cardsFor(finished, receivingCard)}</div></details>`;
+  }
+  return html;
+}
+
+/* ---------- Assembly ---------- */
+
+function renderAssembly() {
+  const groups = groupsAll().filter(g => g.buildableUnits > 0);
+  if (!groups.length) {
+    const waiting = groupsAll().filter(g => g.anyArrived && !g.allArrived).length;
+    return `<div class="empty">Nothing can be built right now.${waiting ? ' ' + waiting + ' model' + (waiting === 1 ? ' is' : 's are') +
+      ' waiting on parts — see <a href="#/tile?k=flow:arriving">Arriving</a>.' : ''}</div>`;
+  }
+  return sortBar() + cardsFor(groups, g => {
+    const right = `<div class="big-num"><div class="k">Can build</div><div class="v" style="color:#15803D;">${g.buildableUnits}</div></div>`;
+    return modelBlock(g, right, partTiles(g) + `
+      <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+        <div style="flex:0 0 150px;">
+          <label>Units to build</label>
+          <input type="number" class="asm-qty" min="1" max="${g.buildableUnits}" value="${g.buildableUnits}" inputmode="numeric">
+        </div>
+        <button class="btn btn-primary asm-btn" data-groupkey="${esc(g.groupKey)}" data-max="${g.buildableUnits}">Build units</button>
+        <span class="hint" style="padding-bottom:10px;">${g.totalBuilt} built so far</span>
+      </div>
+      <div class="card-status note hidden status-line"></div>`);
+  });
+}
+
+/* ---------- Delivery ---------- */
+
+function renderDelivery() {
+  const groups = groupsAll().filter(g => g.readyToSend > 0);
+  if (!groups.length) return `<div class="empty">No assembled units waiting to go out.</div>`;
+  return sortBar() + cardsFor(groups, g => {
+    const available = g.readyToSend;
+    const fr = (g.deliveredTo && g.deliveredTo.FR) || { confirmed: 0, pending: 0 };
+    const bb = (g.deliveredTo && g.deliveredTo.BB) || { confirmed: 0, pending: 0 };
+    const frLeft = Math.max(0, (g.frQty || 0) - fr.confirmed - fr.pending);
+    const bbLeft = Math.max(0, (g.bbQty || 0) - bb.confirmed - bb.pending);
+    const right = `<div class="big-num"><div class="k">On the floor</div><div class="v" style="color:#C2410C;">${available}</div></div>`;
+    return modelBlock(g, right, `
+      <div class="dlv-form">
+        <div class="dlv-cust-field">
+          <label>To FR</label>
+          <input type="number" class="dlv-fr" min="0" max="${available}" placeholder="0" inputmode="numeric" aria-label="Units to FR">
+          <div class="hint">${frLeft ? frLeft + ' still owed' : 'nothing owed'}</div>
+        </div>
+        <div class="dlv-cust-field">
+          <label>To BB</label>
+          <input type="number" class="dlv-bb" min="0" max="${available}" placeholder="0" inputmode="numeric" aria-label="Units to BB">
+          <div class="hint">${bbLeft ? bbLeft + ' still owed' : 'nothing owed'}</div>
+        </div>
+        <div class="dlv-actions">
+          <button class="btn btn-primary dlv-btn" data-groupkey="${esc(g.groupKey)}" data-max="${available}">Send out</button>
+          <div class="hint dlv-left" data-available="${available}">${available} on the floor</div>
+        </div>
+      </div>
+      <div class="card-status note hidden status-line"></div>`);
+  });
+}
+
+/* ---------- Acceptance ---------- */
+
+function renderAcceptance() {
+  const pending = (APP.deliveries || []).filter(d => d.Status === 'pending');
+  if (!pending.length) return `<div class="empty">Nothing is waiting for a customer to accept it.</div>`;
+  const keys = [];
+  pending.forEach(d => { if (keys.indexOf(d.GroupKey) === -1) keys.push(d.GroupKey); });
+  const groups = groupsAll().filter(g => keys.indexOf(g.groupKey) !== -1);
+  return sortBar() + cardsFor(groups, g => {
+    const mine = pending.filter(d => d.GroupKey === g.groupKey);
+    const total = mine.reduce((s, d) => s + (Number(d.QtyOut) || 0), 0);
+    const right = `<div class="big-num"><div class="k">Awaiting</div><div class="v" style="color:#5130B0;">${total}</div></div>`;
+    return modelBlock(g, right, `
+      <div class="tbl-wrap"><table class="lines">
+        <thead><tr><th>Customer</th><th class="r">Sent</th><th>Sent on</th><th>By</th><th style="width:260px;">Accepted</th></tr></thead>
+        <tbody>${mine.map(d => `
+          <tr class="fx">
+            <td><span class="chip" style="background:${d.CustomerCode === 'FR' ? '#FDEBDD' : '#DDF1EE'};color:${d.CustomerCode === 'FR' ? '#9A4318' : '#1D6158'};font-weight:800;">${esc(d.CustomerCode)}</span></td>
+            <td class="r"><b>${esc(d.QtyOut)}</b></td>
+            <td>${esc(fmtDay(d.TimestampDay))}</td>
+            <td class="hint" style="margin:0;">${esc(d.MarkedBy || '')}</td>
+            <td>
+              <div class="row-form" style="justify-content:flex-start;">
+                <input type="number" class="acc-qty" min="0" max="${esc(d.QtyOut)}" value="${esc(d.QtyOut)}" inputmode="numeric" aria-label="Units accepted">
+                <button class="btn btn-sm btn-primary acc-btn" data-deliveryid="${esc(d.DeliveryID)}" data-sent="${esc(d.QtyOut)}">Accept</button>
+              </div>
+            </td>
+          </tr>`).join('')}</tbody>
+      </table></div>
+      <div class="hint">Accepting fewer than were sent records a discrepancy.</div>
+      <div class="card-status note hidden status-line"></div>`);
+  });
+}
+
+/* ---------- Needs review ---------- */
+
+function renderNeedsReview() {
+  const rows = APP.needsReview || [];
+  if (!rows.length) return `<div class="empty">Every line in China Master was read cleanly.</div>`;
+  return `
+    <div class="note" style="margin-bottom:16px;">These lines are left out of every count until their packaging code reads properly.
+      The lasting fix is in China Master itself — the next sync will then pick them up.</div>
+    ${rows.map(r => `
+      <div class="model-block fx">
+        <div class="model-head fh">
+          <div>
+            <div class="model-title"><code style="font-size:13.5px;">${esc(r.SheetRowName)}</code></div>
+            <div class="model-meta">${esc(r.Supplier || '—')} · ${esc(r.FactoryModel || '—')} ${r.SignatureModel ? '· ' + esc(r.SignatureModel) : ''}${r.UniqueID ? ' · ID ' + esc(r.UniqueID) : ''}</div>
+          </div>
+          <div class="model-right">${statusChip(r.Status)}</div>
+        </div>
+        <div class="note note-bad" style="margin-bottom:10px;">${esc(r.ReviewReason)}</div>
+        <div class="row-form" style="justify-content:flex-start;" data-rowid="${esc(r.RowID)}">
+          <input type="text" class="nr-fix" style="width:240px;" placeholder="Corrected packaging code">
+          <button class="btn btn-sm nr-resolve">Fix</button>
+        </div>
+      </div>`).join('')}`;
+}
+
+/* ---------- Reports ---------- */
+
+function renderReports() {
+  return `
+    <div class="card">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+        <input id="rp-search" type="text" placeholder="Search consignment, part, event or person" style="max-width:340px;">
+        <button class="btn" id="rp-filter">Search</button>
+      </div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>When</th><th>Consignment · model</th><th>Part</th><th>Event</th><th class="r">Qty</th><th>By</th></tr></thead>
+        <tbody id="rp-body">${reportRows(APP.events || [])}</tbody>
+      </table></div>
+    </div>`;
+}
+
+function reportRows(events) {
+  if (!events.length) return `<tr><td colspan="6" style="color:var(--text-soft);padding:22px 12px;">No events logged.</td></tr>`;
+  return events.map(e => `<tr class="fx"><td style="white-space:nowrap;">${esc(e.Timestamp)}</td><td>${esc(e.ConsignmentGroup || 'whole file')}</td>
+    <td>${esc(e.PartLetter || '—')}</td><td><b>${esc(e.EventType)}</b></td><td class="r">${e.Qty === '' || e.Qty == null ? '—' : esc(e.Qty)}</td><td>${esc(e.User)}</td></tr>`).join('');
+}
+
+/* ---------- Your activity ---------- */
+
+function myEvents() {
+  return (APP.events || []).filter(e => String(e.User || '').toLowerCase() === String(user.email).toLowerCase());
+}
+
+function renderActivity() {
+  const mine = myEvents();
+  if (!mine.length) return `<div class="empty">You haven't recorded anything yet.</div>`;
+  return `
+    <div class="card">
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>When</th><th>Consignment · model</th><th>Part</th><th>Event</th><th class="r">Qty</th></tr></thead>
+        <tbody>${mine.map(e => `<tr class="fx"><td style="white-space:nowrap;">${esc(e.Timestamp || '—')}</td><td>${esc(e.ConsignmentGroup || 'whole file')}</td>
+          <td>${esc(e.PartLetter || '—')}</td><td><b>${esc(e.EventType)}</b></td><td class="r">${e.Qty === '' || e.Qty == null ? '—' : esc(e.Qty)}</td></tr>`).join('')}</tbody>
+      </table></div>
+    </div>`;
+}
+
+/* ======================================================================
+   DASHBOARD
+   ====================================================================== */
+
+function statusTiles() {
+  const groups = groupsAll();
+  return `<div class="stiles">${STATUS_TILES.map(s => {
+    const models = groups.filter(g => linesWithStatus(g, s).length);
+    const lines = models.reduce((n, g) => n + linesWithStatus(g, s).length, 0);
+    const st = STATUS_STYLE[s];
+    const inner = `<div class="sv">${models.length}</div><div class="sl">${esc(s)}</div>
+      <div class="sf">${lines ? lines + ' line' + (lines === 1 ? '' : 's') : 'none'}</div>`;
+    const cls = 'stile' + (models.length ? '' : ' zero') + (s === 'Factory received' ? ' factory' : '');
+    return models.length
+      ? `<a class="${cls}" style="${styleVars(st)}" href="#/tile?k=${encodeURIComponent('status:' + s)}">${inner}</a>`
+      : `<div class="${cls}" style="${styleVars(st)}">${inner}</div>`;
+  }).join('')}</div>`;
+}
+
+function flowTiles() {
+  const groups = groupsAll();
+  return `<div class="ftiles">${FLOW_TILES.map(f => {
+    const hit = groups.filter(f.pred);
+    const v = hit.reduce((s, g) => s + f.value(g), 0);
+    const inner = `<div class="fl">${esc(f.label)}</div><div class="fv">${v}</div>
+      <div class="ff">${f.unit === 'units' ? 'units' : 'models'} ${esc(f.foot)}</div>`;
+    const style = `--c-dot:${f.color};--c-fg:${f.fg};`;
+    return hit.length
+      ? `<a class="ftile" style="${style}" href="#/tile?k=${encodeURIComponent('flow:' + f.k)}">${inner}</a>`
+      : `<div class="ftile zero" style="${style}">${inner}</div>`;
+  }).join('')}</div>`;
+}
+
+function customerStats(code) {
+  let ordered = 0, delivered = 0, awaiting = 0, owedLanded = 0;
+  groupsAll().forEach(g => {
+    if (g.fullyCancelled) return;
+    const want = code === 'FR' ? (g.frQty || 0) : (g.bbQty || 0);
+    const got = (g.deliveredTo && g.deliveredTo[code]) || { confirmed: 0, pending: 0 };
+    ordered += want;
+    delivered += got.confirmed || 0;
+    awaiting += got.pending || 0;
+    if (g.anyArrived) owedLanded += Math.max(0, want - (got.confirmed || 0) - (got.pending || 0));
+  });
+  return { ordered, delivered, awaiting, owedLanded };
+}
+
+function customerBoxes() {
+  const onFloor = groupsAll().reduce((s, g) => s + (g.readyToSend || 0), 0);
+  const box = (code, cls) => {
+    const c = customerStats(code);
+    return `
+      <a class="cust ${cls}" href="#/delivery">
+        <div class="c-top"><span class="c-code">${code}</span><span class="c-tag">${c.ordered} ordered in total</span></div>
+        <div class="c-main">
+          <div><div class="c-num">${c.owedLanded}</div><div class="c-lab">still to deliver from stock that has landed</div></div>
+          <div><div class="c-num" style="color:#5130B0;">${c.awaiting}</div><div class="c-lab">sent, awaiting acceptance</div></div>
+          <div><div class="c-num" style="color:#0B666C;">${c.delivered}</div><div class="c-lab">delivered</div></div>
+        </div>
+      </a>`;
+  };
+  return `
+    <div class="dash-section">
+      <div class="dash-head"><h2>FR and BB</h2>
+        <span class="sub">${onFloor ? onFloor + ' assembled unit' + (onFloor === 1 ? '' : 's') + ' on the floor, ready to send' : 'nothing assembled on the floor right now'}</span></div>
+      <div class="cust-grid">${box('FR', 'cust-fr')}${box('BB', 'cust-bb')}</div>
+    </div>`;
+}
+
+function partChips(g) {
+  return g.parts.map(p => {
+    const cls = p.fullyIn ? 'chip-ok' : (p.overdue ? 'chip-bad' : (p.arrived || p.awaitingFactory ? 'chip-warn' : 'chip-idle'));
+    return `<span class="chip ${cls}">${esc(p.partLetter)} ${p.qtyReceived}/${p.qtyExpected}</span>`;
+  }).join('');
+}
+
+function atAGlance() {
+  const groups = sortGroups(groupsAll().filter(g => !g.fullyCancelled));
+  if (!groups.length) return '';
+  return `
+    <div class="dash-section">
+      <div class="dash-head"><h2>Every model at a glance</h2><span class="sub">${groups.length} models · most urgent first</span></div>
+      <div class="glance">${groups.map(g => `
+        <a class="gtile prio-${esc(g.priority.toLowerCase())}${g.overdueParts ? ' late' : ''}" href="#/consignments?q=${encodeURIComponent(g.consignmentGroup)}">
+          <div class="g-top">
+            <div><div class="g-model">${prioTag(g)}${modelLabel(g)}</div>
+              <div class="g-meta">${esc(g.consignmentGroup)} · ${esc(g.supplier || '—')}</div></div>
+            ${pipeChip(g.pipeline)}
+          </div>
+          <div class="g-parts">${partChips(g)}</div>
+          <div class="g-stats">
+            <span><b style="color:${g.buildableUnits ? '#15803D' : 'inherit'};">${g.buildableUnits}</b> can build</span>
+            <span><b>${g.totalBuilt}</b> built</span>
+            <span><b>${g.totalConfirmed}</b> delivered</span>
+          </div>
+        </a>`).join('')}</div>
+    </div>`;
+}
+
+function waitingOnParts() {
+  const groups = groupsAll().filter(g => g.anyArrived && !g.allArrived && !g.fullyCancelled);
+  const rows = groups.map(g => {
+    const missing = g.parts.filter(p => !p.fullyIn);
+    return `
+      <a class="mini-row" href="#/receiving?q=${encodeURIComponent(g.consignmentGroup)}">
+        <div class="mr-body">
+          <div class="mr-title">${prioTag(g)}${modelLabel(g)} <span class="hint" style="margin:0;display:inline;">· ${esc(g.consignmentGroup)}</span></div>
+          <div class="mr-sub">${missing.map(p => 'Part ' + esc(p.partLetter) + ' ' + p.qtyReceived + '/' + p.qtyExpected +
+            (p.overdue ? ' — ' + p.daysLate + ' days late' : (p.awaitingFactory ? ' — in the country, not factory received' : (p.nextEta ? ' — due ' + fmtDay(p.nextEta) : '')))).join(' · ')}</div>
+        </div>
+        <div class="mr-end">${missing.map(p => statusChip(p.importStatus)).join(' ')}</div>
+      </a>`;
+  }).join('');
+  return `
+    <div class="card">
+      <h3 class="card-h">Models still waiting on parts</h3>
+      <p class="card-sub">Some parts are in the factory, the rest are not.</p>
+      ${rows || '<div class="empty" style="padding:24px;">No model is part-received right now.</div>'}
+    </div>`;
+}
+
+function upcomingParts() {
+  const items = [];
+  const today = APP.today || '';
+  groupsAll().forEach(g => g.parts.forEach(p => p.lines.forEach(l => {
+    if (l.factoryReceived || l.receivedOnSheet || l.cancelled || !l.eta || l.eta < today) return;
+    items.push({ g, l });
+  })));
+  items.sort((a, b) => String(a.l.eta).localeCompare(String(b.l.eta)));
+  const shown = items.slice(0, 8);
+  const rows = shown.map(({ g, l }) => {
+    const d = parseYmd(l.eta);
+    const rel = relDays(l.eta);
+    return `
+      <a class="mini-row" href="#/receiving?q=${encodeURIComponent(l.packaging)}">
+        <div class="mr-date"><b>${d ? d.getDate() : '—'}</b><span>${d ? d.toLocaleDateString(undefined, { month: 'short' }) : ''}</span></div>
+        <div class="mr-body">
+          <div class="mr-title">${prioTag(g)}${modelLabel(g)} · Part ${esc(l.partLetter)}</div>
+          <div class="mr-sub">${esc(g.consignmentGroup)} · ${rel ? esc(rel.text) : ''}</div>
+        </div>
+        <div class="mr-end">${statusChip(l.status)}<b style="margin-top:4px;">${l.total}</b></div>
+      </a>`;
+  }).join('');
+  return `
+    <div class="card">
+      <h3 class="card-h">Upcoming parts</h3>
+      <p class="card-sub">The next ${shown.length} shipment${shown.length === 1 ? '' : 's'} due, by ETA.${items.length > shown.length ? ' ' + (items.length - shown.length) + ' more after these.' : ''}</p>
+      ${rows || '<div class="empty" style="padding:24px;">Nothing with a future ETA.</div>'}
+    </div>`;
+}
+
+/* ---------- Charts ---------- */
+
+// Units assembled per day, last 30 days. One series, so no legend: the title names it.
+function productionChart() {
+  const data = APP.buildsByDay || [];
+  const W = 560, H = 220, L = 34, R = 14, T = 14, B = 28;
+  const total = data.reduce((s, d) => s + d.units, 0);
+  const rawMax = Math.max(0, ...data.map(d => d.units));
+  const step = rawMax <= 5 ? 1 : rawMax <= 20 ? 5 : rawMax <= 100 ? 20 : rawMax <= 500 ? 100 : Math.pow(10, Math.floor(Math.log10(rawMax)));
+  const max = Math.max(step * 2, Math.ceil(rawMax / step) * step || 4);
+  const n = Math.max(1, data.length - 1);
+  const x = i => L + i * (W - L - R) / n;
+  const y = v => T + (1 - v / max) * (H - T - B);
+
+  const ticks = [0, max / 2, max];
+  const grid = ticks.map(t => `<line x1="${L}" x2="${W - R}" y1="${y(t)}" y2="${y(t)}"/>`).join('');
+  const yLabels = ticks.map(t => `<text x="${L - 7}" y="${y(t) + 3.5}" text-anchor="end">${Math.round(t)}</text>`).join('');
+  const xLabels = data.map((d, i) => {
+    if (i % 7 !== (data.length - 1) % 7) return '';
+    const dt = parseYmd(d.day);
+    return `<text x="${x(i)}" y="${H - 8}" text-anchor="middle">${dt ? dt.getDate() + ' ' + dt.toLocaleDateString(undefined, { month: 'short' }) : ''}</text>`;
+  }).join('');
+
+  const pts = data.map((d, i) => x(i).toFixed(1) + ',' + y(d.units).toFixed(1));
+  const line = pts.length ? 'M' + pts.join(' L') : '';
+  const area = pts.length ? `M${x(0)},${y(0)} L${pts.join(' L')} L${x(data.length - 1)},${y(0)} Z` : '';
+  const dots = data.map((d, i) => d.units > 0
+    ? `<circle cx="${x(i)}" cy="${y(d.units)}" r="3.5" fill="var(--prod)" stroke="#fff" stroke-width="2"/>` : '').join('');
+
+  return `
+    <div class="card">
+      <h3 class="card-h">Units assembled per day</h3>
+      <p class="card-sub">${total ? total + ' units in the last 30 days' : 'Nothing assembled in the last 30 days yet.'}</p>
+      <div class="chart-wrap" id="prod-chart" data-w="${W}" data-h="${H}" data-l="${L}" data-r="${R}" data-t="${T}" data-b="${B}" data-n="${n}" data-max="${max}">
+        <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Units assembled per day over the last 30 days, ${total} in total">
+          <g class="grid">${grid}</g>
+          <g class="axis">${yLabels}${xLabels}</g>
+          <path d="${area}" fill="var(--prod)" opacity="0.10"/>
+          <path d="${line}" fill="none" stroke="var(--prod)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+          ${dots}
+          <line id="prod-cross" x1="0" x2="0" y1="${T}" y2="${H - B}" stroke="#C9AE9C" stroke-width="1" stroke-dasharray="3 3" visibility="hidden"/>
+          <circle id="prod-dot" r="5" fill="var(--prod)" stroke="#fff" stroke-width="2" visibility="hidden"/>
+          <rect x="${L}" y="${T}" width="${W - L - R}" height="${H - T - B}" fill="transparent" id="prod-hit"/>
+        </svg>
+        <div class="tip hidden" id="prod-tip"></div>
+      </div>
+    </div>`;
+}
+
+function wireProductionChart() {
+  const wrap = document.getElementById('prod-chart');
+  if (!wrap) return;
+  const data = APP.buildsByDay || [];
+  const svg = wrap.querySelector('svg');
+  const hit = document.getElementById('prod-hit');
+  const tip = document.getElementById('prod-tip');
+  const cross = document.getElementById('prod-cross');
+  const dot = document.getElementById('prod-dot');
+  const W = +wrap.dataset.w, H = +wrap.dataset.h, L = +wrap.dataset.l, R = +wrap.dataset.r,
+        T = +wrap.dataset.t, B = +wrap.dataset.b, n = +wrap.dataset.n, max = +wrap.dataset.max;
+  const vb = svg.viewBox.baseVal;
+  const move = ev => {
+    const rect = svg.getBoundingClientRect();
+    const sx = (ev.clientX - rect.left) * (vb.width / rect.width);
+    const i = Math.max(0, Math.min(data.length - 1, Math.round((sx - L) / ((W - L - R) / n))));
+    const d = data[i];
+    if (!d) return;
+    const px = L + i * (W - L - R) / n;
+    const cy = T + (1 - d.units / max) * (H - T - B);
+    cross.setAttribute('x1', px); cross.setAttribute('x2', px); cross.setAttribute('visibility', 'visible');
+    dot.setAttribute('cx', px); dot.setAttribute('cy', cy); dot.setAttribute('visibility', 'visible');
+    const dt = parseYmd(d.day);
+    tip.innerHTML = `<b>${d.units}</b> unit${d.units === 1 ? '' : 's'}<br>${dt ? dt.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' }) : ''}`;
+    tip.style.left = (px * rect.width / vb.width) + 'px';
+    tip.style.top = (cy * rect.height / vb.height) + 'px';
+    tip.classList.remove('hidden');
+  };
+  const leave = () => { tip.classList.add('hidden'); cross.setAttribute('visibility', 'hidden'); dot.setAttribute('visibility', 'hidden'); };
+  hit.addEventListener('mousemove', move);
+  hit.addEventListener('mouseleave', leave);
+}
+
+// Per model, one FR line and one BB line: the track is what that customer
+// ordered, the solid fill is what they have accepted, the pale fill is what
+// has been sent and is waiting for acceptance.
+function deliveryChart() {
+  const groups = groupsAll().filter(g => !g.fullyCancelled && (g.frQty || g.bbQty));
+  const lineFor = (g, code, color) => {
+    const want = code === 'FR' ? (g.frQty || 0) : (g.bbQty || 0);
+    const got = (g.deliveredTo && g.deliveredTo[code]) || { confirmed: 0, pending: 0 };
+    const done = got.confirmed || 0, sent = done + (got.pending || 0);
+    const pct = v => want > 0 ? Math.min(100, (v / want) * 100) : 0;
+    const tip = `${code} · ${plainModel(g)}: ${done} delivered${got.pending ? ', ' + got.pending + ' awaiting acceptance' : ''} of ${want} ordered`;
+    return `
+      <div class="db-line">
+        <span class="who">${code}</span>
+        <div class="db-track" data-tip="${esc(tip)}" role="img" aria-label="${esc(tip)}">
+          <div class="db-sent" style="width:${pct(sent)}%;background:${color};"></div>
+          <div class="db-done" style="width:${pct(done)}%;background:${color};"></div>
+        </div>
+        <span class="db-val">${done} / ${want}</span>
+      </div>`;
+  };
+  return `
+    <div class="card">
+      <h3 class="card-h">Delivered to FR and BB</h3>
+      <p class="card-sub">Per model, against what each customer ordered.</p>
+      <div class="legend">
+        <span><i style="background:var(--fr);"></i>FR</span>
+        <span><i style="background:var(--bb);"></i>BB</span>
+        <span><i style="background:var(--fr);opacity:.35;"></i>paler — sent, awaiting acceptance</span>
+      </div>
+      <div class="chart-wrap" id="dlv-chart">
+        ${groups.map(g => `
+          <div class="dbar">
+            <div class="db-label"><span>${modelLabel(g)}</span><span>${esc(g.consignmentGroup)}</span></div>
+            ${g.frQty ? lineFor(g, 'FR', 'var(--fr)') : ''}
+            ${g.bbQty ? lineFor(g, 'BB', 'var(--bb)') : ''}
+          </div>`).join('') || '<div class="empty">No orders yet.</div>'}
+        <div class="tip hidden" id="dlv-tip"></div>
+      </div>
+    </div>`;
+}
+
+function wireDeliveryChart() {
+  const wrap = document.getElementById('dlv-chart');
+  if (!wrap) return;
+  const tip = document.getElementById('dlv-tip');
+  wrap.querySelectorAll('.db-track').forEach(t => {
+    t.addEventListener('mousemove', ev => {
+      const r = wrap.getBoundingClientRect();
+      tip.innerText = t.dataset.tip;
+      tip.style.left = (ev.clientX - r.left) + 'px';
+      tip.style.top = (ev.clientY - r.top - 6) + 'px';
+      tip.classList.remove('hidden');
+    });
+    t.addEventListener('mouseleave', () => tip.classList.add('hidden'));
+  });
+}
+
+/* ---------- Still to arrive ---------- */
+
+function stillToArrive() {
+  const groups = groupsAll().filter(g => !g.allArrived && !g.fullyCancelled)
+    .sort((a, b) => urgencyScore(b) - urgencyScore(a) || String(a.nextEta || '9999').localeCompare(String(b.nextEta || '9999')));
+  const late = groups.filter(g => g.overdueParts).length;
+  return `
+    <div class="dash-section">
+      <div class="dash-head"><h2>Still to arrive</h2>
+        <span class="sub">${groups.length} model${groups.length === 1 ? '' : 's'}${late ? ' · ' + late + ' with a late part' : ''}</span></div>
+      ${groups.length ? `<div class="arrive-grid">${groups.map(g => {
+        const stage = STATUS_STYLE[g.importStage];
+        return `
+          <a class="arrive-tile${g.overdueParts ? ' late' : ''}" style="${stage ? '--c-dot:' + stage.dot : ''}" href="#/receiving?q=${encodeURIComponent(g.consignmentGroup)}">
+            <div class="a-top">
+              <span class="a-model">${prioTag(g)}${modelLabel(g)}</span>
+              ${g.overdueParts ? `<span class="chip chip-bad">${g.worstDaysLate} days late</span>` : statusChip(g.importStage)}
+            </div>
+            <div class="a-meta"><code>${esc(g.consignmentGroup)}</code> · ${esc(g.supplier || '—')} · ${g.totalQty || '—'} units</div>
+            <div class="a-parts">${partChips(g)}</div>
+            <div class="a-meta">${g.awaitingFactory
+              ? g.awaitingFactory + ' line' + (g.awaitingFactory === 1 ? '' : 's') + ' in the country — waiting for factory receipt'
+              : (g.nextEta ? 'Next part due ' + esc(fmtDay(g.nextEta)) : 'No ETA on the remaining parts')}</div>
+          </a>`;
+      }).join('')}</div>` : '<div class="empty">Every model has fully arrived.</div>'}
+    </div>`;
+}
+
+/* ---------- Needs attention ---------- */
+
+function attentionItems() {
+  const items = [];
+  groupsAll().forEach(g => {
+    const name = plainModel(g) + ' · ' + g.consignmentGroup;
+    const q = encodeURIComponent(g.consignmentGroup);
+    const lines = allLinesOf(g);
+
+    const awaiting = lines.filter(l => l.receivedOnSheet && !l.factoryReceived && !l.cancelled);
+    if (awaiting.length) items.push({ rank: 3, sev: 'high', ico: '!', href: '#/receiving?q=' + q,
+      title: name + ' — received in China Master, not factory received',
+      sub: awaiting.map(l => l.packaging).join(', ') + '. It cannot go to Assembly until it is.' });
+
+    const shorts = lines.filter(l => l.shortLoad && !l.factoryReceived && !l.cancelled);
+    if (shorts.length) items.push({ rank: 2, sev: 'mid', ico: 'S', href: '#/receiving?q=' + q,
+      title: name + ' — short load to count',
+      sub: shorts.map(l => l.packaging + ' (' + l.total + ' on the line)').join(', ') });
+
+    if (g.buildableUnits > 0) items.push({ rank: 2, sev: 'mid', ico: 'A', href: '#/assembly?q=' + q,
+      title: name + ' — received but not assembled',
+      sub: g.buildableUnits + ' unit' + (g.buildableUnits === 1 ? '' : 's') + ' can be built from parts on the floor.' });
+
+    (g.sheetNotes || []).forEach(n => items.push({ rank: 3, sev: 'high', ico: 'Δ', href: '#/consignments?q=' + q,
+      title: name + ' — ' + (n.note.indexOf('No longer') === 0 ? 'removed from China Master' : 'changed in China Master after factory receipt'),
+      sub: n.packaging + ': ' + n.note }));
+
+    if (g.totalsDisagree) items.push({ rank: 2, sev: 'mid', ico: '≠', href: '#/consignments?q=' + q,
+      title: name + ' — parts disagree on quantity', sub: g.quantityNote });
+
+    if (g.hasDiscrepancy) items.push({ rank: 3, sev: 'high', ico: '!', href: '#/consignments?q=' + q,
+      title: name + ' — delivery discrepancy', sub: 'A customer accepted fewer units than were sent.' });
+  });
+
+  (APP.syncWarnings || []).forEach(w => items.push({
+    rank: w.type === 'uid' ? 3 : 1, sev: w.type === 'uid' ? 'high' : 'low', ico: 'ID',
+    href: '#/consignments?q=' + encodeURIComponent(w.uniqueId || ''),
+    title: w.type === 'uid' ? 'Unique ID ' + w.uniqueId + ' is shared by ' + (w.models || []).length + ' models' : 'Lines without a Unique ID',
+    sub: w.message }));
+
+  const nr = (APP.needsReview || []).length;
+  if (nr) items.push({ rank: 2, sev: 'mid', ico: '?', href: '#/needsreview',
+    title: nr + ' line' + (nr === 1 ? '' : 's') + ' in China Master could not be read', sub: 'Their packaging codes need fixing in China Master.' });
+
+  return items.sort((a, b) => b.rank - a.rank);
+}
+
+function attentionCard() {
+  const items = attentionItems();
+  const item = i => `
+    <a class="att sev-${i.sev}" href="${i.href}">
+      <span class="att-ico">${esc(i.ico)}</span>
+      <div><div class="att-title">${esc(i.title)}</div><div class="att-sub">${esc(i.sub || '')}</div></div>
+    </a>`;
+  return `
+    <div class="card">
+      <h3 class="card-h">Needs attention</h3>
+      <p class="card-sub">${items.length ? items.length + ' thing' + (items.length === 1 ? '' : 's') + ' to deal with, most serious first.' : 'Nothing needs attention.'}</p>
+      ${items.slice(0, 8).map(item).join('')}
+      ${items.length > 8 ? `<div id="att-more" class="hidden">${items.slice(8).map(item).join('')}</div>
+        <button class="btn btn-sm" style="margin-top:10px;" id="att-toggle">Show all ${items.length}</button>` : ''}
+    </div>`;
+}
+
+function activityCard() {
+  const all = myEvents();
+  const mine = all.slice(0, 5);
+  return `
+    <div class="card">
+      <h3 class="card-h">Your recent activity</h3>
+      <p class="card-sub">${mine.length ? 'Your last ' + mine.length + ', newest first.' : ''}</p>
+      ${mine.length ? mine.map(e => `
+        <div class="act-item">
+          <div class="act-when">${esc(e.Timestamp || '—')}</div>
+          <div><b>${esc(e.EventType)}</b>${e.Qty !== '' && e.Qty != null ? ' · ' + esc(e.Qty) : ''}
+            <div class="act-where">${esc(e.ConsignmentGroup || 'whole file')}${e.PartLetter ? ' · part ' + esc(e.PartLetter) : ''}</div></div>
+        </div>`).join('') : `<div class="empty" style="padding:24px;">You haven't recorded anything yet.</div>`}
+      ${all.length > mine.length ? `<a class="btn btn-sm" style="margin-top:12px;" href="#/activity">Show all ${all.length}</a>` : ''}
+    </div>`;
+}
+
+/* ---------- Put together ---------- */
+
+function renderDashboard() {
+  const groups = groupsAll();
   const syncBar = (user && user.level <= 1) ? `
     <div class="sync-bar">
-      <div class="s-text">
-        China Master last synced <b>${APP.lastSync ? esc(new Date(APP.lastSync).toLocaleString()) : 'never'}</b>
-      </div>
+      <div class="s-text">China Master last synced <b>${APP.lastSync ? esc(new Date(APP.lastSync).toLocaleString()) : 'never'}</b>
+        <span class="hint" style="display:block;margin-top:2px;">${esc(APP.dropboxPath || '')}</span></div>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-sm" id="dash-check">Check connection</button>
         <button class="btn btn-primary btn-sm" id="dash-sync">Sync China Master</button>
       </div>
     </div>
-    <div id="dash-sync-status" class="note hidden" style="margin:-12px 0 22px;"></div>` : '';
+    <div id="dash-sync-status" class="note hidden" style="margin:-8px 0 18px;white-space:pre-line;"></div>` : '';
 
-  const masterSearch = `
+  const master = `
     <div class="master-search">
       <div class="ms-input">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-        <input type="search" id="ms-q" autocomplete="off"
-          placeholder="Search everything — consignment, model, supplier, part, customer, person">
+        <input type="search" id="ms-q" autocomplete="off" placeholder="Search everything — consignment, model, Unique ID, packaging, supplier, customer, person">
       </div>
       <div class="ms-results" id="ms-results"></div>
     </div>`;
@@ -920,751 +1823,89 @@ function renderDashboard() {
     return syncBar + `<div class="empty">Nothing loaded yet. Sync China Master to bring in consignments.</div>`;
   }
 
-  /* --- Grid 1: five numbers, in the order a day actually runs.
-         Arriving, late, to count, to build, to send. Each opens the page the
-         number came from, carrying a filter where one narrows it usefully. --- */
-  const tiles = `
-    <div class="grid grid-5">
-      <a class="tile tile-accent" href="#/receiving">
-        <div class="t-label">Arriving</div>
-        <div class="t-value">${stats.totalArriving || 0}</div>
-        <div class="t-foot">models still waiting on parts</div>
-      </a>
-      <a class="tile ${stats.overdueParts ? 'tile-late' : ''}" href="#/consignments">
-        <div class="t-label">Overdue</div>
-        <div class="t-value">${stats.overdueParts || 0}</div>
-        <div class="t-foot">${stats.overdueParts
-          ? 'past ETA, still not here — worst is ' + stats.worstDaysLate + ' days'
-          : 'nothing is late'}</div>
-      </a>
-      <a class="tile ${stats.shortLoadsToCount ? 'tile-warn' : ''}" href="#/receiving?q=${encodeURIComponent('Short load')}">
-        <div class="t-label">Short loads to count</div>
-        <div class="t-value">${stats.shortLoadsToCount || 0}</div>
-        <div class="t-foot">need a count from the floor</div>
-      </a>
-      <a class="tile ${stats.canBuildNow ? 'tile-good' : ''}" href="#/assembly">
-        <div class="t-label">Can build now</div>
-        <div class="t-value">${stats.canBuildNow || 0}</div>
-        <div class="t-foot">units from parts on hand</div>
-      </a>
-      <a class="tile ${stats.readyToSend ? 'tile-good' : ''}" href="#/delivery">
-        <div class="t-label">Assembled, ready to send</div>
-        <div class="t-value">${stats.readyToSend || 0}</div>
-        <div class="t-foot">built and still on the floor</div>
-      </a>
-    </div>`;
-
-  /* --- The two customers, side by side.
-
-         This replaces a pair of tiles that read "FR still owed 1622". That
-         number was every unit ever ordered, including four models being made
-         in China — nothing anybody could act on. What a person actually needs
-         is what is built and waiting to go out, then what is owed on stock
-         that has landed, with the full order kept underneath for reference. --- */
-  const custBox = (code, cls) => {
-    const c = (APP.dashboard && APP.dashboard.customer && APP.dashboard.customer[code]) || {};
-    const ready = groups.reduce((s, g) => s + (g.readyToSend || 0), 0);
-    return `
-      <a class="cust ${cls}" href="#/delivery?q=${encodeURIComponent(code)}">
-        <div class="c-top">
-          <span class="c-code">${esc(code)}</span>
-          <span class="c-tag">${c.awaiting ? c.awaiting + ' awaiting confirmation' : 'nothing in transit'}</span>
-        </div>
-        <div class="c-main">
-          <div>
-            <div class="c-num">${c.deliverable || 0}</div>
-            <div class="c-lab">to deliver from stock that has landed</div>
-          </div>
-          <div>
-            <div class="c-num c-num-soft">${c.confirmed || 0}</div>
-            <div class="c-lab">confirmed received</div>
-          </div>
-        </div>
-        <div class="c-foot">${c.ordered || 0} ordered in total${ready ? ' · ' + ready + ' assembled and waiting to be split' : ''}</div>
-      </a>`;
-  };
-
-  const customers = `
-    <div class="dash-section">
-      <div class="dash-head">
-        <h2>FR and BB</h2>
-        <span class="sub">what is assembled and to be delivered</span>
-      </div>
-      <div class="grid grid-2">${custBox('FR', 'cust-fr')}${custBox('BB', 'cust-bb')}</div>
-    </div>`;
-
-  /* --- Grid 2: where everything sits on the import journey.
-         Opens Consignments filtered to that stage. Note the tile counts
-         models while Consignments lists packaging lines, so the number of
-         rows there will be higher. --- */
-  const stageStrip = STAGES.map(s => {
-    const n = byStage[s] || 0;
-    const cls = s === 'Received' && n ? 'stage stage-done' : (n ? 'stage' : 'stage stage-empty');
-    if (!n) return `<div class="${cls}"><div class="s-count">0</div><div class="s-name">${esc(s)}</div></div>`;
-    return `<a class="${cls}" href="#/consignments?q=${encodeURIComponent(s)}"><div class="s-count">${n}</div><div class="s-name">${esc(s)}</div></a>`;
-  }).join('');
-
-  /* --- Grid 3: what is still coming. Late ones first, and each opens
-         Receiving on that consignment. --- */
-  const arriving = groups.filter(g => !g.allArrived)
-    .sort((a, b) => {
-      if (!!b.overdueParts !== !!a.overdueParts) return b.overdueParts - a.overdueParts;
-      if (a.overdueParts && b.overdueParts) return b.worstDaysLate - a.worstDaysLate;
-      return String(a.nextEta || '9999').localeCompare(String(b.nextEta || '9999'));
-    });
-
-  const arriveTiles = arriving.length ? arriving.map(g => {
-    const late = g.overdueParts > 0;
-    const rel = relDays(g.nextEta);
-    const waiting = g.parts.filter(p => !p.fullyIn);
-    // The model leads, not the consignment code — ACE-49-50 carries two
-    // different products and the repeated code read as a duplicate tile.
-    return `
-      <a class="arrive-tile${late ? ' arrive-late' : ''}" href="#/receiving?q=${encodeURIComponent(g.consignmentGroup)}">
-        <div class="a-top">
-          <span class="a-model">${modelLabel(g)}</span>
-          ${late ? `<span class="chip chip-bad">${g.worstDaysLate} days late</span>` : importChip(g.importStage)}
-        </div>
-        <div class="a-meta"><code>${esc(g.consignmentGroup)}</code> · ${esc(g.supplier)} · ${g.totalQty || '—'} expected</div>
-        <div class="a-parts">
-          ${g.parts.map(p => {
-            const cls = p.fullyIn ? 'chip-ok' : (p.overdue ? 'chip-bad' : (p.arrived || p.needsCount ? 'chip-warn' : 'chip-idle'));
-            const tag = p.fullyIn ? ' in'
-              : (p.arrived ? ' ' + p.qtyReceived + '/' + p.qtyExpected
-              : (p.needsCount ? ' count' : (p.overdue ? ' late' : '')));
-            return `<span class="chip ${cls}">${esc(p.partLetter)}${tag}</span>`;
-          }).join('')}
-        </div>
-        <div class="a-meta">
-          ${g.nextEta
-            ? (late ? `Due ${esc(fmtDay(g.nextEta))}, still not here`
-                    : `Next part due ${esc(fmtDay(g.nextEta))}${rel ? ` · ${esc(rel.text)}` : ''}`)
-            : `${waiting.length} part${waiting.length === 1 ? '' : 's'} with no ETA`}
-        </div>
-      </a>`;
-  }).join('') : `<div class="empty">Every model has fully arrived.</div>`;
-
-  /* --- Charts.
-
-         The old "ordered, built, delivered" panel drew three bars per model,
-         and since almost nothing is built yet, twenty-one bars were empty
-         track with captions repeating the legend directly above them. One
-         track per model now: the full order is the track, built fills it,
-         confirmed sits inside that, and the numbers are read off the right. --- */
-  const demandMax = Math.max(1, ...groups.map(g => Math.max(g.frQty || 0, g.bbQty || 0)));
-  const frbbChart = groups.map(g => `
-    <div class="bar-row">
-      <div class="bar-label"><span>${modelLabel(g)}</span><span>${esc(g.consignmentGroup)}</span></div>
-      <div class="bar-fr">${barTrack(g.frQty || 0, demandMax, 'var(--fr)')}</div>
-      <div class="bar-bb">${barTrack(g.bbQty || 0, demandMax, 'var(--bb)')}</div>
-    </div>`).join('');
-
-  /* Parts landed comes first in the track because on this data it is the only
-     layer with anything in it — showing built and confirmed alone drew seven
-     empty rows that each said "0 built of 250". Landed is measured across all
-     of a model's parts, so a model with one part of two fully in reads 50%,
-     which is the true picture of how far the consignment has got. */
-  const progressChart = groups.map(g => {
-    const target = g.totalQty || ((g.frQty || 0) + (g.bbQty || 0));
-    const expected = g.parts.reduce((s, p) => s + (p.qtyExpected || 0), 0);
-    const landed = g.parts.reduce((s, p) => s + (p.qtyReceived || 0), 0);
-    const landedPct = expected > 0 ? Math.min(100, (landed / expected) * 100) : 0;
-    const built = g.totalBuilt || 0;
-    const conf = g.totalConfirmed || 0;
-    const pct = n => target > 0 ? Math.min(100, (n / target) * 100) : 0;
-    return `
-      <div class="bar-row">
-        <div class="bar-label">
-          <span>${modelLabel(g)}</span>
-          <span>${Math.round(landedPct)}% of parts in${built ? ' · ' + built + ' built' : ''}${conf ? ' · ' + conf + ' confirmed' : ''}</span>
-        </div>
-        <div class="prog-track" role="img"
-             aria-label="${esc(plainModel(g))}: ${Math.round(landedPct)} percent of parts landed, ${built} built and ${conf} confirmed out of ${target} ordered">
-          <div class="prog-landed" style="width:${landedPct}%;"></div>
-          <div class="prog-built" style="width:${pct(built)}%;"></div>
-          <div class="prog-conf" style="width:${pct(conf)}%;"></div>
-        </div>
-      </div>`;
-  }).join('');
-
-  /* --- Recent activity, this person only --- */
-  const allMine = (APP.events || []).filter(e => String(e.User || '').toLowerCase() === String(user.email).toLowerCase());
-  const mine = allMine.slice(0, 5);
-  const activity = mine.length ? mine.map(e => `
-    <div class="act-item">
-      <div class="act-when">${esc(e.Timestamp || '—')}</div>
-      <div class="act-what">
-        <b>${esc(e.EventType)}</b>${e.Qty !== '' && e.Qty != null ? ' · ' + esc(e.Qty) : ''}
-        <div class="act-where">${esc(e.ConsignmentGroup || 'whole file')}${e.PartLetter ? ' · part ' + esc(e.PartLetter) : ''}</div>
-      </div>
-    </div>`).join('') : `<div class="empty">You haven't recorded anything yet.</div>`;
-
   return `
     ${syncBar}
-    ${masterSearch}
+    ${master}
 
     <div class="dash-section">
-      ${tiles}
-    </div>
-
-    ${customers}
-
-    <div class="dash-section">
-      <div class="dash-head">
-        <h2>Where every model sits</h2>
-        <span class="sub">counted by consignment and factory model, at its furthest-behind part</span>
-      </div>
-      <div class="stage-strip">${stageStrip}</div>
+      <div class="dash-head"><h2>Where everything is</h2><span class="sub">models at each status in China Master, and on the factory floor</span></div>
+      ${statusTiles()}
     </div>
 
     <div class="dash-section">
-      <div class="dash-head">
-        <h2>Still to arrive</h2>
-        <span class="sub">${arriving.length} model${arriving.length === 1 ? '' : 's'}${
-          stats.overdueParts ? ' · ' + stats.overdueModels + ' with a late part' : ''}</span>
-      </div>
-      <div class="grid grid-3">${arriveTiles}</div>
+      <div class="dash-head"><h2>From the factory to the customer</h2><span class="sub">click any tile to see the models behind it</span></div>
+      ${flowTiles()}
     </div>
 
-    <div class="grid grid-2 dash-section">
-      <div class="card">
-        <h3 class="card-h">Who each model is for</h3>
-        <p class="card-sub">Units owed to each standing customer.</p>
-        <div class="legend">
-          <span><i style="background:var(--fr);"></i>FR</span>
-          <span><i style="background:var(--bb);"></i>BB</span>
-        </div>
-        ${frbbChart}
-      </div>
+    ${customerBoxes()}
+    ${atAGlance()}
 
-      <div class="card">
-        <h3 class="card-h">How far each model has got</h3>
-        <p class="card-sub">Parts landing, then units built, then what the customer has confirmed.</p>
-        <div class="legend">
-          <span><i style="background:var(--accent);"></i>Parts landed</span>
-          <span><i style="background:var(--primary);"></i>Built</span>
-          <span><i style="background:var(--success);"></i>Confirmed</span>
-        </div>
-        ${progressChart}
-      </div>
+    <div class="two-col dash-section">
+      ${waitingOnParts()}
+      ${upcomingParts()}
     </div>
 
-    <div class="card">
-      <h3 class="card-h">Your recent activity</h3>
-      <p class="card-sub">Your last ${mine.length} entr${mine.length === 1 ? 'y' : 'ies'}, newest first.</p>
-      ${activity}
-      ${allMine.length > mine.length
-        ? `<a class="btn btn-sm" style="margin-top:14px;" href="#/activity">Show all ${allMine.length}</a>`
-        : ''}
+    <div class="two-col dash-section">
+      ${productionChart()}
+      ${deliveryChart()}
+    </div>
+
+    ${stillToArrive()}
+
+    <div class="two-col">
+      ${attentionCard()}
+      ${activityCard()}
     </div>`;
 }
 
-/* Everything this person has recorded. Reached from the dashboard's
-   "Show all", and filterable like any other list page. */
-function renderActivity() {
-  const mine = (APP.events || []).filter(e =>
-    String(e.User || '').toLowerCase() === String(user.email).toLowerCase());
+/* ---------- Master search ---------- */
 
-  if (!mine.length) {
-    return `<div class="empty">You haven't recorded anything yet.
-      <div style="margin-top:12px;"><a class="btn btn-sm" href="#/dashboard">Back to the dashboard</a></div></div>`;
-  }
-
-  return `
-    <div class="card">
-      <h3 class="card-h">Everything you have recorded</h3>
-      <p class="card-sub">${mine.length} entr${mine.length === 1 ? 'y' : 'ies'}, newest first.
-        Reports shows the whole team's history.</p>
-      <div style="overflow-x:auto;">
-      <table>
-        <thead><tr><th>When</th><th>Consignment · model</th><th>Part</th><th>Event</th><th style="text-align:right;">Qty</th></tr></thead>
-        <tbody>
-          ${mine.map(e => `<tr>
-            <td style="white-space:nowrap;">${esc(e.Timestamp || '—')}</td>
-            <td>${esc(e.ConsignmentGroup || 'whole file')}</td>
-            <td>${esc(e.PartLetter || '—')}</td>
-            <td><b>${esc(e.EventType)}</b></td>
-            <td style="text-align:right;">${e.Qty === '' || e.Qty == null ? '—' : esc(e.Qty)}</td>
-          </tr>`).join('')}
-        </tbody>
-      </table>
-      </div>
-    </div>`;
+function msHit(href, title, meta) {
+  return `<a class="ms-hit" href="${href}"><span>${title}</span><span class="h-meta">${meta}</span></a>`;
+}
+function msGroup(name, hits, total) {
+  if (!hits.length) return '';
+  return `<div class="ms-group"><h4>${esc(name)} · ${total}</h4>${hits.join('')}
+    ${total > hits.length ? `<div class="ms-more">${total - hits.length} more — open the page to see them all.</div>` : ''}</div>`;
 }
 
-/* =========================
-   CONSIGNMENTS
-   ========================= */
+function runMasterSearch(q) {
+  const el = document.getElementById('ms-results');
+  if (!el) return;
+  if (!q) { el.innerHTML = ''; return; }
+  const has = (...vals) => vals.some(v => String(v == null ? '' : v).toLowerCase().indexOf(q) !== -1);
+  const LIMIT = 5;
 
-function renderConsignments() {
-  const rows = APP.rows || [];
-  if (!rows.length) {
-    return `<div class="empty">No consignments yet. Sync China Master from the
-      <a href="#/dashboard">Dashboard</a>.</div>`;
-  }
+  const models = groupsAll().filter(g => has(g.consignmentGroup, g.factoryModel, g.signatureModel, (g.signatureModels || []).join(' '),
+    g.modelName, g.supplier, g.product, (g.containers || []).join(' '), (g.uniqueIds || []).join(' '), g.pipeline, g.importStage, g.priority));
+  const lines = [];
+  groupsAll().forEach(g => allLinesOf(g).forEach(l => {
+    if (has(l.packaging, l.uniqueId, l.status, l.container)) lines.push({ g, l });
+  }));
+  const dels = (APP.deliveries || []).filter(d => has(d.GroupKey, d.CustomerCode, d.Status, d.DeliveryID));
+  const evs = (APP.events || []).filter(e => has(e.ConsignmentGroup, e.EventType, e.User, e.PartLetter));
 
-  const arriving = rows.filter(r => !r.arrived);
-  const overdue = rows.filter(r => r.overdue);
-  const soon = arriving.filter(r => { const rel = relDays(r.eta); return rel && rel.days >= 0 && rel.days <= 14; });
-  const shortLoads = rows.filter(r => r.shortLoad);
+  const total = models.length + lines.length + dels.length + evs.length;
+  if (!total) { el.innerHTML = `<div class="empty" style="padding:22px;">Nothing matches “${esc(q)}”.</div>`; return; }
 
-  const sortBy = window.__consignSort || 'urgency';
-  const dir = (a, b) => String(a).localeCompare(String(b));
-  const sorted = rows.slice().sort((a, b) => {
-    if (sortBy === 'eta')         return dir(a.eta || '9999', b.eta || '9999');
-    if (sortBy === 'consignment') return dir(a.consignmentGroup, b.consignmentGroup);
-    if (sortBy === 'model')       return dir(a.signatureModel, b.signatureModel);
-    if (sortBy === 'status')      return dir(a.importStatus, b.importStatus);
-    return 0; // 'urgency' — the server already sorted it that way
-  });
-
-  const body = sorted.map(r => `
-      <tr${r.overdue ? ' style="background:#FFF6F5;"' : (r.shortLoad ? ' style="background:#FFFBF5;"' : '')}>
-        <td><code>${esc(r.packaging)}</code></td>
-        <td>${esc(r.supplier)}</td>
-        <td>${esc(r.product)}</td>
-        <td><b>${esc(r.signatureModel)}</b><div style="color:var(--text-soft);font-size:11.5px;">${esc(r.factoryModel || '—')}</div></td>
-        <td style="text-align:right;">${r.frQty || '—'}</td>
-        <td style="text-align:right;">${r.bbQty || '—'}</td>
-        <td style="text-align:right;"><b>${r.totalQty || '—'}</b></td>
-        <td>${r.shortLoad ? '<span class="chip chip-warn">Short load</span>' : importChip(r.importStatus)}</td>
-        <td>${esc(fmtDay(r.etd))}</td>
-        <td>${esc(fmtDay(r.eta))}${etaChip(r)}</td>
-        <td>${esc(r.mgr || '—')}</td>
-      </tr>`).join('');
-
-  return `
-    <div class="grid grid-4" style="margin-bottom:18px;">
-      <div class="stat"><div class="stat-label">Lines in total</div><div class="stat-value">${rows.length}</div></div>
-      <div class="stat"><div class="stat-label">Lines still to arrive</div><div class="stat-value">${arriving.length}</div></div>
-      <div class="stat"><div class="stat-label">Overdue</div>
-        <div class="stat-value" style="color:${overdue.length ? 'var(--danger)' : 'var(--dark)'};">${overdue.length}</div></div>
-      <div class="stat"><div class="stat-label">Due within 14 days</div><div class="stat-value">${soon.length}</div></div>
-      <div class="stat"><div class="stat-label">Short loads</div><div class="stat-value">${shortLoads.length}</div></div>
-    </div>
-
-    <div style="display:flex;gap:10px;align-items:end;margin-bottom:14px;">
-      <div style="flex:0 0 220px;">
-        <label>Sort by</label>
-        <select id="cn-sort">
-          <option value="urgency">Urgency</option>
-          <option value="eta">ETA</option>
-          <option value="consignment">Consignment</option>
-          <option value="model">Model</option>
-          <option value="status">Status</option>
-        </select>
-      </div>
-      <div style="font-size:12px;color:var(--text-soft);padding-bottom:11px;">
-        These are packaging lines. The dashboard counts models, so its number is smaller.
-      </div>
-    </div>
-
-    <div class="card">
-      <div style="overflow-x:auto;">
-        <table>
-          <thead><tr>
-            <th>Packaging</th><th>Supplier</th><th>Product</th><th>Model</th>
-            <th style="text-align:right;">FR</th><th style="text-align:right;">BB</th><th style="text-align:right;">Total</th>
-            <th>Status</th><th>ETD</th><th>ETA</th><th>MGR</th>
-          </tr></thead>
-          <tbody>${body}</tbody>
-        </table>
-      </div>
-    </div>`;
+  el.innerHTML =
+    msGroup('Models', models.slice(0, LIMIT).map(g => msHit('#/consignments?q=' + encodeURIComponent(g.consignmentGroup),
+      prioTag(g) + modelLabel(g) + ' <span class="h-meta">' + esc(g.consignmentGroup) + '</span>',
+      esc(g.supplier) + ' · ' + esc(g.pipeline) + ' · ' + g.buildableUnits + ' can build')), models.length) +
+    msGroup('Lines', lines.slice(0, LIMIT).map(({ g, l }) => msHit('#/consignments?q=' + encodeURIComponent(l.packaging),
+      '<code>' + esc(l.packaging) + '</code> ' + esc(plainModel(g)),
+      esc(l.status) + (l.uniqueId ? ' · ' + esc(l.uniqueId) : '') + ' · ETA ' + esc(fmtDay(l.eta)))), lines.length) +
+    msGroup('Deliveries', dels.slice(0, LIMIT).map(d => msHit(d.Status === 'pending' ? '#/acceptance' : '#/reports',
+      esc(String(d.GroupKey).replace('::', ' · ')) + ' → ' + esc(d.CustomerCode),
+      d.QtyOut + ' sent · ' + esc(d.Status) + ' · ' + esc(d.Timestamp || ''))), dels.length) +
+    msGroup('Activity', evs.slice(0, LIMIT).map(e => msHit('#/reports',
+      esc(e.EventType) + (e.Qty !== '' && e.Qty != null ? ' · ' + esc(e.Qty) : ''),
+      esc(e.ConsignmentGroup || 'whole file') + ' · ' + esc(e.Timestamp || ''))), evs.length);
 }
 
-/* =========================
-   RECEIVING
-   FIX 8 — anything the sheet marks Received skips this page entirely and
-   shows up in Assembly, ready to build. Receiving carries only what has not
-   arrived yet, and short loads that need a real count.
-   ========================= */
-
-function renderReceiving() {
-  // A part stays here until the whole count is in. Receiving 10 of 250 used
-  // to make the part "arrived" and drop it off this screen with 240 still
-  // owed — fullyIn is the test now.
-  const groups = (APP.consignments || []).filter(g => g.parts.some(p => !p.fullyIn || p.needsCount));
-  if (!groups.length) return `<div class="empty">Everything has arrived. Head to Assembly to build.</div>`;
-
-  const blocks = byConsignment(groups).map(block => {
-    const models = block.models.map(g => {
-      const parts = g.parts.filter(p => !p.fullyIn || p.needsCount);
-      const partRows = parts.map(p => {
-        const outstanding = Math.max(0, p.qtyExpected - p.qtyReceived);
-        // ModelParts calls part A "Part A", so printing both the letter and
-        // the name put "Part A" twice on every single row. Only show the name
-        // when somebody has actually given the part a real one.
-        const named = p.partName && p.partName !== 'Part ' + p.partLetter;
-        return `
-          <tr${p.overdue ? ' style="background:#FFF6F5;"' : (p.needsCount ? ' style="background:#FFFBF5;"' : '')}>
-            <td><b>Part ${esc(p.partLetter)}</b>${named ? `<div style="color:var(--text-soft);font-size:11.5px;">${esc(p.partName)}</div>` : ''}</td>
-            <td>${importChip(p.importStatus)}${p.needsCount ? ' <span class="chip chip-warn">Short load</span>' : ''}</td>
-            <td>${esc(fmtDay(p.etd))}</td>
-            <td>${esc(fmtDay(p.eta))}${etaChip(p)}</td>
-            <td style="text-align:right;">${p.qtyExpected || '—'}</td>
-            <td style="text-align:right;"><b>${p.qtyReceived}</b></td>
-            <td style="text-align:right;${outstanding > 0 ? 'color:var(--warning);font-weight:600;' : ''}">${outstanding || '—'}</td>
-            <td style="white-space:nowrap;">
-              <input type="number" min="1" max="${p.qtyExpected || ''}" class="rcv-qty" placeholder="count" style="width:80px;display:inline-block;">
-              <button class="btn btn-sm rcv-btn" data-rowid="${esc(p.rowId || '')}" ${p.rowId ? '' : 'disabled'}>Receive</button>
-            </td>
-          </tr>`;
-      }).join('');
-
-      return `
-        <div class="model-block">
-          <div class="model-head">
-            <div class="model-title">${modelLabel(g)}</div>
-            <div class="model-meta">${esc(g.supplier)} · ${esc(g.product || '—')} · FR ${g.frQty || 0} · BB ${g.bbQty || 0} · total ${g.totalQty || '—'}</div>
-          </div>
-          <div style="overflow-x:auto;">
-            <table>
-              <thead><tr>
-                <th>Part</th><th>Status</th><th>ETD</th><th>ETA</th>
-                <th style="text-align:right;">Expected</th><th style="text-align:right;">Received</th>
-                <th style="text-align:right;">Outstanding</th><th style="width:190px;"></th>
-              </tr></thead>
-              <tbody>${partRows}</tbody>
-            </table>
-          </div>
-          <div class="rcv-status note hidden" style="margin-top:12px;"></div>
-        </div>`;
-    }).join('');
-
-    return `
-      <div class="consign-block">
-        <div class="consign-head">
-          <h2>${esc(block.consignment)}</h2>
-          <span class="meta">${block.models.length} model${block.models.length === 1 ? '' : 's'}</span>
-        </div>
-        ${models}
-      </div>`;
-  }).join('');
-
-  return `
-    <div class="note" style="margin-bottom:18px;">
-      The count you type <b>replaces</b> what is on the line — it is how many are physically on the floor,
-      not how many more turned up. Type the full count each time.
-    </div>
-    ${blocks}`;
-}
-
-/* =========================
-   ASSEMBLY
-   ========================= */
-
-function renderAssembly() {
-  const active = (APP.consignments || []).filter(g => g.parts.some(p => p.qtyReceived > 0));
-  if (!active.length) return `<div class="empty">Nothing has arrived yet. Parts show up here once they land.</div>`;
-
-  const totalBuildable = active.reduce((s, g) => s + g.buildableUnits, 0);
-  const blocked = active.filter(g => g.buildableUnits <= 0).length;
-
-  const partBar = p => {
-    const per = p.qtyPerUnit || 1;
-    const units = Math.floor(p.qtyReceived / per);
-    // With one part per unit the count and the unit count are the same number,
-    // so saying "537" and then "537 units" underneath told nobody anything.
-    // The second line earns its place only when a unit takes more than one.
-    return `
-      <div style="border:1px solid var(--border);border-radius:10px;padding:12px;">
-        <div style="font-size:11.5px;color:var(--text-soft);font-weight:700;">Part ${esc(p.partLetter)}</div>
-        <div style="font-size:22px;font-weight:800;color:var(--dark);margin-top:4px;line-height:1;">${p.qtyReceived}</div>
-        <div style="font-size:11.5px;color:var(--text-soft);margin-top:5px;">
-          ${per > 1 ? `${per} per unit · makes ${units}` : 'on the floor'}
-        </div>
-      </div>`;
-  };
-
-  const blocks = byConsignment(active).map(block => {
-    const models = block.models.map(g => {
-      const canBuild = g.buildableUnits > 0;
-      // FIX 3 — buildable is the minimum across parts, never the sum.
-      return `
-        <div class="model-block">
-          <div class="model-head">
-            <div>
-              <div class="model-title">${modelLabel(g)}</div>
-              <div class="model-meta">${esc(g.supplier)} · ${esc(g.product || '—')} · ${g.totalBuilt} built</div>
-            </div>
-            <div style="text-align:right;">
-              <div style="font-size:11.5px;color:var(--text-soft);font-weight:700;">Can build</div>
-              <div style="font-size:28px;font-weight:800;line-height:1;color:${canBuild ? 'var(--success)' : 'var(--text-soft)'};">${g.buildableUnits}</div>
-            </div>
-          </div>
-
-          <div class="grid grid-4" style="margin:14px 0;">${g.parts.map(partBar).join('')}</div>
-
-          ${canBuild ? `
-            <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
-              <div style="flex:0 0 150px;">
-                <label>Units to build</label>
-                <input type="number" class="asm-qty" min="1" max="${g.buildableUnits}" value="${g.buildableUnits}">
-              </div>
-              <button class="btn btn-primary asm-btn" data-groupkey="${esc(g.groupKey)}" data-max="${g.buildableUnits}">Build units</button>
-            </div>
-          ` : (g.blockingPart
-              ? `<div class="note">Part ${esc(g.blockingPart.partLetter)} is ${g.blockingPart.shortfallUnits} unit${g.blockingPart.shortfallUnits === 1 ? '' : 's'} behind.</div>`
-              : '')}
-          <div class="asm-status note hidden" style="margin-top:12px;"></div>
-        </div>`;
-    }).join('');
-
-    return `
-      <div class="consign-block">
-        <div class="consign-head">
-          <h2>${esc(block.consignment)}</h2>
-          <span class="meta">${block.models.length} model${block.models.length === 1 ? '' : 's'}</span>
-        </div>
-        ${models}
-      </div>`;
-  }).join('');
-
-  return `
-    <div class="grid grid-4" style="margin-bottom:18px;">
-      <div class="stat"><div class="stat-label">Ready to build</div><div class="stat-value">${totalBuildable}</div></div>
-      <div class="stat"><div class="stat-label">Waiting on parts</div><div class="stat-value">${blocked}</div></div>
-      <div class="stat"><div class="stat-label">Built to date</div><div class="stat-value">${active.reduce((s, g) => s + g.totalBuilt, 0)}</div></div>
-    </div>
-    ${blocks}`;
-}
-
-/* =========================
-   DELIVERY
-   FIX 9 — FR and BB per model. "We owe FR 200 of AC12", not one combined total.
-   ========================= */
-
-function renderDelivery() {
-  const groups = APP.consignments || [];
-  const deliveries = APP.deliveries || [];
-
-  const rows = groups.map(g => {
-    const fr = (g.deliveredTo && g.deliveredTo.FR) || { out: 0, confirmed: 0 };
-    const bb = (g.deliveredTo && g.deliveredTo.BB) || { out: 0, confirmed: 0 };
-    return `
-      <tr>
-        <td><code>${esc(g.consignmentGroup)}</code></td>
-        <td>${modelLabel(g)}</td>
-        <td style="text-align:right;">${g.frQty || 0}</td>
-        <td style="text-align:right;">${fr.out}</td>
-        <td style="text-align:right;${Math.max(0, (g.frQty || 0) - fr.confirmed) ? 'color:var(--warning);font-weight:600;' : ''}">${Math.max(0, (g.frQty || 0) - fr.confirmed)}</td>
-        <td style="text-align:right;">${g.bbQty || 0}</td>
-        <td style="text-align:right;">${bb.out}</td>
-        <td style="text-align:right;${Math.max(0, (g.bbQty || 0) - bb.confirmed) ? 'color:var(--warning);font-weight:600;' : ''}">${Math.max(0, (g.bbQty || 0) - bb.confirmed)}</td>
-      </tr>`;
-  }).join('');
-
-  const ready = groups.filter(g => g.totalBuilt - g.totalOut > 0);
-  const readyBlocks = ready.length ? byConsignment(ready).map(block => `
-    <div class="consign-block">
-      <div class="consign-head"><h2>${esc(block.consignment)}</h2></div>
-      ${block.models.map(g => {
-        const available = g.totalBuilt - g.totalOut;
-        const frGot = (g.deliveredTo && g.deliveredTo.FR) || { confirmed: 0 };
-        const bbGot = (g.deliveredTo && g.deliveredTo.BB) || { confirmed: 0 };
-        const frLeft = Math.max(0, (g.frQty || 0) - (frGot.confirmed || 0));
-        const bbLeft = Math.max(0, (g.bbQty || 0) - (bbGot.confirmed || 0));
-        return `
-        <div class="model-block">
-          <div class="model-head">
-            <div>
-              <div class="model-title">${modelLabel(g)}</div>
-              <div class="model-meta">${available} built · FR ${g.frQty || 0} · BB ${g.bbQty || 0}</div>
-            </div>
-          </div>
-          <div class="dlv-form">
-            <div class="dlv-cust-field">
-              <label>To FR</label>
-              <input type="number" class="dlv-fr" min="0" max="${available}" placeholder="0"
-                     aria-label="Units out to FR">
-              <div class="dlv-hint">${frLeft ? frLeft + ' still owed' : 'nothing owed'}</div>
-            </div>
-            <div class="dlv-cust-field">
-              <label>To BB</label>
-              <input type="number" class="dlv-bb" min="0" max="${available}" placeholder="0"
-                     aria-label="Units out to BB">
-              <div class="dlv-hint">${bbLeft ? bbLeft + ' still owed' : 'nothing owed'}</div>
-            </div>
-            <div class="dlv-actions">
-              <button class="btn btn-primary dlv-btn" data-groupkey="${esc(g.groupKey)}" data-max="${available}">Mark out</button>
-              <div class="dlv-hint dlv-left" data-available="${available}">${available} on the floor</div>
-            </div>
-          </div>
-          <div class="dlv-status note hidden" style="margin-top:12px;"></div>
-        </div>`;
-      }).join('')}
-    </div>`).join('') : `<div class="empty">No built units waiting to go out.</div>`;
-
-  const pending = deliveries.filter(d => d.Status === 'pending');
-  const groupName = key => {
-    const g = groups.find(x => x.groupKey === key);
-    return g ? (g.consignmentGroup + ' · ' + plainModel(g)) : String(key).replace('::', ' · ');
-  };
-
-  const pendingTable = pending.length ? `
-    <div class="card">
-      <h3 class="card-h">Awaiting confirmation</h3>
-      <div style="overflow-x:auto;">
-      <table>
-        <thead><tr><th>Consignment · model</th><th>Customer</th><th style="text-align:right;">Sent</th><th>When</th><th style="width:220px;"></th></tr></thead>
-        <tbody>
-          ${pending.map(d => `
-            <tr>
-              <td>${esc(groupName(d.GroupKey))}</td>
-              <td><b>${esc(d.CustomerCode)}</b></td>
-              <td style="text-align:right;">${esc(d.QtyOut)}</td>
-              <td>${esc(fmtDay(d.TimestampDay))}</td>
-              <td style="white-space:nowrap;">
-                <input type="number" class="cfm-qty" min="0" value="${esc(d.QtyOut)}" style="width:88px;display:inline-block;">
-                <button class="btn btn-sm cfm-btn" data-deliveryid="${esc(d.DeliveryID)}">Confirm</button>
-              </td>
-            </tr>`).join('')}
-        </tbody>
-      </table>
-      </div>
-      <div id="cfm-status" class="note hidden" style="margin-top:12px;"></div>
-    </div>` : '';
-
-  return `
-    <div class="card">
-      <h3 class="card-h">Owed per model</h3>
-      <div style="overflow-x:auto;">
-      <table>
-        <thead><tr>
-          <th>Consignment</th><th>Model</th>
-          <th style="text-align:right;">FR owed</th><th style="text-align:right;">FR sent</th><th style="text-align:right;">FR left</th>
-          <th style="text-align:right;">BB owed</th><th style="text-align:right;">BB sent</th><th style="text-align:right;">BB left</th>
-        </tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-      </div>
-    </div>
-    ${readyBlocks}
-    ${pendingTable}`;
-}
-
-/* =========================
-   NEEDS REVIEW
-   ========================= */
-
-function renderNeedsReview() {
-  const rows = APP.needsReview || [];
-  if (!rows.length) return `<div class="empty">Every line parsed cleanly.</div>`;
-  return `
-    <div class="card">
-      <table>
-        <thead><tr><th>Packaging</th><th>Reason</th><th>Corrected</th><th></th></tr></thead>
-        <tbody>
-          ${rows.map(r => `
-            <tr data-rowid="${esc(r.RowID)}">
-              <td><code>${esc(r.SheetRowName)}</code></td>
-              <td style="color:var(--warning);">${esc(r.ReviewReason)}</td>
-              <td><input type="text" class="nr-fix" style="max-width:180px;"></td>
-              <td><button class="btn btn-sm nr-resolve">Resolve</button></td>
-            </tr>`).join('')}
-        </tbody>
-      </table>
-    </div>`;
-}
-
-/* =========================
-   REPORTS
-   ========================= */
-
-function renderReports() {
-  return `
-    <div class="card">
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
-        <input id="rp-search" type="text" placeholder="Search consignment, part or event" style="max-width:320px;">
-        <button class="btn" id="rp-filter">Search</button>
-      </div>
-      <div style="overflow-x:auto;">
-      <table>
-        <thead><tr><th>When</th><th>Consignment · model</th><th>Part</th><th>Event</th><th>Qty</th><th>By</th></tr></thead>
-        <tbody id="rp-body">${reportRows(APP.events || [])}</tbody>
-      </table>
-      </div>
-    </div>`;
-}
-
-function reportRows(events) {
-  if (!events.length) return `<tr><td colspan="6" style="color:var(--text-soft);padding:22px 12px;">No events logged.</td></tr>`;
-  return events.map(e => `<tr><td>${esc(e.Timestamp)}</td><td>${esc(e.ConsignmentGroup)}</td><td>${esc(e.PartLetter)}</td><td>${esc(e.EventType)}</td><td>${esc(e.Qty)}</td><td>${esc(e.User)}</td></tr>`).join('');
-}
-
-/* =========================
-   MODELS & PARTS
-   ========================= */
-
-function renderModels() {
-  const dropboxCard = (user && user.level <= 1) ? `
-    <div class="card" style="border:1px solid var(--primary);">
-      <h3 class="card-h">China Master sync</h3>
-      <p class="card-sub">Last synced ${APP.lastSync ? esc(new Date(APP.lastSync).toLocaleString()) : 'never'}.</p>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;">
-        <button class="btn btn-primary" id="dbx-sync-btn">Sync now</button>
-        <button class="btn btn-sm" id="dbx-check-btn">Check connection</button>
-      </div>
-      <div id="dbx-status" class="note hidden" style="margin-top:12px;"></div>
-    </div>` : '';
-
-  const seedCard = (user && user.level === 0) ? `
-    <div class="card">
-      <h3 class="card-h">Sample data</h3>
-      <button class="btn btn-sm" id="seed-sample-btn">Load sample data</button>
-      <div id="seed-sample-status" class="note hidden" style="margin-top:12px;"></div>
-    </div>` : '';
-
-  const models = APP.models || [];
-  const listHtml = models.length ? `
-    <div class="card">
-      <h3 class="card-h">Existing models</h3>
-      <p class="card-sub">Part names and per-unit counts only. What a unit actually needs comes from China Master.</p>
-      <table><thead><tr><th>Model</th><th>Sheet code</th><th>Parts</th></tr></thead><tbody>
-        ${models.map(m => `<tr><td>${esc(m.modelName)}</td><td><code>${esc(m.sheetCode)}</code></td>
-          <td>${m.parts.map(p => `<span class="chip chip-idle">${esc(p.partLetter)} · ${esc(p.partName)} · ${p.qtyPerUnit}/unit</span>`).join(' ')}</td></tr>`).join('')}
-      </tbody></table>
-    </div>` : '';
-
-  return `
-    ${dropboxCard}
-    ${seedCard}
-    ${listHtml}
-    <div class="card">
-      <h3 class="card-h">New model</h3>
-      <div class="form-row">
-        <div class="field"><label>Model name</label><input id="mdl-name" type="text"></div>
-        <div class="field"><label>Sheet code</label><input id="mdl-sheetcode" type="text"></div>
-        <div class="field"><label>Product line</label><input id="mdl-line" type="text"></div>
-      </div>
-      <table id="mdl-parts-table">
-        <thead><tr><th style="width:90px">Letter</th><th>Part name</th><th style="width:120px">Code prefix</th><th style="width:100px">Per unit</th><th></th></tr></thead>
-        <tbody></tbody>
-      </table>
-      <div style="display:flex;gap:10px;margin-top:16px;">
-        <button class="btn btn-primary" id="mdl-save">Save model</button>
-        <button class="btn btn-sm" id="mdl-addpart">+ Add part</button>
-      </div>
-      <div id="mdl-status" class="note hidden" style="margin-top:12px;"></div>
-    </div>`;
-}
-
-function addModelPartRow(letter, name, prefix, qty) {
-  const tbody = document.querySelector('#mdl-parts-table tbody');
-  const row = document.createElement('tr');
-  row.innerHTML = `
-    <td><input type="text" maxlength="1" value="${esc(letter || '')}"></td>
-    <td><input type="text" value="${esc(name || '')}"></td>
-    <td><input type="text" value="${esc(prefix || '')}"></td>
-    <td><input type="number" value="${qty || 1}" min="1"></td>
-    <td><button class="btn btn-sm" onclick="this.closest('tr').remove()">×</button></td>`;
-  tbody.appendChild(row);
-}
-
-/* =========================
-   RENDERERS MAP
-   ========================= */
+/* ======================================================================
+   RENDERERS AND HANDLERS
+   ====================================================================== */
 
 const RENDERERS = {
   dashboard: renderDashboard,
@@ -1672,304 +1913,150 @@ const RENDERERS = {
   receiving: renderReceiving,
   assembly: renderAssembly,
   delivery: renderDelivery,
+  acceptance: renderAcceptance,
   needsreview: renderNeedsReview,
-  activity: renderActivity,
   reports: renderReports,
-  models: renderModels
+  activity: renderActivity,
+  tile: renderTile
 };
 
-/* =========================
-   SYNC (shared by Dashboard and Models & parts)
-   ========================= */
+// Show a message in the card the button lives in.
+function cardMsg(btn, text, bad) {
+  const card = btn.closest('.model-block');
+  const el = card ? card.querySelector('.card-status') : null;
+  if (!el) { toast(text); return; }
+  el.classList.remove('hidden');
+  el.classList.toggle('note-bad', !!bad);
+  el.innerText = text;
+}
 
-/* Put a sync result back on screen after the page has been redrawn. */
+/* Save, then redraw straight from the data the save sent back. */
+async function save(btn, busyLabel, action, payload, doneMsg) {
+  const label = btn.innerText;
+  btn.disabled = true;
+  btn.innerText = busyLabel;
+  const res = await apiCall(action, payload);
+  if (res.ok) {
+    if (!takeApp(res)) await reload();
+    reRender();
+    if (doneMsg) toast(doneMsg);
+    return res;
+  }
+  if (!res.authFailed) {
+    cardMsg(btn, res.error || 'Could not save.', true);
+    btn.disabled = false;
+    btn.innerText = label;
+  }
+  return res;
+}
+
 function showParkedSyncMessage() {
   if (!window.__syncMsg) return;
-  const el = document.getElementById('dash-sync-status') || document.getElementById('dbx-status');
-  if (!el) { window.__syncMsg = null; return; }
+  const el = document.getElementById('dash-sync-status');
+  if (!el) { toast(window.__syncMsg); window.__syncMsg = null; return; }
   el.classList.remove('hidden');
   el.innerText = window.__syncMsg;
   window.__syncMsg = null;
 }
 
-function wireSyncButtons(syncId, checkId, statusId) {
-  const syncBtn = document.getElementById(syncId);
-  const checkBtn = document.getElementById(checkId);
-  const el = document.getElementById(statusId);
+function wireSyncButtons() {
+  const syncBtn = document.getElementById('dash-sync');
+  const checkBtn = document.getElementById('dash-check');
+  const el = document.getElementById('dash-sync-status');
   if (!el) return;
 
-  if (checkBtn) {
-    checkBtn.onclick = async () => {
-      checkBtn.disabled = true;
-      el.classList.remove('hidden');
-      el.innerText = 'Checking…';
-      const res = await apiCall('testDropbox');
-      if (!res.ok) {
-        // The server's message already says where the file actually is.
-        el.innerText = res.error || "Couldn't reach the file.";
-      } else {
-        const when = res.modified ? new Date(res.modified).toLocaleString() : 'unknown';
-        const last = res.lastSync ? new Date(res.lastSync).toLocaleString() : 'never';
-        const kb = res.size ? ' (' + Math.round(res.size / 1024) + ' KB)' : '';
-        el.innerHTML =
-          'Reading <b>' + esc(res.path) + '</b>' + esc(kb) + '.<br>' +
-          'That file was last changed <b>' + esc(when) + '</b>. You last synced ' + esc(last) + '.' +
-          (res.fileUnchanged
-            ? '<br><b>It has not changed since your last sync</b> — anything new is not in this file yet.'
-            : '');
-      }
-      checkBtn.disabled = false;
-    };
-  }
+  if (checkBtn) checkBtn.onclick = async () => {
+    checkBtn.disabled = true;
+    el.classList.remove('hidden');
+    el.innerText = 'Checking…';
+    const res = await apiCall('testDropbox');
+    if (!res.ok) el.innerText = res.error || "Couldn't reach the file.";
+    else {
+      const when = res.modified ? new Date(res.modified).toLocaleString() : 'unknown';
+      const last = res.lastSync ? new Date(res.lastSync).toLocaleString() : 'never';
+      el.innerText = 'Reading ' + res.path + ' (' + Math.round((res.size || 0) / 1024) + ' KB).\n' +
+        'That file was last changed ' + when + '. You last synced ' + last + '.' +
+        (res.fileUnchanged ? '\nIt has not changed since your last sync — anything new is not in this file yet.' : '');
+    }
+    checkBtn.disabled = false;
+  };
 
-  if (syncBtn) {
-    syncBtn.onclick = async () => {
-      const original = syncBtn.innerText;
-      syncBtn.disabled = true;
-      syncBtn.innerText = 'Syncing…';
-      el.classList.remove('hidden');
-      el.innerText = 'Fetching China Master…';
-
-      const res = await apiCall('syncFromDropbox');
-      if (!res.ok) {
-        el.innerText = 'Sync failed: ' + (res.error || 'unknown error');
-        syncBtn.disabled = false;
-        syncBtn.innerText = original;
-        return;
-      }
-      let msg = res.added + ' new line(s), ' + res.updated + ' updated.';
-      if (res.needsReview > 0) msg += ' ' + res.needsReview + ' need review.';
-      if (res.skipped > 0) msg += ' ' + res.skipped + ' blank row(s) ignored.';
-      if (res.staleCount > 0) msg += ' ' + res.staleCount + ' line(s) are no longer in the file — check them by hand.';
-      // Say it plainly when the numbers came from a file that never changed.
-      if (res.fileUnchanged) {
-        msg += '\n\nThis file has not changed since your last sync, so nothing here is new.' +
-               ' If you were expecting a change, it has not reached ' + (res.path || 'this path') + ' yet.';
-      }
-
-      /* Hold the message across the reload.
-
-         reload() redraws the page, which threw away the status box and the
-         result with it — the outcome of a sync flashed up and vanished
-         before anyone could read it. The message is parked here and put back
-         once the new page is on screen. */
-      window.__syncMsg = msg;
+  if (syncBtn) syncBtn.onclick = async () => {
+    syncBtn.disabled = true;
+    syncBtn.innerText = 'Syncing…';
+    el.classList.remove('hidden');
+    el.innerText = 'Reading China Master…';
+    const res = await apiCall('syncFromDropbox');
+    if (!res.ok) {
+      el.innerText = 'Sync failed: ' + (res.error || 'unknown error');
       syncBtn.disabled = false;
-      syncBtn.innerText = original;
-      await reload();
-      showParkedSyncMessage();
-    };
-  }
+      syncBtn.innerText = 'Sync China Master';
+      return;
+    }
+    window.__syncMsg = res.message;
+    if (!takeApp(res)) await reload();
+    reRender();
+    showParkedSyncMessage();
+  };
 }
 
-/* =========================
-   PAGE HANDLER WIRING
-   ========================= */
-
-/* =========================
-   MASTER SEARCH (Dashboard)
-
-   Looks across every part of the file at once — packaging lines, models,
-   deliveries and the event log — and links straight to the page that holds
-   each hit. Different from the topbar box, which only filters what is
-   already on screen.
-   ========================= */
-
-function msHit(href, title, meta) {
-  return `<a class="ms-hit" href="${href}"><span>${title}</span><span class="h-meta">${meta}</span></a>`;
-}
-
-function msGroup(name, hits, total) {
-  if (!hits.length) return '';
-  return `
-    <div class="ms-group">
-      <h4>${esc(name)} · ${total}</h4>
-      ${hits.join('')}
-      ${total > hits.length ? `<div class="ms-more">${total - hits.length} more — open the page to see them all.</div>` : ''}
-    </div>`;
-}
-
-function runMasterSearch(q) {
-  const el = document.getElementById('ms-results');
-  if (!el) return;
-
-  if (!q) { el.innerHTML = ''; return; }
-
-  const has = (...vals) => vals.some(v => String(v == null ? '' : v).toLowerCase().indexOf(q) !== -1);
-  const LIMIT = 5;
-
-  // Models (consignment + factory model)
-  const models = (APP.consignments || []).filter(g =>
-    has(g.consignmentGroup, g.factoryModel, g.signatureModel, g.modelName, g.supplier, g.product, g.container, g.status, g.importStage));
-  const modelHits = models.slice(0, LIMIT).map(g => msHit(
-    '#/assembly',
-    esc(plainModel(g)) + ' <span style="color:var(--text-soft);">' + esc(g.consignmentGroup) + '</span>',
-    esc(g.supplier) + ' · ' + g.buildableUnits + ' buildable · ' + esc(g.status)));
-
-  // Packaging lines
-  const lines = (APP.rows || []).filter(r =>
-    has(r.packaging, r.supplier, r.product, r.factoryModel, r.signatureModel, r.consignmentGroup, r.importStatus, r.container, r.mgr, r.partLetter));
-  const lineHits = lines.slice(0, LIMIT).map(r => msHit(
-    '#/consignments',
-    '<code>' + esc(r.packaging) + '</code> ' + esc(r.signatureModel || ''),
-    esc(r.importStatus) + (r.shortLoad ? ' · short load' : '') + ' · ETA ' + esc(fmtDay(r.eta))));
-
-  // Deliveries
-  const dels = (APP.deliveries || []).filter(d =>
-    has(d.GroupKey, d.CustomerCode, d.Status, d.DeliveryID));
-  const delHits = dels.slice(0, LIMIT).map(d => msHit(
-    '#/delivery',
-    esc(String(d.GroupKey).replace('::', ' · ')) + ' → ' + esc(d.CustomerCode),
-    d.QtyOut + ' out · ' + esc(d.Status) + ' · ' + esc(d.Timestamp || '')));
-
-  // Event log
-  const evs = (APP.events || []).filter(e =>
-    has(e.ConsignmentGroup, e.EventType, e.User, e.PartLetter, e.Qty));
-  const evHits = evs.slice(0, LIMIT).map(e => msHit(
-    '#/reports',
-    esc(e.EventType) + (e.Qty !== '' && e.Qty != null ? ' · ' + esc(e.Qty) : ''),
-    esc(e.ConsignmentGroup || 'whole file') + ' · ' + esc(e.Timestamp || '')));
-
-  const total = models.length + lines.length + dels.length + evs.length;
-  if (!total) {
-    el.innerHTML = `<div class="empty" style="padding:26px 20px;">Nothing matches “${esc(q)}”.</div>`;
-    return;
-  }
-
-  el.innerHTML =
-    msGroup('Models', modelHits, models.length) +
-    msGroup('Packaging lines', lineHits, lines.length) +
-    msGroup('Deliveries', delHits, dels.length) +
-    msGroup('Activity', evHits, evs.length);
+function onEnter(input, btn) {
+  if (input) input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); btn.click(); } });
 }
 
 function wirePageHandlers(pageId) {
-  if (pageId === 'dashboard') {
-    wireSyncButtons('dash-sync', 'dash-check', 'dash-sync-status');
+  wireSortBar();
 
+  if (pageId === 'dashboard') {
+    wireSyncButtons();
+    wireProductionChart();
+    wireDeliveryChart();
     const ms = document.getElementById('ms-q');
     if (ms) {
       const go = () => runMasterSearch(ms.value.trim().toLowerCase());
       ms.oninput = go;
       ms.onkeydown = e => { if (e.key === 'Escape') { ms.value = ''; go(); } };
     }
+    const t = document.getElementById('att-toggle');
+    if (t) t.onclick = () => { document.getElementById('att-more').classList.remove('hidden'); t.remove(); };
   }
 
   if (pageId === 'consignments') {
-    const s = document.getElementById('cn-sort');
-    if (s) {
-      s.value = window.__consignSort || 'urgency';
-      // reRender puts the active filter back. Re-rendering directly used to
-      // bring all 17 rows back while the search box still said "tony".
-      s.onchange = () => { window.__consignSort = s.value; reRender(); };
-    }
-  }
-
-  if (pageId === 'models') {
-    wireSyncButtons('dbx-sync-btn', 'dbx-check-btn', 'dbx-status');
-
-    const seedBtn = document.getElementById('seed-sample-btn');
-    if (seedBtn) {
-      seedBtn.onclick = async () => {
-        seedBtn.disabled = true;
-        seedBtn.innerText = 'Loading…';
-        const res = await apiCall('seedSampleData');
-        const statusEl = document.getElementById('seed-sample-status');
-        statusEl.classList.remove('hidden');
-        statusEl.innerText = !res.ok ? ('Error: ' + res.error)
-          : (res.alreadySeeded ? res.message : `Loaded ${res.parsedCount} row(s). ${res.needsReviewCount} need review.`);
-        seedBtn.disabled = false;
-        seedBtn.innerText = 'Load sample data';
-        await reload();
-      };
-    }
-
-    addModelPartRow('A', '', '', 1);
-    document.getElementById('mdl-addpart').onclick = () => addModelPartRow();
-    document.getElementById('mdl-save').onclick = async () => {
-      const parts = [...document.querySelectorAll('#mdl-parts-table tbody tr')].map(row => {
-        const inputs = row.querySelectorAll('input');
-        return { partLetter: inputs[0].value, partName: inputs[1].value, partCodePrefix: inputs[2].value, qtyPerUnit: Number(inputs[3].value) || 1 };
-      });
-      const res = await apiCall('saveModel', {
-        modelName: document.getElementById('mdl-name').value,
-        sheetCode: document.getElementById('mdl-sheetcode').value,
-        productLine: document.getElementById('mdl-line').value,
-        parts
-      });
-      const statusEl = document.getElementById('mdl-status');
-      statusEl.classList.remove('hidden');
-      statusEl.innerText = res.ok ? 'Model saved.' : ('Error: ' + res.error);
-      if (res.ok) await reload();
-    };
-  }
-
-  if (pageId === 'needsreview') {
-    document.querySelectorAll('.nr-resolve').forEach(btn => {
-      btn.onclick = async () => {
-        const row = btn.closest('tr');
-        const res = await apiCall('resolveNeedsReview', {
-          rowId: row.dataset.rowid,
-          correctedSheetRowName: row.querySelector('.nr-fix').value
-        });
-        if (res.ok) await reload(); else alert('Error: ' + res.error);
-      };
+    document.querySelectorAll('.prio-btn').forEach(btn => {
+      btn.onclick = () => save(btn, '…', 'setPriority',
+        { groupKey: btn.dataset.groupkey, priority: btn.dataset.prio }, 'Priority set to ' + btn.dataset.prio + '.');
     });
   }
 
   if (pageId === 'receiving') {
     document.querySelectorAll('.rcv-btn').forEach(btn => {
-      btn.onclick = async () => {
-        const tr = btn.closest('tr');
-        const statusEl = btn.closest('.model-block').querySelector('.rcv-status');
-        const input = tr.querySelector('.rcv-qty');
+      const input = btn.closest('tr').querySelector('.rcv-qty');
+      onEnter(input, btn);
+      btn.onclick = () => {
         const qty = Number(input.value);
-
-        statusEl.classList.remove('hidden');
-        if (!qty || qty <= 0) { statusEl.innerText = 'Enter how many are on the floor.'; return; }
-
-        btn.disabled = true;
-        btn.innerText = 'Saving…';
-        const res = await apiCall('recordReceipt', { rowId: btn.dataset.rowid, qty });
-        if (res.ok) {
-          await reload();
-        } else {
-          statusEl.innerText = res.error || 'Could not save.';
-          btn.disabled = false;
-          btn.innerText = 'Receive';
-        }
+        const max = Number(input.max) || 0;
+        if (!qty || qty <= 0) { cardMsg(btn, 'Type how many of ' + btn.dataset.pk + ' are on the floor.', true); input.focus(); return; }
+        if (max && qty > max) { cardMsg(btn, 'That is more than the line total of ' + max + '.', true); return; }
+        save(btn, 'Saving…', 'recordReceipt', { rowId: btn.dataset.rowid, qty },
+          'Factory received ' + qty + ' on ' + btn.dataset.pk + '.');
       };
     });
   }
 
   if (pageId === 'assembly') {
     document.querySelectorAll('.asm-btn').forEach(btn => {
-      btn.onclick = async () => {
-        const block = btn.closest('.model-block');
-        const statusEl = block.querySelector('.asm-status');
-        const qty = Number(block.querySelector('.asm-qty').value);
-        const max = Number(btn.dataset.max);
-
-        statusEl.classList.remove('hidden');
-        if (!qty || qty <= 0) { statusEl.innerText = 'Enter how many units to build.'; return; }
-        if (qty > max) { statusEl.innerText = 'Only ' + max + ' can be built from the parts on hand.'; return; }
-
-        btn.disabled = true;
-        btn.innerText = 'Building…';
-        const res = await apiCall('recordBuild', { groupKey: btn.dataset.groupkey, qty, remarks: '' });
-        if (res.ok) {
-          await reload();
-        } else {
-          statusEl.innerText = res.error || 'Could not save.';
-          btn.disabled = false;
-          btn.innerText = 'Build units';
-        }
+      const input = btn.closest('.model-block').querySelector('.asm-qty');
+      onEnter(input, btn);
+      btn.onclick = () => {
+        const qty = Number(input.value), max = Number(btn.dataset.max);
+        if (!qty || qty <= 0) { cardMsg(btn, 'Enter how many units to build.', true); return; }
+        if (qty > max) { cardMsg(btn, 'Only ' + max + ' can be built from the parts on hand.', true); return; }
+        save(btn, 'Building…', 'recordBuild', { groupKey: btn.dataset.groupkey, qty, remarks: '' }, qty + ' units recorded as built.');
       };
     });
   }
 
   if (pageId === 'delivery') {
-    // Live "left on the floor" as the two boxes are filled in.
     document.querySelectorAll('.dlv-form').forEach(form => {
       const leftEl = form.querySelector('.dlv-left');
       const max = Number(leftEl.dataset.available);
@@ -1977,77 +2064,67 @@ function wirePageHandlers(pageId) {
         const fr = Number(form.querySelector('.dlv-fr').value) || 0;
         const bb = Number(form.querySelector('.dlv-bb').value) || 0;
         const left = max - fr - bb;
-        leftEl.innerText = left < 0
-          ? (fr + bb) + ' is more than the ' + max + ' on the floor'
-          : left + ' of ' + max + ' left on the floor';
+        leftEl.innerText = left < 0 ? (fr + bb) + ' is more than the ' + max + ' on the floor' : left + ' of ' + max + ' left on the floor';
         leftEl.style.color = left < 0 ? 'var(--danger)' : '';
       };
       form.querySelectorAll('input').forEach(i => i.oninput = update);
     });
-
     document.querySelectorAll('.dlv-btn').forEach(btn => {
-      btn.onclick = async () => {
-        const block = btn.closest('.model-block');
-        const statusEl = block.querySelector('.dlv-status');
-        const fr = Number(block.querySelector('.dlv-fr').value) || 0;
-        const bb = Number(block.querySelector('.dlv-bb').value) || 0;
+      btn.onclick = () => {
+        const card = btn.closest('.model-block');
+        const fr = Number(card.querySelector('.dlv-fr').value) || 0;
+        const bb = Number(card.querySelector('.dlv-bb').value) || 0;
         const max = Number(btn.dataset.max);
-
-        statusEl.classList.remove('hidden');
-        if (fr <= 0 && bb <= 0) { statusEl.innerText = 'Enter how many units are going to FR, to BB, or to both.'; return; }
-        if (fr < 0 || bb < 0) { statusEl.innerText = 'A quantity cannot be negative.'; return; }
-        if (fr + bb > max) {
-          statusEl.innerText = 'That adds up to ' + (fr + bb) + ', and only ' + max + ' built unit(s) are on the floor.';
-          return;
-        }
-
-        // Both go in one call, so the server checks the pair against stock
-        // before writing either one.
+        if (fr <= 0 && bb <= 0) { cardMsg(btn, 'Enter how many units are going to FR, to BB, or to both.', true); return; }
+        if (fr < 0 || bb < 0) { cardMsg(btn, 'A quantity cannot be negative.', true); return; }
+        if (fr + bb > max) { cardMsg(btn, 'That adds up to ' + (fr + bb) + ', and only ' + max + ' are on the floor.', true); return; }
         const lines = [];
         if (fr > 0) lines.push({ customerCode: 'FR', qty: fr });
         if (bb > 0) lines.push({ customerCode: 'BB', qty: bb });
-
-        btn.disabled = true;
-        btn.innerText = 'Sending…';
-        const res = await apiCall('markOut', { groupKey: btn.dataset.groupkey, lines });
-        if (res.ok) {
-          await reload();
-        } else {
-          statusEl.innerText = res.error || 'Could not save.';
-          btn.disabled = false;
-          btn.innerText = 'Mark out';
-        }
+        save(btn, 'Sending…', 'markOut', { groupKey: btn.dataset.groupkey, lines },
+          'Sent ' + lines.map(l => l.qty + ' to ' + l.customerCode).join(' and ') + '. It now waits in Acceptance.');
       };
     });
+  }
 
-    document.querySelectorAll('.cfm-btn').forEach(btn => {
-      btn.onclick = async () => {
-        const tr = btn.closest('tr');
-        const statusEl = document.getElementById('cfm-status');
-        const confirmedQty = Number(tr.querySelector('.cfm-qty').value);
-        btn.disabled = true;
-        btn.innerText = 'Saving…';
-        const res = await apiCall('confirmDelivery', { deliveryId: btn.dataset.deliveryid, confirmedQty });
-        if (res.ok) {
-          await reload();
-        } else {
-          if (statusEl) { statusEl.classList.remove('hidden'); statusEl.innerText = res.error || 'Could not save.'; }
-          btn.disabled = false;
-          btn.innerText = 'Confirm';
-        }
+  if (pageId === 'acceptance') {
+    document.querySelectorAll('.acc-btn').forEach(btn => {
+      const input = btn.closest('tr').querySelector('.acc-qty');
+      onEnter(input, btn);
+      btn.onclick = () => {
+        const q = Number(input.value), sent = Number(btn.dataset.sent);
+        if (isNaN(q) || q < 0) { cardMsg(btn, 'Enter how many the customer accepted.', true); return; }
+        if (q > sent) { cardMsg(btn, 'The customer cannot accept more than the ' + sent + ' that were sent.', true); return; }
+        save(btn, 'Saving…', 'confirmDelivery', { deliveryId: btn.dataset.deliveryid, confirmedQty: q },
+          q < sent ? 'Accepted ' + q + ' of ' + sent + ' — recorded as a discrepancy.' : 'Accepted ' + q + '. Marked delivered.');
+      };
+    });
+  }
+
+  if (pageId === 'needsreview') {
+    document.querySelectorAll('.nr-resolve').forEach(btn => {
+      btn.onclick = () => {
+        const wrap = btn.closest('.row-form');
+        save(btn, 'Saving…', 'resolveNeedsReview',
+          { rowId: wrap.dataset.rowid, correctedSheetRowName: wrap.querySelector('.nr-fix').value }, 'Fixed.');
       };
     });
   }
 
   if (pageId === 'reports') {
-    document.getElementById('rp-filter').onclick = async () => {
-      const search = document.getElementById('rp-search').value;
-      const res = await apiCall('getReports', { search });
-      document.getElementById('rp-body').innerHTML = res.ok ? reportRows(res.events) : `<tr><td colspan="6">Error: ${esc(res.error)}</td></tr>`;
+    const b = document.getElementById('rp-filter');
+    const i = document.getElementById('rp-search');
+    onEnter(i, b);
+    b.onclick = async () => {
+      const res = await apiCall('getReports', { search: i.value });
+      document.getElementById('rp-body').innerHTML = res.ok ? reportRows(res.events) : `<tr><td colspan="6">${esc(res.error)}</td></tr>`;
     };
   }
 }
-
 </script>
+<!-- Google's sign-in library loads after the page's own script, so the
+     functions it calls back into always exist when it arrives. -->
+<script src="https://accounts.google.com/gsi/client" async defer onload="initGoogleSignIn()"
+onerror="handleGsiLoadError()"></script>
 </body>
 </html>
