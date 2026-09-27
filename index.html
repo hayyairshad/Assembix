@@ -399,6 +399,7 @@ th.asc .th-btn,th.desc .th-btn{color:var(--dark);}
 .data-table td{padding:10px 9px;font-size:12.5px;vertical-align:middle;}
 .data-table td.model-cell{min-width:118px;max-width:150px;}
 .data-table td.nw{white-space:nowrap;}
+.nw{white-space:nowrap;}
 .data-table code{white-space:nowrap;font-size:11.5px;}
 .data-table .eta-chip{margin-top:4px;}
 .data-table .eta-chip .chip{margin:0;}
@@ -487,6 +488,113 @@ background:color-mix(in srgb,var(--c) 14%,#fff);color:var(--cf);}
 .done-section summary{cursor:pointer;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
 .done-section .ds-title{font-family:"Plus Jakarta Sans",sans-serif;font-weight:700;font-size:14px;color:var(--dark);}
 .done-section .ds-sub{font-size:12px;color:var(--text-soft);}
+
+/* ===== F-Recd, short, delivered ===== */
+.frecd{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:#075A41;background:#E6F6EF;border:1px solid #BFE8D6;
+border-radius:7px;padding:2px 8px;white-space:nowrap;}
+.frecd b{font-weight:800;letter-spacing:.01em;}
+.frecd-by{color:#3F7A65;font-weight:500;}
+.model-frecd{margin-top:6px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.dlv-chip{background:#DCF5F2;color:#0B666C;border-color:#A7E3DB;font-weight:700;}
+.model-right .dlv-chip{margin:0 0 6px;}
+.trail-link{color:var(--primary-dark);font-weight:700;text-decoration:none;border-bottom:1px dotted currentColor;}
+.trail-link:hover{color:var(--dark);}
+.role-note{font-size:12.5px;color:var(--text-soft);background:#FBF6F2;border:1px dashed var(--border);border-radius:9px;padding:9px 12px;}
+.part-tile.pt-short{border-color:#FCD9A0;background:#FFFAF0;}
+.part-tile.pt-short .pt-bar i{background:#F59E0B;}
+.gtile .g-when{font-size:11.5px;color:var(--text-soft);min-height:18px;}
+
+/* ===== Charts row: two stacked cards on the left set the height, the
+   FR / BB chart on the right fills it and scrolls inside itself. ===== */
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.chart-stack{display:flex;flex-direction:column;gap:18px;}
+.chart-stack .card + .card{margin-top:0;}
+.chart-fill{position:relative;min-height:360px;}
+.chart-fill > .card{position:absolute;inset:0;display:flex;flex-direction:column;}
+.chart-fill #dlv-chart{flex:1;min-height:0;overflow-y:auto;padding-right:4px;}
+@media (max-width:980px){
+  .chart-row{grid-template-columns:1fr;}
+  .chart-fill{min-height:0;}
+  .chart-fill > .card{position:static;}
+  .chart-fill #dlv-chart{max-height:460px;}
+}
+.os-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.os-stat{display:block;text-decoration:none;color:inherit;background:#FFF9F4;border:1px solid var(--border-soft);border-radius:11px;padding:12px;}
+.os-stat:hover{border-color:var(--accent);}
+.os-stat b{display:block;font-size:24px;line-height:1.05;font-family:"Plus Jakarta Sans",sans-serif;}
+.os-stat span{font-size:11.5px;color:var(--text-soft);font-weight:600;}
+.os-split{margin-top:14px;}
+.os-bar{height:9px;border-radius:99px;background:#F4E7DC;display:flex;overflow:hidden;}
+.os-bar i{display:block;height:100%;}
+.os-leg{display:flex;gap:16px;font-size:11.5px;color:var(--text-soft);margin-top:7px;font-weight:600;}
+.os-leg i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:6px;vertical-align:-1px;}
+.os-now{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;padding-top:12px;border-top:1px solid var(--border-soft);}
+.os-now a{font-size:12.5px;color:var(--text-soft);text-decoration:none;}
+.os-now a b{color:var(--text);font-size:14px;margin-right:3px;}
+.os-now a:hover{color:var(--primary-dark);}
+
+/* ===== Trail ===== */
+.trail-pick{margin-bottom:18px;}
+.trail-pick .tp-search{width:100%;max-width:520px;margin-bottom:14px;}
+.trail-pick .tp-search input{width:100%;}
+.trail-pick.compact{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;padding:14px 16px;}
+.trail-pick.compact .tp-search{margin-bottom:0;flex:1;}
+.trail-pick.compact .tp-list{flex-basis:100%;max-height:340px;overflow-y:auto;}
+.tp-cons{padding:10px 0;border-top:1px solid var(--border-soft);}
+.tp-cons:first-child{border-top:none;}
+.tp-cname{font-family:"Plus Jakarta Sans",sans-serif;font-weight:800;font-size:13px;color:var(--dark);margin-bottom:7px;}
+.tp-models{display:flex;flex-wrap:wrap;gap:8px;}
+.tp-model{display:inline-flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid var(--border);border-radius:10px;
+text-decoration:none;color:inherit;background:#FFFBF8;font-size:12.5px;}
+.tp-model span{color:var(--text-soft);font-size:11.5px;}
+.tp-model:hover{border-color:var(--accent);background:#FFF4EA;}
+.tp-model.on{border-color:var(--primary);box-shadow:0 0 0 2px rgba(249,115,22,.15);}
+.trail-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:18px;align-items:start;}
+.trail-side{position:sticky;top:84px;display:flex;flex-direction:column;gap:18px;}
+.trail-side .card + .card{margin-top:0;}
+@media (max-width:1100px){.trail-grid{grid-template-columns:minmax(0,1fr);}.trail-side{position:static;}}
+.loading-line{display:flex;align-items:center;gap:10px;color:var(--text-soft);font-size:13px;padding:20px 4px;}
+.loading-line .spinner{margin:0;width:18px;height:18px;}
+.tl-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
+.tl-filters{display:flex;gap:6px;flex-wrap:wrap;}
+.tl-filter{border:1px solid var(--border);background:var(--surface);border-radius:99px;padding:4px 10px;font-size:11.5px;font-weight:700;
+color:var(--text-soft);cursor:pointer;font-family:inherit;}
+.tl-filter span{opacity:.7;font-weight:600;margin-left:2px;}
+.tl-filter.on{background:var(--dark);border-color:var(--dark);color:#fff;}
+.timeline{position:relative;padding-left:4px;}
+.tl-day{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--text-soft);margin:16px 0 6px 26px;}
+.tl-day:first-child{margin-top:4px;}
+.tl-item{position:relative;display:flex;gap:12px;padding:0 0 14px 0;}
+.tl-item::before{content:"";position:absolute;left:7px;top:14px;bottom:-2px;width:2px;background:#F1E3D7;}
+.tl-item:last-child::before{display:none;}
+.tl-dot{flex:0 0 16px;height:16px;border-radius:50%;background:#fff;border:4px solid var(--k);margin-top:2px;position:relative;z-index:1;}
+.tl-body{flex:1;min-width:0;background:#FFFCFA;border:1px solid var(--border-soft);border-left:3px solid var(--k);border-radius:9px;padding:8px 11px;}
+.tl-item.k-correction .tl-body{background:#FFF8EB;border-color:#FBE0B2;border-left-color:var(--k);}
+.tl-item.k-sheet .tl-body{background:#FFF5F5;border-color:#FBD5D5;border-left-color:var(--k);}
+.tl-top{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.tl-title{font-weight:700;font-size:13px;color:var(--dark);}
+.tl-badge{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;background:#D97706;color:#fff;border-radius:5px;padding:2px 6px;}
+.tl-qty{margin-left:auto;font-weight:800;font-size:13px;font-family:"Plus Jakarta Sans",sans-serif;}
+.tl-detail{font-size:12px;color:var(--text);margin-top:3px;line-height:1.45;word-break:break-word;}
+.tl-meta{font-size:11px;color:var(--text-soft);margin-top:3px;}
+.ti-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;}
+.tn-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0;}
+.tn{background:#FFF9F4;border:1px solid var(--border-soft);border-radius:10px;padding:9px 10px;}
+.tn b{display:block;font-size:20px;line-height:1.1;font-family:"Plus Jakarta Sans",sans-serif;}
+.tn span{font-size:11px;color:var(--text-soft);font-weight:600;}
+.tf-list{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;margin-top:14px;}
+.tf{display:flex;flex-direction:column;font-size:12.5px;min-width:0;}
+.tf span{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-soft);font-weight:700;}
+.tf b{font-weight:600;word-break:break-word;}
+.ti-sub{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-soft);margin:18px 0 4px;}
+.ti-lines td,.ti-lines th{padding:7px 8px;font-size:12px;}
+.tr-fix .fx-row{padding:12px 0;border-top:1px solid var(--border-soft);}
+.tr-fix .fx-row:first-of-type{border-top:none;padding-top:4px;}
+.tr-fix .fx-inline{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+.tr-fix .fx-inline input[type=number]{flex:0 0 120px;}
+.tr-fix .fx-inline input[type=text]{flex:1;min-width:140px;}
+.tr-fix .prio-sel{max-width:180px;}
+@media (max-width:640px){.tn-grid{grid-template-columns:1fr 1fr;}.tf-list{grid-template-columns:1fr;}.os-grid{grid-template-columns:1fr 1fr 1fr;}}
 
 /* ===== Sidebar icons ===== */
 .nav-item .ni{display:inline-flex;align-items:center;gap:10px;}
@@ -587,7 +695,8 @@ const PAGES = [
   { id: 'delivery',     label: 'Delivery',     group: 'Output',    filter: true, sort: true, count: () => countDelivery() },
   { id: 'acceptance',   label: 'Acceptance',   group: 'Output',    filter: true, sort: true, count: () => countAcceptance() },
   { id: 'needsreview',  label: 'Needs review', group: 'Output',    filter: true, count: () => (APP.needsReview || []).length },
-  { id: 'reports',      label: 'Reports',      group: 'Output',    filter: false },
+  { id: 'trail',        label: 'Trail',        group: 'History',   filter: false },
+  { id: 'reports',      label: 'Reports',      group: 'History',   filter: false },
   { id: 'activity',     label: 'Your activity', hidden: true,      filter: true },
   { id: 'tile',         label: 'Details',       hidden: true,      filter: true, sort: true }
 ];
@@ -631,18 +740,18 @@ const PIPE_STYLE = {
 const FLOW_TILES = [
   { k: 'arriving',  label: 'Arriving',         unit: 'models', color: '#3B82F6', fg: '#1D4AAF',
     foot: 'still waiting on parts',        pred: g => !g.allArrived && !g.fullyCancelled, value: () => 1 },
-  { k: 'received',  label: 'Received',         unit: 'models', color: '#059669', fg: '#075A41',
-    foot: 'every part factory received',   pred: g => g.allArrived, value: () => 1 },
+  { k: 'received',  label: 'F-Recd',           unit: 'models', color: '#059669', fg: '#075A41',
+    foot: 'every part F-Recd',             pred: g => g.allArrived && !g.fullyCancelled, value: () => 1 },
   { k: 'canbuild',  label: 'Can build now',    unit: 'units',  color: '#22C55E', fg: '#166236',
     foot: 'from parts on the floor',       pred: g => g.buildableUnits > 0, value: g => g.buildableUnits },
   { k: 'assembled', label: 'Assembled',        unit: 'units',  color: '#F97316', fg: '#C2410C',
     foot: 'built so far',                  pred: g => g.totalBuilt > 0, value: g => g.totalBuilt },
   { k: 'pending',   label: 'Delivery pending', unit: 'units',  color: '#F59E0B', fg: '#8F5200',
-    foot: 'built, not yet sent',           pred: g => g.readyToSend > 0, value: g => g.readyToSend },
-  { k: 'acceptance',label: 'Acceptance',       unit: 'units',  color: '#8B5CF6', fg: '#5130B0',
-    foot: 'sent, waiting for the customer', pred: g => g.pendingAcceptance > 0, value: g => g.pendingAcceptance },
+    foot: 'assembled, still on the floor', pred: g => g.readyToSend > 0, value: g => g.readyToSend },
+  { k: 'acceptance',label: 'Awaiting acceptance', unit: 'units', color: '#8B5CF6', fg: '#5130B0',
+    foot: 'sent, not yet accepted',        pred: g => g.pendingAcceptance > 0, value: g => g.pendingAcceptance },
   { k: 'delivered', label: 'Delivered',        unit: 'units',  color: '#14B8A6', fg: '#0B666C',
-    foot: 'accepted by FR and BB',         pred: g => g.totalConfirmed > 0, value: g => g.totalConfirmed }
+    foot: 'accepted by FR and BB',         pred: g => g.deliveredQty > 0, value: g => g.deliveredQty }
 ];
 
 /* ---------- State ---------- */
@@ -705,11 +814,15 @@ async function apiCall(action, payload = {}) {
 /* Every save hands back fresh data in the same response, so the page redraws
    at once from it instead of making a second slow round trip. */
 function takeApp(res) {
-  if (res && res.app) { APP = res.app; return true; }
+  if (res && res.app) { APP = res.app; clearTrails(); return true; }
   return false;
 }
 
+// Any save can add to a model's history, so cached Trails are dropped.
+function clearTrails() { if (typeof TRAIL_CACHE !== 'undefined') Object.keys(TRAIL_CACHE).forEach(k => delete TRAIL_CACHE[k]); }
+
 async function reload() {
+  clearTrails();
   const res = await apiCall('getAppData');
   if (res.ok) { APP = res; route(); }
   else if (!res.authFailed) toast(res.error || 'Could not refresh.');
@@ -764,7 +877,7 @@ async function completeLogin() {
     document.getElementById('scr-login').classList.add('hidden');
     document.getElementById('app').classList.remove('hidden');
     document.getElementById('who-name').innerText = user.name || user.email;
-    document.getElementById('who-role').innerText = roleLabel(user.level);
+    document.getElementById('who-role').innerText = roleLabel(user);
     if (!window.__routed) { window.addEventListener('hashchange', route); window.__routed = true; }
     route();
     return;
@@ -795,10 +908,60 @@ function handleSessionExpiry(message) {
   showSignInForm(message || 'Please sign in again.');
 }
 
-function roleLabel(level) {
-  if (level === 0) return 'Director';
-  if (level === 1) return 'Manager';
-  return 'Staff';
+function roleLabel(u) {
+  if (!u) return '';
+  const r = u.role || (u.level === 0 ? 'Director' : u.level === 1 ? 'Head' : 'Factory');
+  return r === 'Receiver' ? 'Receiver' + (u.customer ? ' · ' + u.customer : '') : r;
+}
+
+/* What this person may do. The server refuses anything else anyway; this
+   only decides which buttons are drawn. */
+function can(what) {
+  if (!user) return false;
+  if (user.can) return !!user.can[what];
+  const lv = Number(user.level);
+  return lv <= 1 || (lv === 2 && ['receive', 'build', 'send'].indexOf(what) !== -1);
+}
+
+function person(email) {
+  if (!email) return '';
+  const p = APP && APP.people ? APP.people[String(email).toLowerCase()] : null;
+  return p || String(email).split('@')[0];
+}
+
+// "2026-09-28 14:14" → "28 Sep, 2:14 PM"
+function fmtStamp(v) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2}))?/.exec(String(v || ''));
+  if (!m) return '—';
+  const d = new Date(+m[1], +m[2] - 1, +m[3], +(m[4] || 0), +(m[5] || 0));
+  const day = d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) +
+    (d.getFullYear() !== new Date().getFullYear() ? ' ' + d.getFullYear() : '');
+  return m[4] ? day + ', ' + d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }) : day;
+}
+
+// Shown in place of ETA / ETD once a line or model is F-Recd.
+function frecdTag(at, by, short) {
+  return `<span class="frecd" title="F-Recd${by ? ' by ' + esc(person(by)) : ''}"><b>F-Recd</b> ${esc(fmtStamp(at))}${
+    by ? `<span class="frecd-by"> · ${esc(person(by))}</span>` : ''}</span>${short ? ` <span class="chip chip-warn">${short} short</span>` : ''}`;
+}
+
+function frecdLine(g) {
+  if (!g.fRecdAt) return '';
+  const short = (g.shortParts || []).map(p => 'part ' + p.partLetter + ' ' + p.short + ' short').join(', ');
+  const open = g.parts.filter(p => !p.receivingDone);
+  return `<div class="model-frecd">${frecdTag(g.fRecdAt, g.fRecdBy)}${
+    g.fRecdAll ? '' : ` <span class="hint" style="display:inline;margin:0;">· still due: ${open.map(p => 'part ' + esc(p.partLetter) +
+      (p.nextEta ? ' ' + esc(fmtDay(p.nextEta)) : '')).join(', ')}</span>`}${
+    short ? ` <span class="chip chip-warn">${esc(short)}</span>` : ''}</div>`;
+}
+
+function deliveredTag(g) {
+  if (!g.deliveredQty) return '';
+  return `<span class="chip dlv-chip">Delivered ${g.deliveredQty}${g.leftQty ? ' · ' + g.leftQty + ' left' : ''}</span>`;
+}
+
+function trailLink(g) {
+  return `<a class="trail-link" href="#/trail?g=${encodeURIComponent(g.groupKey)}" title="Full history of this model">Trail</a>`;
 }
 
 function doLogout() {
@@ -817,7 +980,7 @@ if (session) completeLogin(); else document.documentElement.classList.remove('re
 
 /* ---------- Shell ---------- */
 
-const NAV_ICONS = {"dashboard": "<rect x=\"3\" y=\"3\" width=\"7\" height=\"9\" rx=\"1.5\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"5\" rx=\"1.5\"/><rect x=\"14\" y=\"12\" width=\"7\" height=\"9\" rx=\"1.5\"/><rect x=\"3\" y=\"16\" width=\"7\" height=\"5\" rx=\"1.5\"/>", "consignments": "<path d=\"M3 7h11v9H3z\"/><path d=\"M14 10h4l3 3v3h-7\"/><circle cx=\"7\" cy=\"17.5\" r=\"1.8\"/><circle cx=\"17.5\" cy=\"17.5\" r=\"1.8\"/>", "receiving": "<path d=\"M21 8l-9-5-9 5 9 5 9-5z\"/><path d=\"M3 8v8l9 5 9-5V8\"/>", "assembly": "<path d=\"M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z\"/>", "delivery": "<path d=\"M5 12h14\"/><path d=\"M13 6l6 6-6 6\"/>", "acceptance": "<path d=\"M9 4h6v3H9z\"/><path d=\"M8 5H6v16h12V5h-2\"/><path d=\"M9 14l2 2 4-4\"/>", "needsreview": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 8v5\"/><path d=\"M12 16.5v.5\"/>", "reports": "<path d=\"M4 20V10\"/><path d=\"M10 20V4\"/><path d=\"M16 20v-7\"/><path d=\"M22 20H2\"/>"};
+const NAV_ICONS = {"dashboard": "<rect x=\"3\" y=\"3\" width=\"7\" height=\"9\" rx=\"1.5\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"5\" rx=\"1.5\"/><rect x=\"14\" y=\"12\" width=\"7\" height=\"9\" rx=\"1.5\"/><rect x=\"3\" y=\"16\" width=\"7\" height=\"5\" rx=\"1.5\"/>", "consignments": "<path d=\"M3 7h11v9H3z\"/><path d=\"M14 10h4l3 3v3h-7\"/><circle cx=\"7\" cy=\"17.5\" r=\"1.8\"/><circle cx=\"17.5\" cy=\"17.5\" r=\"1.8\"/>", "receiving": "<path d=\"M21 8l-9-5-9 5 9 5 9-5z\"/><path d=\"M3 8v8l9 5 9-5V8\"/>", "assembly": "<path d=\"M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z\"/>", "delivery": "<path d=\"M5 12h14\"/><path d=\"M13 6l6 6-6 6\"/>", "acceptance": "<path d=\"M9 4h6v3H9z\"/><path d=\"M8 5H6v16h12V5h-2\"/><path d=\"M9 14l2 2 4-4\"/>", "needsreview": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 8v5\"/><path d=\"M12 16.5v.5\"/>", "trail": "<circle cx=\"6\" cy=\"5\" r=\"2\"/><circle cx=\"6\" cy=\"19\" r=\"2\"/><circle cx=\"6\" cy=\"12\" r=\"2\"/><path d=\"M6 7v3M6 14v3\"/><path d=\"M11 5h9M11 12h9M11 19h6\"/>", "reports": "<path d=\"M4 20V10\"/><path d=\"M10 20V4\"/><path d=\"M16 20v-7\"/><path d=\"M22 20H2\"/>"};
 
 function renderNav() {
   const nav = document.getElementById('nav');
@@ -1103,7 +1266,7 @@ function styleVars(st) { return st ? `--c-bg:${st.bg};--c-fg:${st.fg};--c-dot:${
 function statusChip(status, extra) {
   if (!status) return '<span class="chip chip-idle">—</span>';
   const st = STATUS_STYLE[status] || { bg: '#F5EBE3', fg: '#8B6F5E', dot: '#C9AE9C' };
-  return `<span class="chip st" style="${styleVars(st)}">${esc(status)}${extra || ''}</span>`;
+  return `<span class="chip st" style="${styleVars(st)}">${esc(status === 'Factory received' ? 'F-Recd' : status)}${extra || ''}</span>`;
 }
 
 function pipeChip(p) {
@@ -1208,7 +1371,8 @@ function modelBlock(g, right, body) {
           <div class="model-title">${prioTag(g)}${modelLabel(g)}${CARD_FLAT
             ? ` <span class="cons-tag">${esc(g.consignmentGroup)}</span>` : ''}</div>
           <div class="model-meta">${esc(g.supplier || '—')} · ${esc(g.product || '—')}${ids ? ' · ID ' + esc(ids) : ''}${
-            g.totalQty ? ' · ' + g.totalQty + ' units (FR ' + (g.frQty || 0) + ' · BB ' + (g.bbQty || 0) + ')' : ''}</div>
+            g.totalQty ? ' · ' + g.totalQty + ' units (FR ' + (g.frQty || 0) + ' · BB ' + (g.bbQty || 0) + ')' : ''} · ${trailLink(g)}</div>
+          ${frecdLine(g)}
         </div>
         <div class="model-right">${right || ''}</div>
       </div>
@@ -1219,10 +1383,11 @@ function modelBlock(g, right, body) {
 function partTiles(g) {
   return `<div class="part-row">${g.parts.map(p => {
     const pct = p.qtyExpected ? Math.round((p.qtyReceived / p.qtyExpected) * 100) : 0;
-    const cls = p.fullyIn ? 'pt-in' : (p.overdue ? 'pt-late' : '');
-    const foot = p.fullyIn ? 'all factory received'
+    const cls = p.fullyIn ? 'pt-in' : p.qtyShort ? 'pt-short' : (p.overdue ? 'pt-late' : '');
+    const foot = p.fullyIn ? 'all F-Recd'
+      : (p.receivingDone && p.qtyShort) ? 'F-Recd · ' + p.qtyShort + ' short'
       : p.overdue ? p.daysLate + ' days late'
-      : p.awaitingFactory ? p.awaitingFactory + ' line' + (p.awaitingFactory === 1 ? '' : 's') + ' waiting for factory receipt'
+      : p.awaitingFactory ? p.awaitingFactory + ' line' + (p.awaitingFactory === 1 ? '' : 's') + ' waiting to be F-Recd'
       : p.needsCount ? 'short load to count'
       : p.nextEta ? 'due ' + fmtDay(p.nextEta)
       : (p.qtyReceived ? 'part received' : 'not here yet');
@@ -1240,15 +1405,16 @@ function linesTable(lines) {
   if (!lines.length) return '';
   return `
     <div class="tbl-wrap"><table class="lines">
-      <thead><tr><th>Part</th><th>Packaging</th><th>Status</th><th>ETD</th><th>ETA</th>
-        <th class="r">FR</th><th class="r">BB</th><th class="r">Total</th><th class="r">Received</th></tr></thead>
+      <thead><tr><th>Part</th><th>Packaging</th><th>Status</th><th>ETD</th><th>ETA / F-Recd</th>
+        <th class="r">FR</th><th class="r">BB</th><th class="r">Total</th><th class="r">F-Recd</th></tr></thead>
       <tbody>${lines.map(l => `
         <tr class="fx ${l.overdue ? 'row-late' : (l.shortLoad && !l.factoryReceived ? 'row-short' : '')}">
           <td><b>${esc(l.partLetter || '—')}</b></td>
           <td><code>${esc(l.packaging)}</code>${l.uniqueId ? `<div class="hint" style="margin-top:2px;">${esc(l.uniqueId)}</div>` : ''}</td>
-          <td>${statusChip(l.status)}</td>
-          <td>${esc(fmtDay(l.etd))}</td>
-          <td style="white-space:nowrap;">${esc(fmtDay(l.eta))}${etaChip(l)}</td>
+          <td>${statusChip(l.status, l.shortBy ? ' · ' + l.shortBy + ' short' : '')}</td>
+          ${l.factoryReceived
+            ? `<td colspan="2" class="nw">${frecdTag(l.factoryReceivedAt, l.factoryReceivedBy)}</td>`
+            : `<td>${esc(fmtDay(l.etd))}</td><td style="white-space:nowrap;">${esc(fmtDay(l.eta))}${etaChip(l)}</td>`}
           <td class="r">${l.fr || '—'}</td>
           <td class="r">${l.bb || '—'}</td>
           <td class="r"><b>${l.total || '—'}</b></td>
@@ -1262,7 +1428,7 @@ function linesTable(lines) {
 // The card shown by the dashboard's drill-downs and the Consignments page.
 function summaryCard(g, lineFilter) {
   const lines = allLinesOf(g).filter(lineFilter || (() => true));
-  const right = `${pipeChip(g.pipeline)}${g.buildableUnits ? `
+  const right = `${pipeChip(g.pipeline)}${deliveredTag(g)}${g.buildableUnits ? `
     <div class="big-num"><div class="k">Can build</div><div class="v" style="color:#15803D;">${g.buildableUnits}</div></div>` : ''}`;
   const warn = [];
   if (g.quantityNote) warn.push(g.quantityNote);
@@ -1315,10 +1481,15 @@ const PAGE_HEAD = {
       (late ? ' · ' + late + ' late' : '') + (short ? ' · ' + short + ' short load' + (short === 1 ? '' : 's') : '') +
       ' · click any heading to sort' };
   },
-  receiving: () => ({ title: 'Receiving', sub: 'Factory receive a line when it is physically on the floor. Nothing reaches Assembly without it.' }),
+  receiving: () => ({ title: 'Receiving', sub: 'F-Recd a line when it is physically on the floor. Nothing reaches Assembly without it.' }),
   assembly: () => ({ title: 'Assembly', sub: 'Only models you can build right now.' }),
-  delivery: () => ({ title: 'Delivery', sub: 'Assembled units ready to go out to FR and BB.' }),
-  acceptance: () => ({ title: 'Acceptance', sub: 'Units sent out, waiting for the customer to accept them.' }),
+  delivery: () => ({ title: 'Delivery', sub: 'Delivery pending: assembled units still on the floor, ready to go out to FR and BB.' }),
+  acceptance: () => ({ title: 'Acceptance', sub: 'Units sent out and awaiting acceptance. Once accepted they count as delivered.' }),
+  trail: q => {
+    const g = q.g ? groupsAll().find(x => x.groupKey === q.g) : null;
+    return g ? { title: 'Trail · ' + plainModel(g), sub: g.consignmentGroup + ' — everything that has happened to this model, oldest first.' }
+             : { title: 'Trail', sub: 'Pick a consignment and model to see its full history.' };
+  },
   needsreview: () => ({ title: 'Needs review', sub: 'Lines in China Master whose packaging code could not be read.' }),
   reports: () => ({ title: 'Reports', sub: 'Everything anyone has recorded.' }),
   activity: () => ({ title: 'Your activity', sub: 'Everything you have recorded, newest first.' }),
@@ -1445,7 +1616,7 @@ STATUS_ORDER['Cancel'] = 99;
 
 function prioControl(g) {
   const p = g.priority || 'Normal';
-  if (!user || user.level > 1) {
+  if (!can('priority')) {
     return p === 'Normal' ? '<span class="hint" style="margin:0;">Normal</span>' : prioTag(g);
   }
   return `<select class="prio-sel prio-sel-${esc(p.toLowerCase())}" data-groupkey="${esc(g.groupKey)}" aria-label="Priority for ${esc(plainModel(g))}">
@@ -1471,7 +1642,6 @@ function renderConsignments() {
 
   const body = rows.map(({ g, l }) => {
     const sig = l.signatureModel || g.signatureModel || g.factoryModel;
-    const partial = l.factoryReceived && !l.done;
     const cls = ['fx', 'prio-row-' + String(g.priority || 'Normal').toLowerCase()];
     if (l.overdue) cls.push('row-late');
     if (l.cancelled) cls.push('row-cancel');
@@ -1482,13 +1652,17 @@ function renderConsignments() {
           ${l.sheetNote ? `<div class="sub sub-bad">${esc(l.sheetNote)}</div>` : ''}</td>
         <td>${esc(g.supplier || '—')}</td>
         <td>${esc(g.product || '—')}</td>
-        <td data-v="${esc(sig)}" class="model-cell">${prioTag(g)}<b>${esc(sig)}</b><div class="sub">${esc(g.factoryModel || '')}</div></td>
+        <td data-v="${esc(sig)}" class="model-cell">${prioTag(g)}<b>${esc(sig)}</b><div class="sub">${esc(g.factoryModel || '')} · ${trailLink(g)}</div></td>
         <td class="r" data-v="${l.fr || ''}">${l.fr || '—'}</td>
         <td class="r" data-v="${l.bb || ''}">${l.bb || '—'}</td>
         <td class="r" data-v="${l.total || ''}"><b>${l.total || '—'}</b></td>
-        <td data-v="${STATUS_ORDER[l.status] || 50}" class="nw">${statusChip(l.status, partial ? ` · ${l.qtyReceived}/${l.total}` : '')}</td>
+        <td data-v="${STATUS_ORDER[l.status] || 50}" class="nw">${statusChip(l.status, l.shortBy ? ' · ' + l.shortBy + ' short' : '')}</td>
+        ${l.factoryReceived ? `
+        <td data-v="${esc(l.factoryReceivedAt || '')}" class="nw"><span class="frecd"><b>F-Recd</b> ${esc(fmtStamp(l.factoryReceivedAt))}</span></td>
+        <td data-v="${esc(l.factoryReceivedAt || '')}" class="nw"><span class="hint" style="margin:0;">by ${esc(person(l.factoryReceivedBy))}</span>${
+          l.qtyReceived ? `<div class="sub">${l.qtyReceived} counted</div>` : ''}</td>` : `
         <td data-v="${esc(l.etd || '')}" class="nw">${esc(fmtDay(l.etd))}</td>
-        <td data-v="${esc(l.eta || '')}" class="nw">${esc(fmtDay(l.eta))}${etaChip(l) ? `<div class="eta-chip">${etaChip(l)}</div>` : ''}</td>
+        <td data-v="${esc(l.eta || '')}" class="nw">${esc(fmtDay(l.eta))}${etaChip(l) ? `<div class="eta-chip">${etaChip(l)}</div>` : ''}</td>`}
         <td>${esc(g.mgr || '—')}</td>
         <td data-v="${PRIO_RANK[g.priority] || 0}">${prioControl(g)}</td>
       </tr>`;
@@ -1501,7 +1675,7 @@ function renderConsignments() {
           <thead><tr>
             ${th('Packaging')}${th('Supplier')}${th('Product')}${th('Model')}
             ${th('FR', 'num', 'r')}${th('BB', 'num', 'r')}${th('Total', 'num', 'r')}
-            ${th('Status', 'num')}${th('ETD')}${th('ETA')}${th('MGR')}${th('Priority', 'num')}
+            ${th('Status', 'num')}${th('ETD / F-Recd')}${th('ETA / by')}${th('MGR')}${th('Priority', 'num')}
           </tr></thead>
           <tbody>${body}</tbody>
         </table>
@@ -1511,49 +1685,61 @@ function renderConsignments() {
 
 /* ---------- Receiving ----------
    One row per line — a line is one shipment in China Master, and each one is
-   factory received on its own. A line stays here until its whole total is
-   counted; a short load's count is final, so one count finishes it. */
+   F-Recd on its own. The count is final: 200 of 250 makes the line
+   "F-Recd · 50 short". A Head or Director can correct it afterwards. */
 
 function receivingRow(l, done) {
   const cls = done ? 'row-done' : (l.overdue ? 'row-late' : (l.shortLoad ? 'row-short' : ''));
-  const partial = l.factoryReceived && !l.done;
+  let action;
+  if (!done) {
+    action = can('receive') ? `
+      <div class="row-form">
+        <input type="number" min="1" max="${l.total || ''}" class="rcv-qty" inputmode="numeric"
+          placeholder="count" aria-label="Count for ${esc(l.packaging)}">
+        <button class="btn btn-sm ${l.receivedOnSheet || l.shortLoad ? 'btn-primary' : ''} rcv-btn" data-rowid="${esc(l.rowId)}"
+          data-pk="${esc(l.packaging)}" data-total="${l.total || 0}" data-mode="receive">F-Recd</button>
+      </div>` : '<span class="hint" style="margin:0;">Factory staff F-Recd this</span>';
+  } else {
+    action = can('correct') ? `
+      <div class="row-form">
+        <input type="number" min="0" max="${l.total || ''}" class="rcv-qty" inputmode="numeric"
+          placeholder="${l.qtyReceived}" aria-label="Corrected count for ${esc(l.packaging)}">
+        <button class="btn btn-sm rcv-btn" data-rowid="${esc(l.rowId)}" data-pk="${esc(l.packaging)}"
+          data-total="${l.total || 0}" data-was="${l.qtyReceived}" data-mode="correct">Correct</button>
+      </div>` : '';
+  }
   return `
     <tr class="fx ${cls}">
       <td><b>${esc(l.partLetter)}</b></td>
       <td><code>${esc(l.packaging)}</code>${l.uniqueId ? `<div class="hint" style="margin-top:2px;">${esc(l.uniqueId)}</div>` : ''}</td>
-      <td>${statusChip(l.status, partial ? ` · ${l.qtyReceived}/${l.total}` : '')}</td>
-      <td style="white-space:nowrap;">${esc(fmtDay(l.eta))}${etaChip(l)}</td>
+      <td>${statusChip(l.status, l.shortBy ? ' · ' + l.shortBy + ' short' : '')}</td>
+      <td style="white-space:nowrap;">${l.factoryReceived ? frecdTag(l.factoryReceivedAt, l.factoryReceivedBy) : esc(fmtDay(l.eta)) + etaChip(l)}</td>
       <td class="r"><b>${l.total}</b></td>
-      <td class="r">${l.factoryReceived ? `<b style="color:#075A41;">${l.qtyReceived}</b>` : '—'}</td>
-      <td>
-        <div class="row-form">
-          <input type="number" min="1" max="${l.total || ''}" class="rcv-qty" inputmode="numeric"
-            placeholder="${l.factoryReceived ? l.qtyReceived : 'count'}" aria-label="Count for ${esc(l.packaging)}">
-          <button class="btn btn-sm ${!done && (l.receivedOnSheet || l.shortLoad || partial) ? 'btn-primary' : ''} rcv-btn" data-rowid="${esc(l.rowId)}"
-            data-pk="${esc(l.packaging)}">${done ? 'Correct' : (partial ? 'Update count' : 'Factory receive')}</button>
-        </div>
-      </td>
+      <td class="r">${l.factoryReceived ? `<b style="color:${l.shortBy ? '#8F5200' : '#075A41'};">${l.qtyReceived}</b>` : '—'}</td>
+      <td>${action}</td>
     </tr>`;
 }
 
 function receivingTable(rows) {
   return `<div class="tbl-wrap"><table class="lines">
-    <thead><tr><th>Part</th><th>Packaging</th><th>Status</th><th>ETA</th><th class="r">Total</th><th class="r">Counted</th><th style="width:240px;"></th></tr></thead>
+    <thead><tr><th>Part</th><th>Packaging</th><th>Status</th><th>ETA / F-Recd</th><th class="r">Total</th><th class="r">Counted</th><th style="width:240px;"></th></tr></thead>
     <tbody>${rows}</tbody></table></div>`;
 }
 
 function receivingCard(g) {
   const open = [], done = [];
   g.parts.forEach(p => p.lines.forEach(l => (l.done ? done : open).push(l)));
-  const act = l => (l.receivedOnSheet || l.shortLoad || l.factoryReceived) ? 0 : 1;
+  const act = l => (l.receivedOnSheet || l.shortLoad) ? 0 : 1;
   open.sort((a, b) => act(a) - act(b) || String(a.eta || '9999').localeCompare(String(b.eta || '9999')));
-  const waiting = open.filter(l => !l.factoryReceived && (l.receivedOnSheet || l.shortLoad)).length;
+  const waiting = open.filter(l => l.receivedOnSheet || l.shortLoad).length;
   const right = waiting
-    ? `<span class="chip st" style="${styleVars(STATUS_STYLE['Already received'])}">${waiting} ready to receive</span>`
+    ? `<span class="chip st" style="${styleVars(STATUS_STYLE['Already received'])}">${waiting} ready to F-Recd</span>`
     : pipeChip(g.pipeline);
+  const shortDone = done.filter(l => l.shortBy).length;
   return modelBlock(g, right,
     (open.length ? receivingTable(open.map(l => receivingRow(l, false)).join('')) : '') +
-    (done.length ? `<details style="margin-top:8px;"><summary class="hint" style="cursor:pointer;">${done.length} line${done.length === 1 ? '' : 's'} already factory received — correct a count</summary>
+    (done.length ? `<details style="margin-top:8px;"${open.length ? '' : ' open'}><summary class="hint" style="cursor:pointer;">${done.length} line${done.length === 1 ? '' : 's'} F-Recd${
+      shortDone ? ' · ' + shortDone + ' short' : ''}${can('correct') ? ' — correct a count' : ''}</summary>
       ${receivingTable(done.map(l => receivingRow(l, true)).join(''))}</details>` : '') +
     `<div class="card-status note hidden status-line"></div>`);
 }
@@ -1564,19 +1750,17 @@ function renderReceiving() {
   const open = live.filter(hasOpen);
   const finished = live.filter(g => !hasOpen(g));
 
-  /* One list, sorted as a whole. It used to be split into "ready" and "on the
-     way" and each half sorted on its own, so choosing ETA put a line due in
-     late August below one due in September. The default order, Most urgent,
-     already brings late and ready-to-receive lines to the top. */
-  let html = `<div class="note" style="margin-bottom:14px;">The count you type <b>replaces</b> the one on the line — it is how many are
-    physically on the floor, not how many more turned up. To correct a count, type the right number again.</div>`;
+  let html = `<div class="note" style="margin-bottom:14px;">Count what is <b>physically on the floor</b> and press F-Recd. The count is final:
+    fewer than the line total marks it <b>F-Recd · short</b>, and Assembly uses the number you counted.${
+    can('correct') ? ' A wrong count can be corrected below or from the model\'s Trail.' : ' If a count is wrong, a Head or Director can correct it.'}</div>`;
   html += open.length
     ? sortBar(open.length) + cardsFor(open, receivingCard)
-    : `<div class="empty" style="margin-bottom:24px;">Nothing is waiting to be received.</div>`;
+    : `<div class="empty" style="margin-bottom:24px;">Nothing is waiting to be F-Recd.</div>`;
 
   if (finished.length) {
-    html += `<details class="done-section"><summary><span class="ds-title">Fully factory received</span>
-      <span class="ds-sub">${finished.length} model${finished.length === 1 ? '' : 's'} · open to correct a count</span></summary>
+    const shorts = finished.filter(g => (g.shortParts || []).length).length;
+    html += `<details class="done-section"><summary><span class="ds-title">Fully F-Recd</span>
+      <span class="ds-sub">${finished.length} model${finished.length === 1 ? '' : 's'}${shorts ? ' · ' + shorts + ' short' : ''}${can('correct') ? ' · open to correct a count' : ''}</span></summary>
       <div style="margin-top:14px;">${cardsFor(finished, receivingCard)}</div></details>`;
   }
   return html;
@@ -1593,6 +1777,7 @@ function renderAssembly() {
   }
   return sortBar(groups.length) + cardsFor(groups, g => {
     const right = `<div class="big-num"><div class="k">Can build</div><div class="v" style="color:#15803D;">${g.buildableUnits}</div></div>`;
+    if (!can('build')) return modelBlock(g, right, partTiles(g) + `<div class="role-note">Your role can't record assembly. ${g.totalBuilt} built so far.</div>`);
     return modelBlock(g, right, partTiles(g) + `
       <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
         <div style="flex:0 0 150px;">
@@ -1617,7 +1802,8 @@ function renderDelivery() {
     const bb = (g.deliveredTo && g.deliveredTo.BB) || { confirmed: 0, pending: 0 };
     const frLeft = Math.max(0, (g.frQty || 0) - fr.confirmed - fr.pending);
     const bbLeft = Math.max(0, (g.bbQty || 0) - bb.confirmed - bb.pending);
-    const right = `<div class="big-num"><div class="k">On the floor</div><div class="v" style="color:#C2410C;">${available}</div></div>`;
+    const right = `${deliveredTag(g)}<div class="big-num"><div class="k">Delivery pending</div><div class="v" style="color:#C2410C;">${available}</div></div>`;
+    if (!can('send')) return modelBlock(g, right, `<div class="role-note">Your role can't send units out. FR ${frLeft} · BB ${bbLeft} still owed.</div>`);
     return modelBlock(g, right, `
       <div class="dlv-form">
         <div class="dlv-cust-field">
@@ -1643,14 +1829,15 @@ function renderDelivery() {
 
 function renderAcceptance() {
   const pending = (APP.deliveries || []).filter(d => d.Status === 'pending');
-  if (!pending.length) return `<div class="empty">Nothing is waiting for a customer to accept it.</div>`;
+  if (!pending.length) return `<div class="empty">Nothing is awaiting acceptance.</div>`;
+  const mayAccept = d => can('accept') && !(user.role === 'Receiver' && user.customer && user.customer !== String(d.CustomerCode).toUpperCase());
   const keys = [];
   pending.forEach(d => { if (keys.indexOf(d.GroupKey) === -1) keys.push(d.GroupKey); });
   const groups = groupsAll().filter(g => keys.indexOf(g.groupKey) !== -1);
   return sortBar(groups.length) + cardsFor(groups, g => {
     const mine = pending.filter(d => d.GroupKey === g.groupKey);
     const total = mine.reduce((s, d) => s + (Number(d.QtyOut) || 0), 0);
-    const right = `<div class="big-num"><div class="k">Awaiting</div><div class="v" style="color:#5130B0;">${total}</div></div>`;
+    const right = `${deliveredTag(g)}<div class="big-num"><div class="k">Awaiting acceptance</div><div class="v" style="color:#5130B0;">${total}</div></div>`;
     return modelBlock(g, right, `
       <div class="tbl-wrap"><table class="lines">
         <thead><tr><th>Customer</th><th class="r">Sent</th><th>Sent on</th><th>By</th><th style="width:260px;">Accepted</th></tr></thead>
@@ -1658,13 +1845,13 @@ function renderAcceptance() {
           <tr class="fx">
             <td><span class="chip" style="background:${d.CustomerCode === 'FR' ? '#FDEBDD' : '#DDF1EE'};color:${d.CustomerCode === 'FR' ? '#9A4318' : '#1D6158'};font-weight:800;">${esc(d.CustomerCode)}</span></td>
             <td class="r"><b>${esc(d.QtyOut)}</b></td>
-            <td>${esc(fmtDay(d.TimestampDay))}</td>
-            <td class="hint" style="margin:0;">${esc(d.MarkedBy || '')}</td>
-            <td>
+            <td class="nw">${esc(fmtStamp(d.Timestamp))}</td>
+            <td class="hint" style="margin:0;">${esc(person(d.MarkedBy))}</td>
+            <td>${mayAccept(d) ? `
               <div class="row-form" style="justify-content:flex-start;">
                 <input type="number" class="acc-qty" min="0" max="${esc(d.QtyOut)}" value="${esc(d.QtyOut)}" inputmode="numeric" aria-label="Units accepted">
                 <button class="btn btn-sm btn-primary acc-btn" data-deliveryid="${esc(d.DeliveryID)}" data-sent="${esc(d.QtyOut)}">Accept</button>
-              </div>
+              </div>` : `<span class="hint" style="margin:0;">Awaiting ${esc(d.CustomerCode)}'s receiver</span>`}
             </td>
           </tr>`).join('')}</tbody>
       </table></div>
@@ -1691,11 +1878,282 @@ function renderNeedsReview() {
           <div class="model-right">${statusChip(r.Status)}</div>
         </div>
         <div class="note note-bad" style="margin-bottom:10px;">${esc(r.ReviewReason)}</div>
-        <div class="row-form" style="justify-content:flex-start;" data-rowid="${esc(r.RowID)}">
+        ${can('review') ? `<div class="row-form" style="justify-content:flex-start;" data-rowid="${esc(r.RowID)}">
           <input type="text" class="nr-fix" style="width:240px;" placeholder="Corrected packaging code">
           <button class="btn btn-sm nr-resolve">Fix</button>
-        </div>
+        </div>` : ''}
       </div>`).join('')}`;
+}
+
+/* ---------- Trail ----------
+   Pick a consignment and a model; see everything that has happened to it,
+   oldest first, beside everything there is to know about it now. Heads and
+   Directors correct mistakes here — each one lands in the Trail marked as a
+   correction. China Master data (ETA, quantities, status) is not editable:
+   it is changed in the sheet and arrives with the next sync. */
+
+const TRAIL_CACHE = {};
+let TRAIL_FILTER = 'all';
+
+const TRAIL_KIND = {
+  sync:       { label: 'China Master',  c: '#94A3B8' },
+  status:     { label: 'China Master',  c: '#3B82F6' },
+  sheet:      { label: 'Sheet changed', c: '#EF4444' },
+  receipt:    { label: 'F-Recd',        c: '#059669' },
+  correction: { label: 'Correction',    c: '#D97706' },
+  build:      { label: 'Assembly',      c: '#5B6CD9' },
+  send:       { label: 'Sent',          c: '#F97316' },
+  accept:     { label: 'Accepted',      c: '#0D9488' },
+  priority:   { label: 'Priority',      c: '#8B5CF6' },
+  other:      { label: 'Other',         c: '#A1A1AA' }
+};
+
+function trailPicker(q) {
+  const current = q.g || '';
+  const blocks = byConsignment(sortGroups(groupsAll()).slice().sort((a, b) =>
+    String(a.consignmentGroup).localeCompare(String(b.consignmentGroup), undefined, { numeric: true })));
+  return `
+    <div class="card trail-pick${current ? ' compact' : ''}">
+      <div class="search-wrap tp-search">
+        <svg class="s-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="search" id="tr-q" placeholder="Search a consignment, model, Unique ID or packaging" autocomplete="off">
+      </div>
+      <div class="tp-list" id="tr-list"${current ? ' hidden' : ''}>
+        ${blocks.map(b => `
+          <div class="tp-cons" data-s="${esc((b.consignment + ' ' + b.models.map(g => [g.factoryModel, g.signatureModel, (g.uniqueIds || []).join(' '),
+            g.supplier, allLinesOf(g).map(l => l.packaging).join(' ')].join(' ')).join(' ')).toLowerCase())}">
+            <div class="tp-cname">${esc(b.consignment)}</div>
+            <div class="tp-models">${b.models.map(g => `
+              <a class="tp-model${g.groupKey === current ? ' on' : ''}" href="#/trail?g=${encodeURIComponent(g.groupKey)}"
+                data-s="${esc([b.consignment, g.factoryModel, g.signatureModel, (g.uniqueIds || []).join(' '), g.supplier,
+                  allLinesOf(g).map(l => l.packaging).join(' ')].join(' ').toLowerCase())}">
+                ${prioTag(g)}<b>${esc(plainModel(g))}</b><span>${esc(g.factoryModel || '')}</span>${pipeChip(g.pipeline)}</a>`).join('')}
+            </div>
+          </div>`).join('')}
+        <div class="empty hidden" id="tr-none" style="padding:18px;">Nothing matches.</div>
+      </div>
+      ${current ? `<button class="btn btn-sm" id="tr-change">Pick another model</button>` : ''}
+    </div>`;
+}
+
+function renderTrail(q) {
+  if (!q.g) return trailPicker(q);
+  const g = groupsAll().find(x => x.groupKey === q.g);
+  if (!g) return trailPicker({}) + `<div class="empty">That model is no longer in China Master.</div>`;
+  const t = TRAIL_CACHE[q.g];
+  return trailPicker(q) + `
+    <div class="trail-grid">
+      <div class="card trail-time" id="trail-time">${t ? trailTimeline(t) : '<div class="loading-line"><div class="spinner"></div>Loading the history…</div>'}</div>
+      <div class="trail-side">${trailInfo(g, t)}</div>
+    </div>`;
+}
+
+function trailTimeline(t) {
+  const evs = t.events.slice();
+  if (!evs.length) return '<div class="empty">Nothing recorded yet.</div>';
+  const who = e => e.user === 'China Master' ? 'China Master' : person(e.user);
+  const pass = e => TRAIL_FILTER === 'all' ||
+    (TRAIL_FILTER === 'sheet' && (e.kind === 'sync' || e.kind === 'status' || e.kind === 'sheet')) ||
+    (TRAIL_FILTER === 'floor' && ['receipt', 'build', 'send', 'accept', 'priority'].indexOf(e.kind) !== -1) ||
+    (TRAIL_FILTER === 'correction' && e.kind === 'correction');
+  const shown = evs.filter(pass);
+  let lastDay = '', html = '';
+  shown.forEach(e => {
+    const day = String(e.at || '').slice(0, 10);
+    if (day !== lastDay) { html += `<div class="tl-day">${esc(fmtDay(day))}</div>`; lastDay = day; }
+    const k = TRAIL_KIND[e.kind] || TRAIL_KIND.other;
+    const title = e.type === 'Factory received' ? 'F-Recd' : e.type;
+    html += `
+      <div class="tl-item k-${esc(e.kind)}" style="--k:${k.c};">
+        <span class="tl-dot"></span>
+        <div class="tl-body">
+          <div class="tl-top">
+            <span class="tl-title">${esc(title)}</span>
+            ${e.kind === 'correction' ? '<span class="tl-badge">Correction</span>' : ''}
+            ${e.part ? `<span class="chip chip-idle">Part ${esc(e.part)}</span>` : ''}
+            ${e.qty !== '' && e.qty != null && e.kind !== 'sync' ? `<span class="tl-qty">${esc(e.qty)}</span>` : ''}
+          </div>
+          ${e.detail ? `<div class="tl-detail">${esc(e.detail)}</div>` : ''}
+          <div class="tl-meta">${esc(String(e.at || '').slice(11) || '')}${e.at && String(e.at).length > 10 ? ' · ' : ''}${esc(who(e))}</div>
+        </div>
+      </div>`;
+  });
+  const n = k => evs.filter(e => k === 'all' ? true : k === 'sheet' ? ['sync', 'status', 'sheet'].indexOf(e.kind) !== -1
+    : k === 'floor' ? ['receipt', 'build', 'send', 'accept', 'priority'].indexOf(e.kind) !== -1 : e.kind === k).length;
+  const chip = (k, l) => `<button class="tl-filter${TRAIL_FILTER === k ? ' on' : ''}" data-f="${k}">${l} <span>${n(k)}</span></button>`;
+  return `
+    <div class="tl-head">
+      <h3 class="card-h" style="margin:0;">Timeline</h3>
+      <div class="tl-filters">${chip('all', 'All')}${chip('sheet', 'China Master')}${chip('floor', 'Floor')}${chip('correction', 'Corrections')}</div>
+    </div>
+    <p class="card-sub">China Master status changes are recorded from the first sync after this version went live; older status history was never stored.</p>
+    <div class="timeline">${html || '<div class="empty" style="padding:18px;">Nothing of this kind.</div>'}</div>`;
+}
+
+function trailInfo(g, t) {
+  const fact = (k, v) => v ? `<div class="tf"><span>${esc(k)}</span><b>${v}</b></div>` : '';
+  const num = (v, l, c) => `<div class="tn"><b style="${c ? 'color:' + c : ''}">${v}</b><span>${l}</span></div>`;
+  const lines = allLinesOf(g);
+  const locked = lines.filter(l => l.factoryReceived && !l.cancelled);
+  const builds = t ? t.builds.filter(b => b.left > 0) : [];
+  const warns = [];
+  if (g.quantityNote) warns.push(g.quantityNote);
+  (g.sheetNotes || []).forEach(n => warns.push(n.packaging + ': ' + n.note));
+  if (g.hasDiscrepancy) warns.push('A customer accepted fewer units than were sent.');
+
+  const corrections = can('correct') ? `
+    <div class="card tr-fix">
+      <h3 class="card-h">Corrections</h3>
+      <p class="card-sub">Head and Director only. Each one is recorded in the Trail as a correction. ETA, quantities and status are changed in China Master, not here.</p>
+      <div class="fx-row">
+        <label>Priority</label>
+        ${prioControl(g)}
+      </div>
+      <div class="fx-row">
+        <label>Correct an F-Recd count</label>
+        ${locked.length ? `
+        <select id="fx-line">${locked.map(l => `<option value="${esc(l.rowId)}" data-total="${l.total}" data-was="${l.qtyReceived}">Part ${esc(l.partLetter)} · ${esc(l.packaging)} · ${l.qtyReceived} of ${l.total}</option>`).join('')}</select>
+        <div class="fx-inline">
+          <input type="number" id="fx-qty" min="0" placeholder="Correct count" inputmode="numeric">
+          <input type="text" id="fx-reason" placeholder="Why (optional)">
+          <button class="btn btn-sm btn-primary" id="fx-save">Correct</button>
+        </div>
+        <div class="hint">0 takes the line back to not F-Recd.</div>` : '<div class="hint">No line has been F-Recd yet.</div>'}
+      </div>
+      <div class="fx-row">
+        <label>Reverse a build entered by mistake</label>
+        ${!t ? '<div class="hint">Loading…</div>' : builds.length ? `
+        <select id="fx-build">${builds.map(b => `<option value="${esc(b.logId)}" data-left="${b.left}">${esc(fmtStamp(b.at))} · ${b.qty} by ${esc(person(b.by))}${b.reversed ? ' (' + b.reversed + ' already reversed)' : ''}</option>`).join('')}</select>
+        <div class="fx-inline">
+          <input type="number" id="fx-bqty" min="1" placeholder="Units" inputmode="numeric">
+          <input type="text" id="fx-breason" placeholder="Why (optional)">
+          <button class="btn btn-sm" id="fx-bsave">Reverse</button>
+        </div>
+        <div class="hint">Only units still on the floor (${g.readyToSend}) can be taken back — sent units are out.</div>` : '<div class="hint">No builds to reverse.</div>'}
+      </div>
+      <div class="card-status note hidden status-line" id="fx-msg"></div>
+    </div>` : '';
+
+  return `
+    <div class="card tr-info">
+      <div class="ti-head">
+        <div>
+          <div class="model-title">${prioTag(g)}${modelLabel(g)}</div>
+          <div class="model-meta"><code>${esc(g.consignmentGroup)}</code> · ${esc(g.supplier || '—')}</div>
+        </div>
+        <div style="text-align:right;">${pipeChip(g.pipeline)}</div>
+      </div>
+      ${frecdLine(g)}
+      <div class="tn-grid">
+        ${num(g.totalQty || 0, 'ordered · FR ' + (g.frQty || 0) + ' / BB ' + (g.bbQty || 0))}
+        ${num(g.buildableUnits, 'can build now', g.buildableUnits ? '#15803D' : '')}
+        ${num(g.totalBuilt, 'assembled', 'var(--prod)')}
+        ${num(g.readyToSend, 'delivery pending', g.readyToSend ? '#C2410C' : '')}
+        ${num(g.pendingAcceptance, 'awaiting acceptance', g.pendingAcceptance ? '#5130B0' : '')}
+        ${num(g.deliveredQty, 'delivered' + (g.deliveredQty && g.leftQty ? ' · ' + g.leftQty + ' left' : ''), g.deliveredQty ? '#0B666C' : '')}
+      </div>
+      ${g.parts.length ? partTiles(g) : ''}
+      ${warns.map(w => `<div class="note note-bad" style="margin-top:8px;">${esc(w)}</div>`).join('')}
+      <div class="tf-list">
+        ${fact('Product', esc(g.product))}
+        ${fact('Unique ID', esc((g.uniqueIds || []).join(', ')))}
+        ${fact('Signature model', esc((g.signatureModels || []).join(', ')))}
+        ${fact('Factory model', esc(g.factoryModel))}
+        ${fact('Container', esc((g.containers || []).join(', ')))}
+        ${fact('MGR', esc(g.mgr))}
+        ${fact('Priority', esc(g.priority))}
+        ${fact('FR delivered', g.deliveredTo && g.deliveredTo.FR ? g.deliveredTo.FR.confirmed + ' accepted · ' + g.deliveredTo.FR.pending + ' awaiting' : '')}
+        ${fact('BB delivered', g.deliveredTo && g.deliveredTo.BB ? g.deliveredTo.BB.confirmed + ' accepted · ' + g.deliveredTo.BB.pending + ' awaiting' : '')}
+      </div>
+      <h4 class="ti-sub">Lines in China Master</h4>
+      <div class="tbl-wrap"><table class="lines ti-lines">
+        <thead><tr><th>Part</th><th>Packaging</th><th>Status</th><th>ETA / F-Recd</th><th class="r">Total</th><th class="r">Counted</th></tr></thead>
+        <tbody>${lines.map(l => `<tr class="${l.cancelled ? 'row-cancel' : l.shortBy ? 'row-short' : ''}">
+          <td><b>${esc(l.partLetter)}</b></td>
+          <td><code>${esc(l.packaging)}</code>${l.uniqueId ? `<div class="hint" style="margin:2px 0 0;">${esc(l.uniqueId)}</div>` : ''}</td>
+          <td>${statusChip(l.status)}${l.shortBy ? `<div class="hint" style="margin:3px 0 0;color:#8F5200;font-weight:700;">${l.shortBy} short</div>` : ''}</td>
+          <td>${l.factoryReceived
+            ? `<span class="frecd"><b>F-Recd</b> ${esc(fmtStamp(l.factoryReceivedAt))}</span><div class="hint" style="margin:2px 0 0;">by ${esc(person(l.factoryReceivedBy))}</div>`
+            : `<span class="nw">${esc(fmtDay(l.eta))}</span>${etaChip(l)}`}</td>
+          <td class="r"><b>${l.total || '—'}</b></td>
+          <td class="r">${l.factoryReceived ? l.qtyReceived : '—'}</td></tr>`).join('')}</tbody>
+      </table></div>
+    </div>
+    ${corrections}`;
+}
+
+async function loadTrail(groupKey) {
+  const res = await apiCall('getTrail', { groupKey });
+  if (!res.ok) {
+    const el = document.getElementById('trail-time');
+    if (el && currentPage === 'trail' && currentQuery.g === groupKey) el.innerHTML = `<div class="note note-bad">${esc(res.error || 'Could not load the history.')}</div>`;
+    return;
+  }
+  TRAIL_CACHE[groupKey] = res;
+  if (currentPage === 'trail' && currentQuery.g === groupKey) reRender();
+}
+
+function wireTrail() {
+  const input = document.getElementById('tr-q');
+  const list = document.getElementById('tr-list');
+  const change = document.getElementById('tr-change');
+  if (change) change.onclick = () => { list.hidden = !list.hidden; if (!list.hidden) input.focus(); };
+  if (input) {
+    input.oninput = () => {
+      const q = input.value.trim().toLowerCase();
+      if (q) list.hidden = false;
+      let any = false;
+      list.querySelectorAll('.tp-cons').forEach(c => {
+        let hit = 0;
+        c.querySelectorAll('.tp-model').forEach(m => {
+          const on = !q || m.dataset.s.indexOf(q) !== -1;
+          m.style.display = on ? '' : 'none';
+          if (on) hit++;
+        });
+        c.style.display = hit ? '' : 'none';
+        if (hit) any = true;
+      });
+      document.getElementById('tr-none').classList.toggle('hidden', any);
+    };
+    input.onkeydown = e => {
+      if (e.key === 'Enter') {
+        const first = [...list.querySelectorAll('.tp-model')].find(m => m.style.display !== 'none');
+        if (first) window.location.hash = first.getAttribute('href');
+      }
+    };
+  }
+  document.querySelectorAll('.tl-filter').forEach(b => b.onclick = () => { TRAIL_FILTER = b.dataset.f; reRender(); });
+
+  const gk = currentQuery.g;
+  if (gk && !TRAIL_CACHE[gk] && groupsAll().some(x => x.groupKey === gk)) loadTrail(gk);
+
+  const msg = (text, bad) => { const el = document.getElementById('fx-msg'); if (!el) return; el.classList.remove('hidden'); el.classList.toggle('note-bad', !!bad); el.innerText = text; };
+  const fixBtn = document.getElementById('fx-save');
+  if (fixBtn) fixBtn.onclick = () => {
+    const sel = document.getElementById('fx-line');
+    const opt = sel.options[sel.selectedIndex];
+    const raw = document.getElementById('fx-qty').value.trim();
+    const qty = Number(raw), total = Number(opt.dataset.total), was = Number(opt.dataset.was);
+    if (raw === '' || isNaN(qty) || qty < 0 || Math.floor(qty) !== qty) return msg('Type the correct count as a whole number.', true);
+    if (total && qty > total) return msg('That is more than the line total of ' + total + '.', true);
+    if (qty === was) return msg('That is already the count on this line.', true);
+    if (!confirm('Change the F-Recd count from ' + was + ' to ' + qty + '?' + (qty === 0 ? '\n\nThe line goes back to not F-Recd.' : ''))) return;
+    delete TRAIL_CACHE[gk];
+    save(fixBtn, 'Saving…', 'correctReceipt', { rowId: sel.value, qty, reason: document.getElementById('fx-reason').value },
+      'F-Recd count corrected to ' + qty + '.');
+  };
+  const bBtn = document.getElementById('fx-bsave');
+  if (bBtn) bBtn.onclick = () => {
+    const sel = document.getElementById('fx-build');
+    const left = Number(sel.options[sel.selectedIndex].dataset.left);
+    const qty = Number(document.getElementById('fx-bqty').value);
+    if (!qty || qty <= 0 || Math.floor(qty) !== qty) return msg('Type how many units to take back.', true);
+    if (qty > left) return msg('Only ' + left + ' unit(s) of that build are left to reverse.', true);
+    if (!confirm('Take back ' + qty + ' built unit(s)? The parts return to "can build".')) return;
+    delete TRAIL_CACHE[gk];
+    save(bBtn, 'Saving…', 'reverseBuild', { logId: sel.value, qty, reason: document.getElementById('fx-breason').value },
+      qty + ' unit(s) reversed.');
+  };
 }
 
 /* ---------- Reports ---------- */
@@ -1751,7 +2209,7 @@ const PHASES = [
   { name: 'Ordering',      statuses: ['Formal order', 'Production await', 'Production', 'Cancel'] },
   { name: 'Shipping',      statuses: ['Loaded', 'Short load', 'Foreign banking', 'Local banking', 'Clearance', 'On road'] },
   { name: 'Arrived',       statuses: ['Recently received', 'Already received'] },
-  { name: 'At the factory', statuses: ['Factory received'] }
+  { name: 'At the factory · F-Recd', statuses: ['Factory received'] }
 ];
 
 function statusTiles() {
@@ -1767,11 +2225,12 @@ function statusTiles() {
 
     if (ph.statuses.length === 1) {
       const st = ph.statuses[0], v = stat(st), c = STATUS_STYLE[st];
+      const shortLines = groups.reduce((n, g) => n + allLinesOf(g).filter(l => l.shortBy).length, 0);
       const inner = `
         <div class="ph-head"><span class="ph-step">${pi + 1}</span><span class="ph-name">${esc(ph.name)}</span></div>
         <div class="ph-hero-v">${v.models}</div>
-        <div class="ph-hero-l">model${v.models === 1 ? '' : 's'} factory received</div>
-        <div class="ph-hero-f">${v.lines} line${v.lines === 1 ? '' : 's'} counted on the website</div>`;
+        <div class="ph-hero-l">model${v.models === 1 ? '' : 's'} F-Recd</div>
+        <div class="ph-hero-f">${v.lines} line${v.lines === 1 ? '' : 's'} counted${shortLines ? ` · <b>${shortLines} short</b>` : ''}</div>`;
       return v.models
         ? `<a class="phase phase-hero" style="${styleVars(c)}" href="${link(st)}">${inner}</a>`
         : `<div class="phase phase-hero is-zero" style="${styleVars(c)}">${inner}</div>`;
@@ -1828,7 +2287,7 @@ function flowTiles() {
 }
 
 function customerStats(code) {
-  let ordered = 0, delivered = 0, awaiting = 0, owedLanded = 0;
+  let ordered = 0, delivered = 0, awaiting = 0, left = 0;
   groupsAll().forEach(g => {
     if (g.fullyCancelled) return;
     const want = code === 'FR' ? (g.frQty || 0) : (g.bbQty || 0);
@@ -1836,9 +2295,9 @@ function customerStats(code) {
     ordered += want;
     delivered += got.confirmed || 0;
     awaiting += got.pending || 0;
-    if (g.anyArrived) owedLanded += Math.max(0, want - (got.confirmed || 0) - (got.pending || 0));
+    left += Math.max(0, want - (got.confirmed || 0) - (got.pending || 0));
   });
-  return { ordered, delivered, awaiting, owedLanded };
+  return { ordered, delivered, awaiting, left };
 }
 
 function customerBoxes() {
@@ -1849,16 +2308,16 @@ function customerBoxes() {
       <a class="cust ${cls}" href="#/delivery">
         <div class="c-top"><span class="c-code">${code}</span><span class="c-tag">${c.ordered} ordered in total</span></div>
         <div class="c-main">
-          <div><div class="c-num">${c.owedLanded}</div><div class="c-lab">still to deliver from stock that has landed</div></div>
-          <div><div class="c-num" style="color:#5130B0;">${c.awaiting}</div><div class="c-lab">sent, awaiting acceptance</div></div>
-          <div><div class="c-num" style="color:#0B666C;">${c.delivered}</div><div class="c-lab">delivered</div></div>
+          <div><div class="c-num" style="color:#0B666C;">${c.delivered}</div><div class="c-lab">delivered — accepted</div></div>
+          <div><div class="c-num" style="color:#5130B0;">${c.awaiting}</div><div class="c-lab">awaiting acceptance</div></div>
+          <div><div class="c-num">${c.left}</div><div class="c-lab">left to deliver</div></div>
         </div>
       </a>`;
   };
   return `
     <div class="dash-section">
       <div class="dash-head"><h2>FR and BB</h2>
-        <span class="sub">${onFloor ? onFloor + ' assembled unit' + (onFloor === 1 ? '' : 's') + ' on the floor, ready to send' : 'nothing assembled on the floor right now'}</span></div>
+        <span class="sub">${onFloor ? 'Delivery pending: ' + onFloor + ' assembled unit' + (onFloor === 1 ? '' : 's') + ' on the floor' : 'no assembled units waiting on the floor'}</span></div>
       <div class="cust-grid">${box('FR', 'cust-fr')}${box('BB', 'cust-bb')}</div>
     </div>`;
 }
@@ -1866,7 +2325,7 @@ function customerBoxes() {
 function partChips(g) {
   return g.parts.map(p => {
     const cls = p.fullyIn ? 'chip-ok' : (p.overdue ? 'chip-bad' : (p.arrived || p.awaitingFactory ? 'chip-warn' : 'chip-idle'));
-    return `<span class="chip ${cls}">${esc(p.partLetter)} ${p.qtyReceived}/${p.qtyExpected}</span>`;
+    return `<span class="chip ${cls}">${esc(p.partLetter)} ${p.qtyReceived}/${p.qtyExpected}${p.receivingDone && p.qtyShort ? ' · ' + p.qtyShort + ' short' : ''}</span>`;
   }).join('');
 }
 
@@ -1875,19 +2334,20 @@ function atAGlance() {
   if (!groups.length) return '';
   return `
     <div class="dash-section">
-      <div class="dash-head"><h2>Model tracker</h2><span class="sub">${groups.length} models from China Master · most urgent first · click one to open it</span></div>
+      <div class="dash-head"><h2>Model tracker</h2><span class="sub">${groups.length} models from China Master · most urgent first · click one for its Trail</span></div>
       <div class="glance">${groups.map(g => `
-        <a class="gtile prio-${esc(g.priority.toLowerCase())}${g.overdueParts ? ' late' : ''}" href="#/consignments?q=${encodeURIComponent(g.consignmentGroup)}">
+        <a class="gtile prio-${esc(g.priority.toLowerCase())}${g.overdueParts ? ' late' : ''}" href="#/trail?g=${encodeURIComponent(g.groupKey)}">
           <div class="g-top">
             <div><div class="g-model">${prioTag(g)}${modelLabel(g)}</div>
               <div class="g-meta">${esc(g.consignmentGroup)} · ${esc(g.supplier || '—')}</div></div>
             ${pipeChip(g.pipeline)}
           </div>
           <div class="g-parts">${partChips(g)}</div>
+          <div class="g-when">${g.fRecdAt ? frecdTag(g.fRecdAt, g.fRecdBy) : (g.nextEta ? 'ETA ' + esc(fmtDay(g.nextEta)) : '')}</div>
           <div class="g-stats">
             <span><b style="color:${g.buildableUnits ? '#15803D' : 'inherit'};">${g.buildableUnits}</b> can build</span>
             <span><b>${g.totalBuilt}</b> built</span>
-            <span><b>${g.totalConfirmed}</b> delivered</span>
+            <span><b style="color:${g.deliveredQty ? '#0B666C' : 'inherit'};">${g.deliveredQty}</b> delivered${g.deliveredQty && g.leftQty ? ' · ' + g.leftQty + ' left' : ''}</span>
           </div>
         </a>`).join('')}</div>
     </div>`;
@@ -1902,7 +2362,7 @@ function waitingOnParts() {
         <div class="mr-body">
           <div class="mr-title">${prioTag(g)}${modelLabel(g)} <span class="hint" style="margin:0;display:inline;">· ${esc(g.consignmentGroup)}</span></div>
           <div class="mr-sub">${missing.map(p => 'Part ' + esc(p.partLetter) + ' ' + p.qtyReceived + '/' + p.qtyExpected +
-            (p.overdue ? ' — ' + p.daysLate + ' days late' : (p.awaitingFactory ? ' — in the country, not factory received' : (p.nextEta ? ' — due ' + fmtDay(p.nextEta) : '')))).join(' · ')}</div>
+            (p.overdue ? ' — ' + p.daysLate + ' days late' : (p.awaitingFactory ? ' — in the country, not F-Recd' : (p.nextEta ? ' — due ' + fmtDay(p.nextEta) : '')))).join(' · ')}</div>
         </div>
         <div class="mr-end">${missing.map(p => statusChip(p.importStatus)).join(' ')}</div>
       </a>`;
@@ -2085,6 +2545,46 @@ function wireDeliveryChart() {
   });
 }
 
+/* Sits under the production chart so the two left-hand cards together match
+   the height of the FR / BB chart beside them, which scrolls inside itself. */
+function outputCard() {
+  const since = (APP.buildsByDay && APP.buildsByDay[0]) ? APP.buildsByDay[0].day : '';
+  const built = (APP.buildsByDay || []).reduce((s, d) => s + d.units, 0);
+  let sent = 0, accepted = 0;
+  const acc = { FR: 0, BB: 0 };
+  (APP.deliveries || []).forEach(d => {
+    if (String(d.Timestamp || '').slice(0, 10) >= since) sent += Number(d.QtyOut) || 0;
+    if (d.Status !== 'pending' && String(d.ConfirmedAt || '').slice(0, 10) >= since) {
+      const q = Number(d.ConfirmedQty) || 0;
+      accepted += q;
+      const c = String(d.CustomerCode || '').toUpperCase();
+      if (acc[c] !== undefined) acc[c] += q;
+    }
+  });
+  const onFloor = groupsAll().reduce((s, g) => s + (g.readyToSend || 0), 0);
+  const awaiting = groupsAll().reduce((s, g) => s + (g.pendingAcceptance || 0), 0);
+  const split = acc.FR + acc.BB;
+  const stat = (v, l, c, href) => `<a class="os-stat" href="${href}"><b style="color:${c};">${v}</b><span>${l}</span></a>`;
+  return `
+    <div class="card">
+      <h3 class="card-h">Output, last 30 days</h3>
+      <p class="card-sub">From the floor to the customer.</p>
+      <div class="os-grid">
+        ${stat(built, 'assembled', 'var(--prod)', '#/tile?k=flow:assembled')}
+        ${stat(sent, 'sent out', '#C2410C', '#/reports')}
+        ${stat(accepted, 'delivered', '#0B666C', '#/tile?k=flow:delivered')}
+      </div>
+      <div class="os-split">
+        <div class="os-bar">${split ? `<i style="width:${acc.FR / split * 100}%;background:var(--fr);"></i><i style="width:${acc.BB / split * 100}%;background:var(--bb);"></i>` : ''}</div>
+        <div class="os-leg"><span><i style="background:var(--fr);"></i>FR ${acc.FR}</span><span><i style="background:var(--bb);"></i>BB ${acc.BB}</span></div>
+      </div>
+      <div class="os-now">
+        <a href="#/delivery"><b>${onFloor}</b> delivery pending — on the floor</a>
+        <a href="#/acceptance"><b>${awaiting}</b> awaiting acceptance</a>
+      </div>
+    </div>`;
+}
+
 /* ---------- Still to arrive ---------- */
 
 function stillToArrive() {
@@ -2105,8 +2605,9 @@ function stillToArrive() {
             </div>
             <div class="a-meta"><code>${esc(g.consignmentGroup)}</code> · ${esc(g.supplier || '—')} · ${g.totalQty || '—'} units</div>
             <div class="a-parts">${partChips(g)}</div>
+            ${g.fRecdAt ? `<div class="a-meta">${frecdTag(g.fRecdAt, g.fRecdBy)}</div>` : ''}
             <div class="a-meta">${g.awaitingFactory
-              ? g.awaitingFactory + ' line' + (g.awaitingFactory === 1 ? '' : 's') + ' in the country — waiting for factory receipt'
+              ? g.awaitingFactory + ' line' + (g.awaitingFactory === 1 ? '' : 's') + ' in the country — waiting to be F-Recd'
               : (g.nextEta ? 'Next part due ' + esc(fmtDay(g.nextEta)) : 'No ETA on the remaining parts')}</div>
           </a>`;
       }).join('')}</div>` : '<div class="empty">Every model has fully arrived.</div>'}
@@ -2121,10 +2622,11 @@ function attentionItems() {
     const name = plainModel(g) + ' · ' + g.consignmentGroup;
     const q = encodeURIComponent(g.consignmentGroup);
     const lines = allLinesOf(g);
+    const trailHref = '#/trail?g=' + encodeURIComponent(g.groupKey);
 
     const awaiting = lines.filter(l => l.receivedOnSheet && !l.factoryReceived && !l.cancelled);
     if (awaiting.length) items.push({ rank: 3, sev: 'high', ico: '!', href: '#/receiving?q=' + q,
-      title: name + ' — received in China Master, not factory received',
+      title: name + ' — received in China Master, not F-Recd',
       sub: awaiting.map(l => l.packaging).join(', ') + '. It cannot go to Assembly until it is.' });
 
     const shorts = lines.filter(l => l.shortLoad && !l.factoryReceived && !l.cancelled);
@@ -2132,18 +2634,24 @@ function attentionItems() {
       title: name + ' — short load to count',
       sub: shorts.map(l => l.packaging + ' (' + l.total + ' on the line)').join(', ') });
 
+    const shortLines = lines.filter(l => l.shortBy && !l.cancelled);
+    if (shortLines.length) items.push({ rank: 2, sev: 'mid', ico: '−', href: '#/trail?g=' + encodeURIComponent(g.groupKey),
+      title: name + ' — F-Recd short',
+      sub: shortLines.map(l => 'Part ' + l.partLetter + ': ' + l.qtyReceived + ' of ' + l.total + ', ' + l.shortBy + ' short').join(' · ') +
+        (g.shortUnits ? '. The model can reach ' + g.maxUnits + ' of ' + g.totalQty + ' units.' : '') });
+
     if (g.buildableUnits > 0) items.push({ rank: 2, sev: 'mid', ico: 'A', href: '#/assembly?q=' + q,
       title: name + ' — received but not assembled',
       sub: g.buildableUnits + ' unit' + (g.buildableUnits === 1 ? '' : 's') + ' can be built from parts on the floor.' });
 
-    (g.sheetNotes || []).forEach(n => items.push({ rank: 3, sev: 'high', ico: 'Δ', href: '#/consignments?q=' + q,
-      title: name + ' — ' + (n.note.indexOf('No longer') === 0 ? 'removed from China Master' : 'changed in China Master after factory receipt'),
+    (g.sheetNotes || []).forEach(n => items.push({ rank: 3, sev: 'high', ico: 'Δ', href: trailHref,
+      title: name + ' — ' + (n.note.indexOf('No longer') === 0 ? 'removed from China Master' : 'China Master changed after F-Recd'),
       sub: n.packaging + ': ' + n.note }));
 
     if (g.totalsDisagree) items.push({ rank: 2, sev: 'mid', ico: '≠', href: '#/consignments?q=' + q,
       title: name + ' — parts disagree on quantity', sub: g.quantityNote });
 
-    if (g.hasDiscrepancy) items.push({ rank: 3, sev: 'high', ico: '!', href: '#/consignments?q=' + q,
+    if (g.hasDiscrepancy) items.push({ rank: 3, sev: 'high', ico: '!', href: trailHref,
       title: name + ' — delivery discrepancy', sub: 'A customer accepted fewer units than were sent.' });
   });
 
@@ -2198,7 +2706,7 @@ function activityCard() {
 
 function renderDashboard() {
   const groups = groupsAll();
-  const syncBar = (user && user.level <= 1) ? `
+  const syncBar = can('sync') ? `
     <div class="sync-bar">
       <div class="s-text">China Master last synced <b>${APP.lastSync ? esc(new Date(APP.lastSync).toLocaleString()) : 'never'}</b>
         <span class="hint" style="display:block;margin-top:2px;">${esc(APP.dropboxPath || '')}</span></div>
@@ -2244,9 +2752,12 @@ function renderDashboard() {
       ${upcomingParts()}
     </div>
 
-    <div class="two-col dash-section">
-      ${productionChart()}
-      ${deliveryChart()}
+    <div class="chart-row dash-section">
+      <div class="chart-stack">
+        ${productionChart()}
+        ${outputCard()}
+      </div>
+      <div class="chart-fill">${deliveryChart()}</div>
     </div>
 
     ${stillToArrive()}
@@ -2288,7 +2799,7 @@ function runMasterSearch(q) {
   if (!total) { el.innerHTML = `<div class="empty" style="padding:22px;">Nothing matches “${esc(q)}”.</div>`; return; }
 
   el.innerHTML =
-    msGroup('Models', models.slice(0, LIMIT).map(g => msHit('#/consignments?q=' + encodeURIComponent(g.consignmentGroup),
+    msGroup('Models', models.slice(0, LIMIT).map(g => msHit('#/trail?g=' + encodeURIComponent(g.groupKey),
       prioTag(g) + modelLabel(g) + ' <span class="h-meta">' + esc(g.consignmentGroup) + '</span>',
       esc(g.supplier) + ' · ' + esc(g.pipeline) + ' · ' + g.buildableUnits + ' can build')), models.length) +
     msGroup('Lines', lines.slice(0, LIMIT).map(({ g, l }) => msHit('#/consignments?q=' + encodeURIComponent(l.packaging),
@@ -2315,6 +2826,7 @@ const RENDERERS = {
   acceptance: renderAcceptance,
   needsreview: renderNeedsReview,
   reports: renderReports,
+  trail: renderTrail,
   activity: renderActivity,
   tile: renderTile
 };
@@ -2421,11 +2933,14 @@ function wirePageHandlers(pageId) {
     if (t) t.onclick = () => { document.getElementById('att-more').classList.remove('hidden'); t.remove(); };
   }
 
-  if (pageId === 'consignments') {
+  if (pageId === 'trail') wireTrail();
+
+  if (pageId === 'consignments' || pageId === 'trail') {
     document.querySelectorAll('.prio-sel').forEach(sel => {
       sel.onchange = async () => {
         const was = sel.className;
         sel.disabled = true;
+        delete TRAIL_CACHE[sel.dataset.groupkey];
         const res = await apiCall('setPriority', { groupKey: sel.dataset.groupkey, priority: sel.value });
         if (res.ok) {
           if (!takeApp(res)) await reload();
@@ -2445,12 +2960,26 @@ function wirePageHandlers(pageId) {
       const input = btn.closest('tr').querySelector('.rcv-qty');
       onEnter(input, btn);
       btn.onclick = () => {
-        const qty = Number(input.value);
-        const max = Number(input.max) || 0;
-        if (!qty || qty <= 0) { cardMsg(btn, 'Type how many of ' + btn.dataset.pk + ' are on the floor.', true); input.focus(); return; }
-        if (max && qty > max) { cardMsg(btn, 'That is more than the line total of ' + max + '.', true); return; }
+        const raw = input.value.trim();
+        const qty = Number(raw);
+        const total = Number(btn.dataset.total) || 0;
+        const pk = btn.dataset.pk;
+        if (btn.dataset.mode === 'correct') {
+          if (raw === '' || isNaN(qty) || qty < 0) { cardMsg(btn, 'Type the correct count for ' + pk + ' (0 undoes the F-Recd).', true); input.focus(); return; }
+          if (total && qty > total) { cardMsg(btn, 'That is more than the line total of ' + total + '.', true); return; }
+          const reason = prompt('Correct ' + pk + ' from ' + btn.dataset.was + ' to ' + qty + '.\nWhy? (shown in the Trail)', '');
+          if (reason === null) return;
+          delete TRAIL_CACHE[btn.closest('.model-block').dataset.groupkey];
+          save(btn, 'Saving…', 'correctReceipt', { rowId: btn.dataset.rowid, qty, reason },
+            'Corrected ' + pk + ' to ' + qty + '.');
+          return;
+        }
+        if (!qty || qty <= 0) { cardMsg(btn, 'Type how many of ' + pk + ' are on the floor.', true); input.focus(); return; }
+        if (total && qty > total) { cardMsg(btn, 'That is more than the line total of ' + total + '.', true); return; }
+        if (total && qty < total &&
+            !confirm(qty + ' of ' + total + ' on ' + pk + '?\n\nThis is final: the line becomes F-Recd · ' + (total - qty) + ' short.')) return;
         save(btn, 'Saving…', 'recordReceipt', { rowId: btn.dataset.rowid, qty },
-          'Factory received ' + qty + ' on ' + btn.dataset.pk + '.');
+          'F-Recd ' + qty + ' on ' + pk + (total && qty < total ? ' — ' + (total - qty) + ' short.' : '.'));
       };
     });
   }
