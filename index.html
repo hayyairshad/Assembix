@@ -506,8 +506,8 @@ a.phase-hero:hover{box-shadow:0 6px 16px rgba(5,150,105,0.14);}
 .phase-hero.is-zero{opacity:.55;}
 
 /* ===== DASHBOARD ROW 2: process strip ===== */
-.flow{display:grid;grid-template-columns:repeat(7,1fr);gap:14px;}
-@media (max-width:1280px){.flow{grid-template-columns:repeat(4,1fr);}}
+.flow{display:grid;grid-template-columns:repeat(8,1fr);gap:12px;}
+@media (max-width:1500px){.flow{grid-template-columns:repeat(4,1fr);}}
 @media (max-width:640px){.flow{grid-template-columns:repeat(2,1fr);}}
 .flow-step{position:relative;display:flex;flex-direction:column;padding:14px 14px 13px;border-radius:14px;text-decoration:none;color:inherit;
 background:var(--surface);border:1px solid var(--border);box-shadow:0 1px 2px rgba(124,45,18,0.04);
@@ -602,7 +602,7 @@ text-decoration:none;color:inherit;background:#FFFBF8;font-size:12.5px;}
 .trail-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:18px;align-items:start;}
 .trail-side{position:sticky;top:84px;display:flex;flex-direction:column;gap:18px;}
 .trail-side .card + .card{margin-top:0;}
-@media (max-width:1100px){.trail-grid{grid-template-columns:minmax(0,1fr);}.trail-side{position:static;}}
+@media (max-width:1280px){.trail-grid{grid-template-columns:minmax(0,1fr);}.trail-side{position:static;}}
 .loading-line{display:flex;align-items:center;gap:10px;color:var(--text-soft);font-size:13px;padding:20px 4px;}
 .loading-line .spinner{margin:0;width:18px;height:18px;}
 .tl-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
@@ -628,7 +628,8 @@ color:var(--text-soft);cursor:pointer;font-family:inherit;}
 .tl-detail{font-size:12px;color:var(--text);margin-top:3px;line-height:1.45;word-break:break-word;}
 .tl-meta{font-size:11px;color:var(--text-soft);margin-top:3px;}
 .ti-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;}
-.tn-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0;}
+.tn-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0;}
+.tn-grid .tn:first-child{grid-row:span 2;display:flex;flex-direction:column;justify-content:center;}
 .tn{background:#FFF9F4;border:1px solid var(--border-soft);border-radius:10px;padding:9px 10px;}
 .tn b{display:block;font-size:20px;line-height:1.1;font-family:"Plus Jakarta Sans",sans-serif;}
 .tn span{font-size:11px;color:var(--text-soft);font-weight:600;}
@@ -637,7 +638,10 @@ color:var(--text-soft);cursor:pointer;font-family:inherit;}
 .tf span{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-soft);font-weight:700;}
 .tf b{font-weight:600;word-break:break-word;}
 .ti-sub{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-soft);margin:18px 0 4px;}
-.ti-lines td,.ti-lines th{padding:7px 8px;font-size:12px;}
+.ti-lines td,.ti-lines th{padding:7px 6px;font-size:12px;}
+.ti-lines code{font-size:11px;white-space:nowrap;}
+.ti-lines .chip{font-size:10.5px;padding:2px 7px;}
+.ti-lines .frecd{font-size:11px;padding:1px 6px;}
 .tr-fix .fx-row{padding:12px 0;border-top:1px solid var(--border-soft);}
 .tr-fix .fx-row:first-of-type{border-top:none;padding-top:4px;}
 .tr-fix .fx-inline{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
@@ -645,6 +649,25 @@ color:var(--text-soft);cursor:pointer;font-family:inherit;}
 .tr-fix .fx-inline input[type=text]{flex:1;min-width:140px;}
 .tr-fix .prio-sel{max-width:180px;}
 @media (max-width:640px){.tn-grid{grid-template-columns:1fr 1fr;}.tf-list{grid-template-columns:1fr;}.os-grid{grid-template-columns:1fr 1fr 1fr;}}
+
+/* ===== PI, cartons, sub factory, saving ===== */
+.pi{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:#3F4E63;background:#EEF2F7;border:1px solid #D5DEEA;border-radius:7px;padding:2px 8px;white-space:nowrap;}
+.pi b{font-weight:800;}
+.pi i{font-style:normal;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;background:#fff;border-radius:4px;padding:0 4px;margin-left:2px;}
+.pi.pi-soon{background:#FEF3C7;border-color:#FCD98A;color:#8A5300;}
+.pi.pi-late{background:#FEE2E2;border-color:#FBCFCF;color:#991B1B;}
+.pi.pi-done{background:#E6F6EF;border-color:#BFE8D6;color:#075A41;}
+.pack-form{display:grid;grid-template-columns:78px 86px 1fr;gap:6px;margin-top:6px;}
+.pack-form input{padding:6px 8px;font-size:12px;border-radius:7px;}
+.data-table .sub.pack,.sub.pack{color:#3F4E63;font-weight:600;}
+.pack-note{font-style:italic;}
+.sub-check{display:flex;align-items:center;gap:9px;margin:12px 0 0;text-transform:none;letter-spacing:0;font-size:12.5px;font-weight:500;color:var(--text);cursor:pointer;}
+.sub-check input{width:16px;height:16px;margin:0;accent-color:#DB2777;flex:0 0 auto;}
+.saving-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#F59E0B;margin-right:6px;vertical-align:1px;animation:pulse 1s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.stale{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:300;background:#2B1206;color:#fff;font-size:12.5px;font-weight:600;
+padding:8px 14px;border-radius:99px;box-shadow:0 8px 24px rgba(0,0,0,.2);display:flex;align-items:center;gap:8px;}
+.spin-sm{width:12px;height:12px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
 
 /* ===== Sidebar icons ===== */
 .nav-item .ni{display:inline-flex;align-items:center;gap:10px;}
@@ -764,6 +787,7 @@ const PAGES = [
   { id: 'receiving',    label: 'Receiving',    group: 'Warehouse', filter: true, sort: true, count: () => countReceiving() },
   { id: 'assembly',     label: 'Assembly',     group: 'Warehouse', filter: true, sort: true, count: () => countAssembly() },
   { id: 'delivery',     label: 'Delivery',     group: 'Output',    filter: true, sort: true, count: () => countDelivery() },
+  { id: 'subfactory',   label: 'Sub factory',  group: 'Output',    filter: true, sort: true, count: () => groupsAll().filter(g => g.subStock > 0).length },
   { id: 'acceptance',   label: 'Acceptance',   group: 'Output',    filter: true, sort: true, count: () => countAcceptance() },
   { id: 'needsreview',  label: 'Needs review', group: 'Output',    filter: true, count: () => (APP.needsReview || []).length },
   { id: 'trail',        label: 'Trail',        group: 'History',   filter: false },
@@ -803,6 +827,7 @@ const PIPE_STYLE = {
   'Can build':            { bg: '#DEF5E7', fg: '#166236', dot: '#22C55E' },
   'Delivery pending':     { bg: '#FFEAD5', fg: '#9A3412', dot: '#F97316' },
   'Awaiting acceptance':  { bg: '#EDE8FE', fg: '#5130B0', dot: '#8B5CF6' },
+  'In sub factory':       { bg: '#FCE7F3', fg: '#9D174D', dot: '#DB2777' },
   'Delivered':            { bg: '#D3F2E6', fg: '#075A41', dot: '#059669' },
   'Delivery discrepancy': { bg: '#FEE2E2', fg: '#991B1B', dot: '#EF4444' }
 };
@@ -819,6 +844,8 @@ const FLOW_TILES = [
     foot: 'built so far',                  pred: g => g.totalBuilt > 0, value: g => g.totalBuilt },
   { k: 'pending',   label: 'Delivery pending', unit: 'units',  color: '#F59E0B', fg: '#8F5200',
     foot: 'assembled, still on the floor', pred: g => g.readyToSend > 0, value: g => g.readyToSend },
+  { k: 'sub',       label: 'Sub factory',      unit: 'units',  color: '#DB2777', fg: '#9D174D',
+    foot: 'made, not taken yet',           pred: g => g.subStock > 0, value: g => g.subStock },
   { k: 'acceptance',label: 'Awaiting acceptance', unit: 'units', color: '#8B5CF6', fg: '#5130B0',
     foot: 'sent, not yet accepted',        pred: g => g.pendingAcceptance > 0, value: g => g.pendingAcceptance },
   { k: 'delivered', label: 'Delivered',        unit: 'units',  color: '#14B8A6', fg: '#0B666C',
@@ -884,8 +911,22 @@ async function apiCall(action, payload = {}) {
 
 /* Every save hands back fresh data in the same response, so the page redraws
    at once from it instead of making a second slow round trip. */
+/* The last data this browser saw is kept, so opening the site shows it at
+   once and refreshes behind it, instead of a spinner for several seconds. */
+const APP_CACHE_KEY = 'assembix_app';
+function rememberApp() {
+  try { if (APP && session) localStorage.setItem(APP_CACHE_KEY, JSON.stringify({ at: Date.now(), app: APP })); } catch (e) {}
+}
+function cachedApp() {
+  try {
+    const c = JSON.parse(localStorage.getItem(APP_CACHE_KEY) || 'null');
+    return c && c.app && c.app.user ? c : null;
+  } catch (e) { return null; }
+}
+function forgetApp() { try { localStorage.removeItem(APP_CACHE_KEY); } catch (e) {} }
+
 function takeApp(res) {
-  if (res && res.app) { APP = res.app; clearTrails(); return true; }
+  if (res && res.app) { APP = res.app; clearTrails(); rememberApp(); return true; }
   return false;
 }
 
@@ -895,7 +936,7 @@ function clearTrails() { if (typeof TRAIL_CACHE !== 'undefined') Object.keys(TRA
 async function reload() {
   clearTrails();
   const res = await apiCall('getAppData');
-  if (res.ok) { APP = res; route(); }
+  if (res.ok) { APP = res; rememberApp(); route(); }
   else if (!res.authFailed) toast(res.error || 'Could not refresh.');
   return res;
 }
@@ -927,10 +968,27 @@ function showSignInForm(message) {
   try { if (typeof google !== 'undefined' && google.accounts && !user) google.accounts.id.prompt(); } catch (e) {}
 }
 
+function showApp() {
+  document.getElementById('login-status').innerText = '';
+  document.documentElement.classList.remove('restoring');
+  document.getElementById('scr-login').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  document.getElementById('who-name').innerText = user.name || user.email;
+  document.getElementById('who-role').innerText = roleLabel(user);
+  if (!window.__routed) { window.addEventListener('hashchange', route); window.__routed = true; }
+}
+
 async function completeLogin() {
   const restoring = !!session && !pendingIdToken;
   const statusEl = document.getElementById('login-status');
-  if (restoring) {
+  const cache = restoring ? cachedApp() : null;
+  let showingCache = false;
+  if (cache) {
+    APP = cache.app; user = cache.app.user;
+    showApp(); route();
+    showingCache = true;
+    setStale(true);
+  } else if (restoring) {
     document.documentElement.classList.add('restoring');
     document.getElementById('restore-msg').innerText = 'Loading your consignments.';
     document.getElementById('restore-actions').innerHTML = '';
@@ -944,17 +1002,18 @@ async function completeLogin() {
   if (res.ok) {
     APP = res;
     user = res.user;
-    statusEl.innerText = '';
-    document.documentElement.classList.remove('restoring');
-    document.getElementById('scr-login').classList.add('hidden');
-    document.getElementById('app').classList.remove('hidden');
-    document.getElementById('who-name').innerText = user.name || user.email;
-    document.getElementById('who-role').innerText = roleLabel(user);
-    if (!window.__routed) { window.addEventListener('hashchange', route); window.__routed = true; }
-    route();
+    rememberApp();
+    setStale(false);
+    showApp();
+    // Redraw in place: keeps what someone already typed in a filter.
+    if (showingCache) reRender(); else route();
     return;
   }
 
+  if (res.network && showingCache) {
+    setStale(true, 'Offline — showing what was loaded ' + new Date(cache.at).toLocaleString() + '.');
+    return;
+  }
   if (res.network) {
     // Keep the session: the server was unreachable, not the sign-in wrong.
     if (restoring) {
@@ -970,7 +1029,22 @@ async function completeLogin() {
   showSignInForm(res.error || 'Sign-in failed.');
 }
 
+// A thin notice while the saved copy is on screen and fresh data is coming.
+function setStale(on, text) {
+  let el = document.getElementById('stale');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'stale';
+    el.className = 'stale hidden';
+    document.body.appendChild(el);
+  }
+  el.innerHTML = on ? `<span class="spin-sm"></span>${esc(text || 'Updating to the latest data…')}` : '';
+  el.classList.toggle('hidden', !on);
+}
+
 function handleSessionExpiry(message) {
+  forgetApp();
+  setStale(false);
   setSession(null);
   pendingIdToken = null;
   user = null;
@@ -1032,6 +1106,40 @@ function deliveredTag(g) {
   return `<span class="chip dlv-chip">Delivered ${g.deliveredQty}${g.leftQty ? ' · ' + g.leftQty + ' left' : ''}</span>`;
 }
 
+/* PI signed date and its countdown. Runs until the model is fully
+   delivered to FR and BB, then states how it finished against the PI. */
+function daysFromToday(ymd) {
+  const d = parseYmd(ymd);
+  if (!d) return null;
+  const t = new Date(); t.setHours(0, 0, 0, 0);
+  return Math.round((d - t) / 86400000);
+}
+function piTag(g, compact) {
+  if (!g.piDate) return '';
+  const moved = g.piMoved ? ` title="Originally ${esc(fmtDay(g.piOriginal))}"` : '';
+  const day = esc(fmtStamp(g.piDate));
+  if (g.fullyDelivered) return `<span class="pi pi-done"${moved}><b>PI</b> ${day} · delivered</span>`;
+  const n = daysFromToday(g.piDate);
+  const cls = n < 0 ? 'pi-late' : n <= 7 ? 'pi-soon' : '';
+  const txt = n === 0 ? 'due today' : n > 0 ? n + ' day' + (n === 1 ? '' : 's') + ' left' : Math.abs(n) + ' day' + (n === -1 ? '' : 's') + ' past PI';
+  return `<span class="pi ${cls}"${moved}><b>PI</b> ${day} · ${txt}${g.piMoved && !compact ? ' <i>moved</i>' : ''}</span>`;
+}
+// For one line: how its F-Recd landed against the PI date.
+function piVsRecd(l) {
+  if (!l.piDate || !l.factoryReceivedAt) return '';
+  const pi = parseYmd(l.piDate), r = parseYmd(String(l.factoryReceivedAt).slice(0, 10));
+  const n = Math.round((r - pi) / 86400000);
+  return n === 0 ? 'on the PI date' : Math.abs(n) + ' day' + (Math.abs(n) === 1 ? '' : 's') + (n > 0 ? ' after PI' : ' before PI');
+}
+function packText(l) {
+  const bits = [];
+  if (l.cartons != null) bits.push(l.cartons + ' cartons');
+  if (l.spareCartons != null) bits.push(l.spareCartons + ' spare');
+  return bits.join(' · ');
+}
+
+function uniqNonEmpty(a) { return a.filter((x, i) => x && a.indexOf(x) === i); }
+
 function trailLink(g) {
   return `<a class="trail-link" href="#/trail?g=${encodeURIComponent(g.groupKey)}" title="Full history of this model">Trail</a>`;
 }
@@ -1043,6 +1151,7 @@ function doLogout() {
       body: JSON.stringify({ action: 'logout', session: tok }) }).catch(() => {});
   }
   setSession(null);
+  forgetApp();
   try { google.accounts.id.disableAutoSelect(); } catch (e) {}
   setTimeout(() => location.reload(), 150);
 }
@@ -1063,12 +1172,11 @@ function doLogout() {
   });
 })();
 
-// A saved session signs you straight in — no Google popup, no waiting for it.
-if (session) completeLogin(); else document.documentElement.classList.remove('restoring');
+
 
 /* ---------- Shell ---------- */
 
-const NAV_ICONS = {"dashboard": "<rect x=\"3\" y=\"3\" width=\"7\" height=\"9\" rx=\"1.5\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"5\" rx=\"1.5\"/><rect x=\"14\" y=\"12\" width=\"7\" height=\"9\" rx=\"1.5\"/><rect x=\"3\" y=\"16\" width=\"7\" height=\"5\" rx=\"1.5\"/>", "consignments": "<path d=\"M3 7h11v9H3z\"/><path d=\"M14 10h4l3 3v3h-7\"/><circle cx=\"7\" cy=\"17.5\" r=\"1.8\"/><circle cx=\"17.5\" cy=\"17.5\" r=\"1.8\"/>", "receiving": "<path d=\"M21 8l-9-5-9 5 9 5 9-5z\"/><path d=\"M3 8v8l9 5 9-5V8\"/>", "assembly": "<path d=\"M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z\"/>", "delivery": "<path d=\"M5 12h14\"/><path d=\"M13 6l6 6-6 6\"/>", "acceptance": "<path d=\"M9 4h6v3H9z\"/><path d=\"M8 5H6v16h12V5h-2\"/><path d=\"M9 14l2 2 4-4\"/>", "needsreview": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 8v5\"/><path d=\"M12 16.5v.5\"/>", "trail": "<circle cx=\"6\" cy=\"5\" r=\"2\"/><circle cx=\"6\" cy=\"19\" r=\"2\"/><circle cx=\"6\" cy=\"12\" r=\"2\"/><path d=\"M6 7v3M6 14v3\"/><path d=\"M11 5h9M11 12h9M11 19h6\"/>", "reports": "<path d=\"M4 20V10\"/><path d=\"M10 20V4\"/><path d=\"M16 20v-7\"/><path d=\"M22 20H2\"/>"};
+const NAV_ICONS = {"dashboard": "<rect x=\"3\" y=\"3\" width=\"7\" height=\"9\" rx=\"1.5\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"5\" rx=\"1.5\"/><rect x=\"14\" y=\"12\" width=\"7\" height=\"9\" rx=\"1.5\"/><rect x=\"3\" y=\"16\" width=\"7\" height=\"5\" rx=\"1.5\"/>", "consignments": "<path d=\"M3 7h11v9H3z\"/><path d=\"M14 10h4l3 3v3h-7\"/><circle cx=\"7\" cy=\"17.5\" r=\"1.8\"/><circle cx=\"17.5\" cy=\"17.5\" r=\"1.8\"/>", "receiving": "<path d=\"M21 8l-9-5-9 5 9 5 9-5z\"/><path d=\"M3 8v8l9 5 9-5V8\"/>", "assembly": "<path d=\"M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z\"/>", "delivery": "<path d=\"M5 12h14\"/><path d=\"M13 6l6 6-6 6\"/>", "subfactory": "<path d=\"M3 21V9l6 4V9l6 4V5l6 4v12z\"/><path d=\"M7 17h2M12 17h2M17 17h2\"/>", "acceptance": "<path d=\"M9 4h6v3H9z\"/><path d=\"M8 5H6v16h12V5h-2\"/><path d=\"M9 14l2 2 4-4\"/>", "needsreview": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 8v5\"/><path d=\"M12 16.5v.5\"/>", "trail": "<circle cx=\"6\" cy=\"5\" r=\"2\"/><circle cx=\"6\" cy=\"19\" r=\"2\"/><circle cx=\"6\" cy=\"12\" r=\"2\"/><path d=\"M6 7v3M6 14v3\"/><path d=\"M11 5h9M11 12h9M11 19h6\"/>", "reports": "<path d=\"M4 20V10\"/><path d=\"M10 20V4\"/><path d=\"M16 20v-7\"/><path d=\"M22 20H2\"/>"};
 
 function renderNav() {
   const nav = document.getElementById('nav');
@@ -1460,6 +1568,7 @@ function modelBlock(g, right, body) {
             ? ` <span class="cons-tag">${esc(g.consignmentGroup)}</span>` : ''}</div>
           <div class="model-meta">${esc(g.supplier || '—')} · ${esc(g.product || '—')}${ids ? ' · ID ' + esc(ids) : ''}${
             g.totalQty ? ' · ' + g.totalQty + ' units (FR ' + (g.frQty || 0) + ' · BB ' + (g.bbQty || 0) + ')' : ''} · ${trailLink(g)}</div>
+          ${g.piDate ? `<div class="model-frecd">${piTag(g)}</div>` : ''}
           ${frecdLine(g)}
         </div>
         <div class="model-right">${right || ''}</div>
@@ -1572,6 +1681,7 @@ const PAGE_HEAD = {
   receiving: () => ({ title: 'Receiving', sub: 'F-Recd a line when it is physically on the floor. Nothing reaches Assembly without it.' }),
   assembly: () => ({ title: 'Assembly', sub: 'Only models you can build right now.' }),
   delivery: () => ({ title: 'Delivery', sub: 'Delivery pending: assembled units still on the floor, ready to go out to FR and BB.' }),
+  subfactory: () => ({ title: 'Sub factory', sub: 'Units already made that FR or BB have not taken yet. Send them from here when they want more.' }),
   acceptance: () => ({ title: 'Acceptance', sub: 'Units sent out and awaiting acceptance. Once accepted they count as delivered.' }),
   trail: q => {
     const g = q.g ? groupsAll().find(x => x.groupKey === q.g) : null;
@@ -1737,7 +1847,9 @@ function renderConsignments() {
       <tr class="${cls.join(' ')}">
         <td data-v="${esc(l.packaging)}"><code>${esc(l.packaging)}</code>
           ${l.uniqueId ? `<div class="sub">${esc(l.uniqueId)}</div>` : ''}
-          ${l.sheetNote ? `<div class="sub sub-bad">${esc(l.sheetNote)}</div>` : ''}</td>
+          ${l.sheetNote ? `<div class="sub sub-bad">${esc(l.sheetNote)}</div>` : ''}
+          ${packText(l) ? `<div class="sub pack">${esc(packText(l))}</div>` : ''}
+          ${l.receiptNotes ? `<div class="sub pack-note">“${esc(l.receiptNotes)}”</div>` : ''}</td>
         <td>${esc(g.supplier || '—')}</td>
         <td>${esc(g.product || '—')}</td>
         <td data-v="${esc(sig)}" class="model-cell">${prioTag(g)}<b>${esc(sig)}</b><div class="sub">${esc(g.factoryModel || '')} · ${trailLink(g)}</div></td>
@@ -1751,6 +1863,8 @@ function renderConsignments() {
           l.qtyReceived ? `<div class="sub">${l.qtyReceived} counted</div>` : ''}</td>` : `
         <td data-v="${esc(l.etd || '')}" class="nw">${esc(fmtDay(l.etd))}</td>
         <td data-v="${esc(l.eta || '')}" class="nw">${esc(fmtDay(l.eta))}${etaChip(l) ? `<div class="eta-chip">${etaChip(l)}</div>` : ''}</td>`}
+        <td data-v="${esc(l.piDate || '')}" class="nw">${l.piDate ? esc(fmtDay(l.piDate)) + `<div class="sub">${esc(
+          l.factoryReceived ? piVsRecd(l) : (() => { const n = daysFromToday(l.piDate); return n === 0 ? 'due today' : n > 0 ? n + ' days left' : Math.abs(n) + ' days past PI'; })())}</div>` : '—'}</td>
         <td>${esc(g.mgr || '—')}</td>
         <td data-v="${PRIO_RANK[g.priority] || 0}">${prioControl(g)}</td>
       </tr>`;
@@ -1763,7 +1877,7 @@ function renderConsignments() {
           <thead><tr>
             ${th('Packaging')}${th('Supplier')}${th('Product')}${th('Model')}
             ${th('FR', 'num', 'r')}${th('BB', 'num', 'r')}${th('Total', 'num', 'r')}
-            ${th('Status', 'num')}${th('ETD / F-Recd')}${th('ETA / by')}${th('MGR')}${th('Priority', 'num')}
+            ${th('Status', 'num')}${th('ETD / F-Recd')}${th('ETA / by')}${th('PI date')}${th('MGR')}${th('Priority', 'num')}
           </tr></thead>
           <tbody>${body}</tbody>
         </table>
@@ -1786,6 +1900,11 @@ function receivingRow(l, done) {
           placeholder="count" aria-label="Count for ${esc(l.packaging)}">
         <button class="btn btn-sm ${l.receivedOnSheet || l.shortLoad ? 'btn-primary' : ''} rcv-btn" data-rowid="${esc(l.rowId)}"
           data-pk="${esc(l.packaging)}" data-total="${l.total || 0}" data-mode="receive">F-Recd</button>
+      </div>
+      <div class="pack-form">
+        <input type="number" min="0" class="rcv-cartons" inputmode="numeric" placeholder="Cartons" aria-label="Cartons">
+        <input type="number" min="0" class="rcv-spare" inputmode="numeric" placeholder="Spare ctns" aria-label="Spare-part cartons">
+        <input type="text" class="rcv-notes" placeholder="Notes" aria-label="Notes" maxlength="500">
       </div>` : '<span class="hint" style="margin:0;">Factory staff F-Recd this</span>';
   } else {
     action = can('correct') ? `
@@ -1803,14 +1922,16 @@ function receivingRow(l, done) {
       <td>${statusChip(l.status, l.shortBy ? ' · ' + l.shortBy + ' short' : '')}</td>
       <td style="white-space:nowrap;">${l.factoryReceived ? frecdTag(l.factoryReceivedAt, l.factoryReceivedBy) : esc(fmtDay(l.eta)) + etaChip(l)}</td>
       <td class="r"><b>${l.total}</b></td>
-      <td class="r">${l.factoryReceived ? `<b style="color:${l.shortBy ? '#8F5200' : '#075A41'};">${l.qtyReceived}</b>` : '—'}</td>
+      <td class="r">${l.factoryReceived ? `${l._saving ? '<span class="saving-dot" title="Saving…"></span>' : ''}<b style="color:${l.shortBy ? '#8F5200' : '#075A41'};">${l.qtyReceived}</b>${
+        packText(l) ? `<div class="hint" style="margin:2px 0 0;">${esc(packText(l))}</div>` : ''}${
+        l.receiptNotes ? `<div class="hint pack-note" style="margin:2px 0 0;">“${esc(l.receiptNotes)}”</div>` : ''}` : '—'}</td>
       <td>${action}</td>
     </tr>`;
 }
 
 function receivingTable(rows) {
   return `<div class="tbl-wrap"><table class="lines">
-    <thead><tr><th>Part</th><th>Packaging</th><th>Status</th><th>ETA / F-Recd</th><th class="r">Total</th><th class="r">Counted</th><th style="width:240px;"></th></tr></thead>
+    <thead><tr><th>Part</th><th>Packaging</th><th>Status</th><th>ETA / F-Recd</th><th class="r">Total</th><th class="r">Counted</th><th style="width:300px;"></th></tr></thead>
     <tbody>${rows}</tbody></table></div>`;
 }
 
@@ -1826,7 +1947,7 @@ function receivingCard(g) {
   const shortDone = done.filter(l => l.shortBy).length;
   return modelBlock(g, right,
     (open.length ? receivingTable(open.map(l => receivingRow(l, false)).join('')) : '') +
-    (done.length ? `<details style="margin-top:8px;"${open.length ? '' : ' open'}><summary class="hint" style="cursor:pointer;">${done.length} line${done.length === 1 ? '' : 's'} F-Recd${
+    (done.length ? `<details style="margin-top:8px;"${!open.length || done.some(l => l._saving) ? ' open' : ''}><summary class="hint" style="cursor:pointer;">${done.length} line${done.length === 1 ? '' : 's'} F-Recd${
       shortDone ? ' · ' + shortDone + ' short' : ''}${can('correct') ? ' — correct a count' : ''}</summary>
       ${receivingTable(done.map(l => receivingRow(l, true)).join(''))}</details>` : '') +
     `<div class="card-status note hidden status-line"></div>`);
@@ -1838,7 +1959,7 @@ function renderReceiving() {
   const open = live.filter(hasOpen);
   const finished = live.filter(g => !hasOpen(g));
 
-  let html = `<div class="note" style="margin-bottom:14px;">Count what is <b>physically on the floor</b> and press F-Recd. The count is final:
+  let html = `<div class="note" style="margin-bottom:14px;">Count what is <b>physically on the floor</b>, add the cartons and spare-part cartons if you have them, and press F-Recd. The count is final:
     fewer than the line total marks it <b>F-Recd · short</b>, and Assembly uses the number you counted.${
     can('correct') ? ' A wrong count can be corrected below or from the model\'s Trail.' : ' If a count is wrong, a Head or Director can correct it.'}</div>`;
   html += open.length
@@ -1909,8 +2030,50 @@ function renderDelivery() {
           <div class="hint dlv-left" data-available="${available}">${available} on the floor</div>
         </div>
       </div>
+      <label class="sub-check"><input type="checkbox" class="dlv-rest" checked>
+        <span>Move whatever FR and BB don't take now to the <b>Sub factory</b></span></label>
       <div class="card-status note hidden status-line"></div>`);
   });
+}
+
+/* ---------- Sub factory ----------
+   Units already assembled that FR or BB did not take yet — the rest of a
+   partial delivery, or what a customer did not accept. They wait here until
+   somebody sends them on, and then go through Acceptance as usual. */
+
+function renderSubFactory() {
+  const groups = groupsAll().filter(g => g.subStock > 0);
+  const total = groups.reduce((s, g) => s + g.subStock, 0);
+  if (!groups.length) return `<div class="empty">The sub factory is empty. When FR or BB take only part of a batch in Delivery, the rest waits here.</div>`;
+  return `<div class="note" style="margin-bottom:14px;"><b>${total}</b> unit${total === 1 ? '' : 's'} waiting across ${groups.length} model${groups.length === 1 ? '' : 's'}.
+      Send them to FR or BB when they want more; they then go to Acceptance.</div>` +
+    sortBar(groups.length) + cardsFor(groups, g => {
+      const fr = (g.deliveredTo && g.deliveredTo.FR) || { confirmed: 0, pending: 0 };
+      const bb = (g.deliveredTo && g.deliveredTo.BB) || { confirmed: 0, pending: 0 };
+      const frLeft = Math.max(0, (g.frQty || 0) - fr.confirmed - fr.pending);
+      const bbLeft = Math.max(0, (g.bbQty || 0) - bb.confirmed - bb.pending);
+      const right = `${deliveredTag(g)}<div class="big-num"><div class="k">In sub factory</div><div class="v" style="color:#9D174D;">${g.subStock}</div></div>`;
+      const body = can('send') ? `
+        <div class="dlv-form">
+          <div class="dlv-cust-field">
+            <label>To FR</label>
+            <input type="number" class="sf-fr" min="0" max="${g.subStock}" placeholder="0" inputmode="numeric" aria-label="Units to FR">
+            <div class="hint">${fr.confirmed} accepted · ${frLeft ? frLeft + ' still owed' : 'nothing owed'}</div>
+          </div>
+          <div class="dlv-cust-field">
+            <label>To BB</label>
+            <input type="number" class="sf-bb" min="0" max="${g.subStock}" placeholder="0" inputmode="numeric" aria-label="Units to BB">
+            <div class="hint">${bb.confirmed} accepted · ${bbLeft ? bbLeft + ' still owed' : 'nothing owed'}</div>
+          </div>
+          <div class="dlv-actions">
+            <button class="btn btn-primary sf-btn" data-groupkey="${esc(g.groupKey)}" data-max="${g.subStock}">Send from sub factory</button>
+            <div class="hint sf-left">${g.subStock} waiting here</div>
+          </div>
+        </div>
+        <div class="card-status note hidden status-line"></div>`
+        : `<div class="role-note">Your role can't send units out. FR ${frLeft} · BB ${bbLeft} still owed.</div>`;
+      return modelBlock(g, right, body);
+    });
 }
 
 /* ---------- Acceptance ---------- */
@@ -1932,7 +2095,7 @@ function renderAcceptance() {
         <tbody>${mine.map(d => `
           <tr class="fx">
             <td><span class="chip" style="background:${d.CustomerCode === 'FR' ? '#FDEBDD' : '#DDF1EE'};color:${d.CustomerCode === 'FR' ? '#9A4318' : '#1D6158'};font-weight:800;">${esc(d.CustomerCode)}</span></td>
-            <td class="r"><b>${esc(d.QtyOut)}</b></td>
+            <td class="r"><b>${esc(d.QtyOut)}</b>${d.FromSub ? '<div class="hint" style="margin:2px 0 0;">from sub factory</div>' : ''}</td>
             <td class="nw">${esc(fmtStamp(d.Timestamp))}</td>
             <td class="hint" style="margin:0;">${esc(person(d.MarkedBy))}</td>
             <td>${mayAccept(d) ? `
@@ -1943,7 +2106,7 @@ function renderAcceptance() {
             </td>
           </tr>`).join('')}</tbody>
       </table></div>
-      <div class="hint">Accepting fewer than were sent records a discrepancy.</div>
+      <div class="hint">Accepting fewer than were sent moves the rest to the Sub factory.</div>
       <div class="card-status note hidden status-line"></div>`);
   });
 }
@@ -1993,6 +2156,7 @@ const TRAIL_KIND = {
   send:       { label: 'Sent',          c: '#F97316' },
   accept:     { label: 'Accepted',      c: '#0D9488' },
   priority:   { label: 'Priority',      c: '#8B5CF6' },
+  sub:        { label: 'Sub factory',   c: '#DB2777' },
   other:      { label: 'Other',         c: '#A1A1AA' }
 };
 
@@ -2042,7 +2206,7 @@ function trailTimeline(t) {
   const who = e => e.user === 'China Master' ? 'China Master' : person(e.user);
   const pass = e => TRAIL_FILTER === 'all' ||
     (TRAIL_FILTER === 'sheet' && (e.kind === 'sync' || e.kind === 'status' || e.kind === 'sheet')) ||
-    (TRAIL_FILTER === 'floor' && ['receipt', 'build', 'send', 'accept', 'priority'].indexOf(e.kind) !== -1) ||
+    (TRAIL_FILTER === 'floor' && ['receipt', 'build', 'send', 'accept', 'priority', 'sub'].indexOf(e.kind) !== -1) ||
     (TRAIL_FILTER === 'correction' && e.kind === 'correction');
   const shown = evs.filter(pass);
   let lastDay = '', html = '';
@@ -2067,7 +2231,7 @@ function trailTimeline(t) {
       </div>`;
   });
   const n = k => evs.filter(e => k === 'all' ? true : k === 'sheet' ? ['sync', 'status', 'sheet'].indexOf(e.kind) !== -1
-    : k === 'floor' ? ['receipt', 'build', 'send', 'accept', 'priority'].indexOf(e.kind) !== -1 : e.kind === k).length;
+    : k === 'floor' ? ['receipt', 'build', 'send', 'accept', 'priority', 'sub'].indexOf(e.kind) !== -1 : e.kind === k).length;
   const chip = (k, l) => `<button class="tl-filter${TRAIL_FILTER === k ? ' on' : ''}" data-f="${k}">${l} <span>${n(k)}</span></button>`;
   return `
     <div class="tl-head">
@@ -2109,6 +2273,19 @@ function trailInfo(g, t) {
         <div class="hint">0 takes the line back to not F-Recd.</div>` : '<div class="hint">No line has been F-Recd yet.</div>'}
       </div>
       <div class="fx-row">
+        <label>Cartons and notes</label>
+        ${locked.length ? `
+        <select id="fx-pline">${locked.map(l => `<option value="${esc(l.rowId)}" data-c="${l.cartons == null ? '' : l.cartons}" data-s="${l.spareCartons == null ? '' : l.spareCartons}" data-n="${esc(l.receiptNotes)}">Part ${esc(l.partLetter)} · ${esc(l.packaging)}${packText(l) ? ' · ' + esc(packText(l)) : ''}</option>`).join('')}</select>
+        <div class="fx-inline">
+          <input type="number" id="fx-c" min="0" placeholder="Cartons" inputmode="numeric">
+          <input type="number" id="fx-s" min="0" placeholder="Spare ctns" inputmode="numeric">
+        </div>
+        <div class="fx-inline">
+          <input type="text" id="fx-n" placeholder="Notes" maxlength="500">
+          <button class="btn btn-sm" id="fx-psave">Save</button>
+        </div>` : '<div class="hint">No line has been F-Recd yet.</div>'}
+      </div>
+      <div class="fx-row">
         <label>Reverse a build entered by mistake</label>
         ${!t ? '<div class="hint">Loading…</div>' : builds.length ? `
         <select id="fx-build">${builds.map(b => `<option value="${esc(b.logId)}" data-left="${b.left}">${esc(fmtStamp(b.at))} · ${b.qty} by ${esc(person(b.by))}${b.reversed ? ' (' + b.reversed + ' already reversed)' : ''}</option>`).join('')}</select>
@@ -2131,18 +2308,22 @@ function trailInfo(g, t) {
         </div>
         <div style="text-align:right;">${pipeChip(g.pipeline)}</div>
       </div>
+      ${g.piDate ? `<div class="model-frecd">${piTag(g)}</div>` : ''}
       ${frecdLine(g)}
       <div class="tn-grid">
         ${num(g.totalQty || 0, 'ordered · FR ' + (g.frQty || 0) + ' / BB ' + (g.bbQty || 0))}
         ${num(g.buildableUnits, 'can build now', g.buildableUnits ? '#15803D' : '')}
         ${num(g.totalBuilt, 'assembled', 'var(--prod)')}
         ${num(g.readyToSend, 'delivery pending', g.readyToSend ? '#C2410C' : '')}
+        ${num(g.subStock || 0, 'in sub factory', g.subStock ? '#9D174D' : '')}
         ${num(g.pendingAcceptance, 'awaiting acceptance', g.pendingAcceptance ? '#5130B0' : '')}
         ${num(g.deliveredQty, 'delivered' + (g.deliveredQty && g.leftQty ? ' · ' + g.leftQty + ' left' : ''), g.deliveredQty ? '#0B666C' : '')}
       </div>
       ${g.parts.length ? partTiles(g) : ''}
       ${warns.map(w => `<div class="note note-bad" style="margin-top:8px;">${esc(w)}</div>`).join('')}
       <div class="tf-list">
+        ${fact('PI signed date', g.piDate ? esc(fmtDay(g.piDate)) + (g.piMoved ? ' <span class="hint" style="display:inline;margin:0;">(originally ' + esc(fmtDay(g.piOriginal)) + ')</span>' : '') : '')}
+        ${fact('F-Recd vs PI', esc(uniqNonEmpty(allLinesOf(g).filter(l => l.factoryReceived).map(l => 'Part ' + l.partLetter + ' ' + piVsRecd(l)).filter(x => !/ $/.test(x))).join(' · ')))}
         ${fact('Product', esc(g.product))}
         ${fact('Unique ID', esc((g.uniqueIds || []).join(', ')))}
         ${fact('Signature model', esc((g.signatureModels || []).join(', ')))}
@@ -2155,16 +2336,15 @@ function trailInfo(g, t) {
       </div>
       <h4 class="ti-sub">Lines in China Master</h4>
       <div class="tbl-wrap"><table class="lines ti-lines">
-        <thead><tr><th>Part</th><th>Packaging</th><th>Status</th><th>ETA / F-Recd</th><th class="r">Total</th><th class="r">Counted</th></tr></thead>
+        <thead><tr><th>Line</th><th>Status</th><th>ETA / F-Recd</th><th class="r">Counted</th></tr></thead>
         <tbody>${lines.map(l => `<tr class="${l.cancelled ? 'row-cancel' : l.shortBy ? 'row-short' : ''}">
-          <td><b>${esc(l.partLetter)}</b></td>
           <td><code>${esc(l.packaging)}</code>${l.uniqueId ? `<div class="hint" style="margin:2px 0 0;">${esc(l.uniqueId)}</div>` : ''}</td>
           <td>${statusChip(l.status)}${l.shortBy ? `<div class="hint" style="margin:3px 0 0;color:#8F5200;font-weight:700;">${l.shortBy} short</div>` : ''}</td>
           <td>${l.factoryReceived
             ? `<span class="frecd"><b>F-Recd</b> ${esc(fmtStamp(l.factoryReceivedAt))}</span><div class="hint" style="margin:2px 0 0;">by ${esc(person(l.factoryReceivedBy))}</div>`
             : `<span class="nw">${esc(fmtDay(l.eta))}</span>${etaChip(l)}`}</td>
-          <td class="r"><b>${l.total || '—'}</b></td>
-          <td class="r">${l.factoryReceived ? l.qtyReceived : '—'}</td></tr>`).join('')}</tbody>
+          <td class="r" style="max-width:110px;"><span class="nw"><b>${l.factoryReceived ? l.qtyReceived : '—'}</b><span class="hint" style="display:inline;margin:0;"> / ${l.total || '—'}</span></span>${packText(l) ? `<div class="hint" style="margin:2px 0 0;">${esc(packText(l))}</div>` : ''}${
+            l.receiptNotes ? `<div class="hint pack-note" style="margin:2px 0 0;">“${esc(l.receiptNotes)}”</div>` : ''}</td></tr>`).join('')}</tbody>
       </table></div>
     </div>
     ${corrections}`;
@@ -2230,6 +2410,18 @@ function wireTrail() {
     save(fixBtn, 'Saving…', 'correctReceipt', { rowId: sel.value, qty, reason: document.getElementById('fx-reason').value },
       'F-Recd count corrected to ' + qty + '.');
   };
+  const pSel = document.getElementById('fx-pline');
+  if (pSel) {
+    const fill = () => { const o = pSel.options[pSel.selectedIndex]; document.getElementById('fx-c').value = o.dataset.c;
+      document.getElementById('fx-s').value = o.dataset.s; document.getElementById('fx-n').value = o.dataset.n; };
+    pSel.onchange = fill; fill();
+    const pb = document.getElementById('fx-psave');
+    pb.onclick = () => {
+      delete TRAIL_CACHE[gk];
+      save(pb, 'Saving…', 'updatePacking', { rowId: pSel.value, cartons: document.getElementById('fx-c').value,
+        spareCartons: document.getElementById('fx-s').value, notes: document.getElementById('fx-n').value }, 'Cartons and notes saved.');
+    };
+  }
   const bBtn = document.getElementById('fx-bsave');
   if (bBtn) bBtn.onclick = () => {
     const sel = document.getElementById('fx-build');
@@ -2351,7 +2543,8 @@ const FLOW_ICONS = {
   assembled:  '<path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/><path d="M3 17l9 5 9-5"/>',
   pending:    '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
   acceptance: '<path d="M9 4h6v3H9z"/><path d="M8 5H6v16h12V5h-2"/><path d="M9 14l2 2 4-4"/>',
-  delivered:  '<circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/>'
+  delivered:  '<circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/>',
+  sub:        '<path d="M3 21V9l6 4V9l6 4V5l6 4v12z"/>'
 };
 
 function flowTiles() {
@@ -2432,9 +2625,10 @@ function atAGlance() {
           </div>
           <div class="g-parts">${partChips(g)}</div>
           <div class="g-when">${g.fRecdAt ? frecdTag(g.fRecdAt, g.fRecdBy) : (g.nextEta ? 'ETA ' + esc(fmtDay(g.nextEta)) : '')}</div>
+          ${g.piDate ? `<div class="g-when">${piTag(g, true)}</div>` : ''}
           <div class="g-stats">
             <span><b style="color:${g.buildableUnits ? '#15803D' : 'inherit'};">${g.buildableUnits}</b> can build</span>
-            <span><b>${g.totalBuilt}</b> built</span>
+            <span><b>${g.totalBuilt}</b> built</span>${g.subStock ? `<span><b style="color:#9D174D;">${g.subStock}</b> sub fac.</span>` : ''}
             <span><b style="color:${g.deliveredQty ? '#0B666C' : 'inherit'};">${g.deliveredQty}</b> delivered${g.deliveredQty && g.leftQty ? ' · ' + g.leftQty + ' left' : ''}</span>
           </div>
         </a>`).join('')}</div>
@@ -2654,6 +2848,7 @@ function stillToArrive() {
             <div class="a-meta"><code>${esc(g.consignmentGroup)}</code> · ${esc(g.supplier || '—')} · ${g.totalQty || '—'} units</div>
             <div class="a-parts">${partChips(g)}</div>
             ${g.fRecdAt ? `<div class="a-meta">${frecdTag(g.fRecdAt, g.fRecdBy)}</div>` : ''}
+            ${g.piDate ? `<div class="a-meta">${piTag(g, true)}</div>` : ''}
             <div class="a-meta">${g.awaitingFactory
               ? g.awaitingFactory + ' line' + (g.awaitingFactory === 1 ? '' : 's') + ' in the country — waiting to be F-Recd'
               : (g.nextEta ? 'Next part due ' + esc(fmtDay(g.nextEta)) : 'No ETA on the remaining parts')}</div>
@@ -2687,6 +2882,13 @@ function attentionItems() {
       title: name + ' — F-Recd short',
       sub: shortLines.map(l => 'Part ' + l.partLetter + ': ' + l.qtyReceived + ' of ' + l.total + ', ' + l.shortBy + ' short').join(' · ') +
         (g.shortUnits ? '. The model can reach ' + g.maxUnits + ' of ' + g.totalQty + ' units.' : '') });
+
+    if (g.piDate && !g.fullyDelivered && !g.fullyCancelled) {
+      const n = daysFromToday(g.piDate);
+      if (n < 0) items.push({ rank: 1, sev: 'low', ico: 'PI', href: trailHref,
+        title: name + ' — ' + Math.abs(n) + ' day' + (n === -1 ? '' : 's') + ' past the PI date',
+        sub: 'PI signed date ' + fmtDay(g.piDate) + (g.piMoved ? ' (originally ' + fmtDay(g.piOriginal) + ')' : '') + '. Not yet fully delivered to FR and BB.' });
+    }
 
     if (g.buildableUnits > 0) items.push({ rank: 2, sev: 'mid', ico: 'A', href: '#/assembly?q=' + q,
       title: name + ' — received but not assembled',
@@ -2868,6 +3070,7 @@ const RENDERERS = {
   receiving: renderReceiving,
   assembly: renderAssembly,
   delivery: renderDelivery,
+  subfactory: renderSubFactory,
   acceptance: renderAcceptance,
   needsreview: renderNeedsReview,
   reports: renderReports,
@@ -2886,15 +3089,33 @@ function cardMsg(btn, text, bad) {
   el.innerText = text;
 }
 
+/* Saves go to the server one after another, never side by side: two at
+   once only made each wait for the other's lock. */
+let SAVE_CHAIN = Promise.resolve();
+let SAVES_WAITING = 0;
+function queued(action, payload) {
+  SAVES_WAITING++;
+  const run = SAVE_CHAIN.then(() => apiCall(action, payload)).then(res => {
+    SAVES_WAITING--;
+    if (res && res.timing) console.info('[AssembiX] ' + action + ': ' + res.timing.totalMs + ' ms' +
+      (res.timing.lockWaitMs > 1000 ? ' (waited ' + res.timing.lockWaitMs + ' ms for another save or sync)' : ''));
+    return res;
+  }, err => { SAVES_WAITING--; throw err; });
+  SAVE_CHAIN = run.catch(() => {});
+  return run;
+}
+
 /* Save, then redraw straight from the data the save sent back. */
 async function save(btn, busyLabel, action, payload, doneMsg) {
   const label = btn.innerText;
   btn.disabled = true;
   btn.innerText = busyLabel;
-  const res = await apiCall(action, payload);
+  const res = await queued(action, payload);
   if (res.ok) {
-    if (!takeApp(res)) await reload();
-    reRender();
+    // A later save still on its way will bring newer data; don't redraw
+    // with this older copy and undo what is already on screen.
+    if (SAVES_WAITING === 0 || !res.app) { if (!takeApp(res)) await reload(); reRender(); }
+    else takeApp(res);
     if (doneMsg) toast(doneMsg);
     return res;
   }
@@ -2954,6 +3175,36 @@ function wireSyncButtons() {
     reRender();
     showParkedSyncMessage();
   };
+}
+
+/* F-Recd shows on screen the moment it is pressed. The save runs behind
+   it; if the server refuses, the line flips back and says why. */
+function receiveNow(rowId, pk, qty, total, pack) {
+  let line = null;
+  groupsAll().forEach(g => g.parts.forEach(p => p.lines.forEach(l => { if (l.rowId === rowId) line = l; })));
+  if (line) {
+    const now = new Date(), pad = n => String(n).padStart(2, '0');
+    Object.assign(line, {
+      qtyReceived: qty, factoryReceived: true, done: true, status: 'Factory received',
+      shortBy: total > qty ? total - qty : 0, factoryReceivedBy: user.email,
+      factoryReceivedAt: now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate()) + ' ' + pad(now.getHours()) + ':' + pad(now.getMinutes()),
+      cartons: pack.cartons === '' ? line.cartons : Number(pack.cartons),
+      spareCartons: pack.spareCartons === '' ? line.spareCartons : Number(pack.spareCartons),
+      receiptNotes: pack.notes || line.receiptNotes, _saving: true
+    });
+    reRender();
+  }
+  toast('F-Recd ' + qty + ' on ' + pk + (total && qty < total ? ' — ' + (total - qty) + ' short' : '') + '. Saving…');
+  queued('recordReceipt', Object.assign({ rowId, qty }, pack)).then(async res => {
+    if (res.ok) {
+      if (SAVES_WAITING === 0) { takeApp(res); reRender();
+        toast('Saved: F-Recd ' + qty + ' on ' + pk + (total && qty < total ? ' — ' + (total - qty) + ' short.' : '.')); }
+      else takeApp(res);
+    } else if (!res.authFailed) {
+      toast('Not saved — ' + (res.error || 'the server refused it') + ' (' + pk + ')');
+      await reload();
+    }
+  });
 }
 
 function onEnter(input, btn) {
@@ -3021,10 +3272,16 @@ function wirePageHandlers(pageId) {
         }
         if (!qty || qty <= 0) { cardMsg(btn, 'Type how many of ' + pk + ' are on the floor.', true); input.focus(); return; }
         if (total && qty > total) { cardMsg(btn, 'That is more than the line total of ' + total + '.', true); return; }
+        const tr = btn.closest('td');
+        const cartons = tr.querySelector('.rcv-cartons').value.trim();
+        const spareCartons = tr.querySelector('.rcv-spare').value.trim();
+        const notes = tr.querySelector('.rcv-notes').value.trim();
+        if ([cartons, spareCartons].some(v => v !== '' && (isNaN(Number(v)) || Number(v) < 0 || Math.floor(Number(v)) !== Number(v)))) {
+          cardMsg(btn, 'Cartons must be whole numbers.', true); return;
+        }
         if (total && qty < total &&
             !confirm(qty + ' of ' + total + ' on ' + pk + '?\n\nThis is final: the line becomes F-Recd · ' + (total - qty) + ' short.')) return;
-        save(btn, 'Saving…', 'recordReceipt', { rowId: btn.dataset.rowid, qty },
-          'F-Recd ' + qty + ' on ' + pk + (total && qty < total ? ' — ' + (total - qty) + ' short.' : '.'));
+        receiveNow(btn.dataset.rowid, pk, qty, total, { cartons, spareCartons, notes });
       };
     });
   }
@@ -3046,14 +3303,23 @@ function wirePageHandlers(pageId) {
     document.querySelectorAll('.dlv-form').forEach(form => {
       const leftEl = form.querySelector('.dlv-left');
       const max = Number(leftEl.dataset.available);
+      const card = form.closest('.model-block');
+      const rest = card.querySelector('.dlv-rest');
+      const btn = form.querySelector('.dlv-btn');
       const update = () => {
         const fr = Number(form.querySelector('.dlv-fr').value) || 0;
         const bb = Number(form.querySelector('.dlv-bb').value) || 0;
         const left = max - fr - bb;
-        leftEl.innerText = left < 0 ? (fr + bb) + ' is more than the ' + max + ' on the floor' : left + ' of ' + max + ' left on the floor';
+        const toSub = rest && rest.checked;
+        leftEl.innerText = left < 0 ? (fr + bb) + ' is more than the ' + max + ' on the floor'
+          : toSub ? (left ? left + ' will go to the Sub factory' : 'nothing left over')
+          : left + ' of ' + max + ' stay on the floor';
         leftEl.style.color = left < 0 ? 'var(--danger)' : '';
+        btn.innerText = (fr + bb) === 0 && toSub ? 'Move all to Sub factory' : 'Send out';
       };
       form.querySelectorAll('input').forEach(i => i.oninput = update);
+      if (rest) rest.onchange = update;
+      update();
     });
     document.querySelectorAll('.dlv-btn').forEach(btn => {
       btn.onclick = () => {
@@ -3061,14 +3327,43 @@ function wirePageHandlers(pageId) {
         const fr = Number(card.querySelector('.dlv-fr').value) || 0;
         const bb = Number(card.querySelector('.dlv-bb').value) || 0;
         const max = Number(btn.dataset.max);
-        if (fr <= 0 && bb <= 0) { cardMsg(btn, 'Enter how many units are going to FR, to BB, or to both.', true); return; }
+        const restToSub = card.querySelector('.dlv-rest').checked;
         if (fr < 0 || bb < 0) { cardMsg(btn, 'A quantity cannot be negative.', true); return; }
+        if (fr <= 0 && bb <= 0 && !restToSub) { cardMsg(btn, 'Enter how many units are going to FR, to BB, or to both.', true); return; }
         if (fr + bb > max) { cardMsg(btn, 'That adds up to ' + (fr + bb) + ', and only ' + max + ' are on the floor.', true); return; }
         const lines = [];
         if (fr > 0) lines.push({ customerCode: 'FR', qty: fr });
         if (bb > 0) lines.push({ customerCode: 'BB', qty: bb });
-        save(btn, 'Sending…', 'markOut', { groupKey: btn.dataset.groupkey, lines },
-          'Sent ' + lines.map(l => l.qty + ' to ' + l.customerCode).join(' and ') + '. It now waits in Acceptance.');
+        const rest = max - fr - bb;
+        if (!lines.length && !confirm('Move all ' + max + ' units to the Sub factory?')) return;
+        save(btn, lines.length ? 'Sending…' : 'Moving…', 'markOut', { groupKey: btn.dataset.groupkey, lines, restToSub },
+          (lines.length ? 'Sent ' + lines.map(l => l.qty + ' to ' + l.customerCode).join(' and ') + ' — waiting in Acceptance.' : '') +
+          (restToSub && rest > 0 ? ' ' + rest + ' moved to the Sub factory.' : ''));
+      };
+    });
+  }
+
+  if (pageId === 'subfactory') {
+    document.querySelectorAll('.sf-btn').forEach(btn => {
+      const card = btn.closest('.model-block');
+      const max = Number(btn.dataset.max);
+      const leftEl = card.querySelector('.sf-left');
+      const read = () => [Number(card.querySelector('.sf-fr').value) || 0, Number(card.querySelector('.sf-bb').value) || 0];
+      card.querySelectorAll('input').forEach(i => i.oninput = () => {
+        const [fr, bb] = read(), left = max - fr - bb;
+        leftEl.innerText = left < 0 ? (fr + bb) + ' is more than the ' + max + ' here' : left + ' of ' + max + ' stay here';
+        leftEl.style.color = left < 0 ? 'var(--danger)' : '';
+      });
+      btn.onclick = () => {
+        const [fr, bb] = read();
+        if (fr < 0 || bb < 0) { cardMsg(btn, 'A quantity cannot be negative.', true); return; }
+        if (fr + bb <= 0) { cardMsg(btn, 'Enter how many go to FR, to BB, or to both.', true); return; }
+        if (fr + bb > max) { cardMsg(btn, 'That adds up to ' + (fr + bb) + ', and only ' + max + ' are in the sub factory.', true); return; }
+        const lines = [];
+        if (fr > 0) lines.push({ customerCode: 'FR', qty: fr });
+        if (bb > 0) lines.push({ customerCode: 'BB', qty: bb });
+        save(btn, 'Sending…', 'markOut', { groupKey: btn.dataset.groupkey, from: 'sub', lines },
+          'Sent ' + lines.map(l => l.qty + ' to ' + l.customerCode).join(' and ') + ' from the sub factory — waiting in Acceptance.');
       };
     });
   }
@@ -3081,8 +3376,9 @@ function wirePageHandlers(pageId) {
         const q = Number(input.value), sent = Number(btn.dataset.sent);
         if (isNaN(q) || q < 0) { cardMsg(btn, 'Enter how many the customer accepted.', true); return; }
         if (q > sent) { cardMsg(btn, 'The customer cannot accept more than the ' + sent + ' that were sent.', true); return; }
+        if (q < sent && !confirm('Accept ' + q + ' of ' + sent + '?\n\nThe other ' + (sent - q) + ' go to the Sub factory.')) return;
         save(btn, 'Saving…', 'confirmDelivery', { deliveryId: btn.dataset.deliveryid, confirmedQty: q },
-          q < sent ? 'Accepted ' + q + ' of ' + sent + ' — recorded as a discrepancy.' : 'Accepted ' + q + '. Marked delivered.');
+          q < sent ? 'Accepted ' + q + ' of ' + sent + ' — the other ' + (sent - q) + ' went to the Sub factory.' : 'Accepted ' + q + '. Marked delivered.');
       };
     });
   }
@@ -3108,6 +3404,11 @@ function wirePageHandlers(pageId) {
     };
   }
 }
+
+// A saved session signs you straight in — no Google popup, no waiting for it.
+// Started here, at the very end, so every page's code exists before the
+// saved copy of the data is drawn.
+if (session) completeLogin(); else document.documentElement.classList.remove('restoring');
 </script>
 <!-- Google's sign-in library loads after the page's own script, so the
      functions it calls back into always exist when it arrives. -->
