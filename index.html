@@ -669,6 +669,19 @@ color:var(--text-soft);cursor:pointer;font-family:inherit;}
 padding:8px 14px;border-radius:99px;box-shadow:0 8px 24px rgba(0,0,0,.2);display:flex;align-items:center;gap:8px;}
 .spin-sm{width:12px;height:12px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
 
+/* ===== Headings that stay put while you scroll =====
+   --topbar-h and --toolbar-h are measured by the page itself (the title bar
+   grows when its subtitle wraps), so nothing slides under anything else.
+   Long tables scroll inside their own card, which is what lets their
+   column headings stay pinned, side-scroll included. */
+:root{--topbar-h:0px;--toolbar-h:0px;}
+.toolbar{position:sticky;top:var(--topbar-h);z-index:15;box-shadow:0 6px 14px -10px rgba(67,20,7,.25);}
+.consign-head{position:sticky;top:calc(var(--topbar-h) + var(--toolbar-h));z-index:12;background:var(--bg-page);padding-top:14px;}
+.table-card,.sticky-card{position:sticky;top:calc(var(--topbar-h) + 10px);}
+.table-card .tbl-wrap{overflow:auto;max-height:calc(100vh - var(--topbar-h) - 72px);}
+.sticky-card .tbl-wrap{overflow:auto;max-height:calc(100vh - var(--topbar-h) - 176px);}
+.data-table thead th{box-shadow:inset 0 -1px 0 var(--border);}
+
 /* ===== Sidebar icons ===== */
 .nav-item .ni{display:inline-flex;align-items:center;gap:10px;}
 .nav-item .ni svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;opacity:.85;}
@@ -1246,6 +1259,7 @@ function route() {
   document.getElementById('content').innerHTML = RENDERERS[page.id](query);
   wirePageHandlers(page.id);
   wirePageSearch();
+  measureStickies();
 
   const input = document.getElementById('page-search');
   if (input && keepFilter) {
@@ -1258,6 +1272,23 @@ function route() {
 
 /* Redraw this page from APP without going to the server, keeping the filter
    and scroll where they were. Used after sorting, and after every save. */
+function measureStickies() {
+  const root = document.documentElement.style;
+  const top = document.querySelector('.topbar');
+  const pinned = top && getComputedStyle(top).position === 'sticky';
+  root.setProperty('--topbar-h', (pinned ? top.offsetHeight : 0) + 'px');
+  const tb = document.querySelector('#content .toolbar');
+  root.setProperty('--toolbar-h', (tb ? tb.offsetHeight - 1 : 0) + 'px');
+}
+window.addEventListener('resize', () => measureStickies());
+// The title bar changes height when fonts finish loading or its subtitle wraps.
+if (window.ResizeObserver) {
+  const ro = new ResizeObserver(() => measureStickies());
+  document.addEventListener('DOMContentLoaded', () => { const t = document.querySelector('.topbar'); if (t) ro.observe(t); });
+  const t0 = document.querySelector('.topbar'); if (t0) ro.observe(t0);
+}
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => measureStickies());
+
 function reRender() {
   const input = document.getElementById('page-search');
   const q = input ? input.value.trim().toLowerCase() : '';
@@ -1265,6 +1296,7 @@ function reRender() {
   renderNav();
   document.getElementById('content').innerHTML = RENDERERS[currentPage](currentQuery);
   wirePageHandlers(currentPage);
+  measureStickies();
   if (q) applyPageFilter(q);
   window.scrollTo(0, y);
 }
@@ -2440,7 +2472,7 @@ function wireTrail() {
 
 function renderReports() {
   return `
-    <div class="card">
+    <div class="card sticky-card">
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
         <input id="rp-search" type="text" placeholder="Search consignment, part, event or person" style="max-width:340px;">
         <button class="btn" id="rp-filter">Search</button>
